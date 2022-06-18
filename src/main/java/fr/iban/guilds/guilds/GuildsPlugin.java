@@ -2,7 +2,7 @@ package fr.iban.guilds.guilds;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Guilds extends JavaPlugin {
+public final class GuildsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
