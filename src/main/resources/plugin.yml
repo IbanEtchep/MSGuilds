@@ -1,7 +1,7 @@
 name: Guilds
 version: '${project.version}'
-main: fr.iban.guilds.guilds.GuildsPlugin
-api-version: 1.19
+main: fr.iban.guilds.GuildsPlugin
+api-version: 1.18
 depend: [ Core ]
 authors: [ Iban ]
 description: Guilds plugin

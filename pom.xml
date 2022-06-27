@@ -24,8 +24,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>14</source>
+                    <target>14</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -62,6 +62,10 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -77,5 +81,20 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
+            <!-- For the common module -->
+            <dependency>
+                <groupId>com.github.Revxrsal.Lamp</groupId>
+                <artifactId>common</artifactId>
+                <version>3.0.7</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <!-- For the bukkit module -->
+            <dependency>
+                <groupId>com.github.Revxrsal.Lamp</groupId>
+                <artifactId>bukkit</artifactId>
+                <version>3.0.7</version>
+                <scope>compile</scope>
+            </dependency>
     </dependencies>
 </project>
