@@ -1,5 +1,6 @@
 package fr.iban.guilds.command;
 
+import fr.iban.guilds.Guild;
 import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.GuildsManager;
 import fr.iban.guilds.GuildsPlugin;
@@ -9,11 +10,15 @@ import fr.iban.guilds.exception.GuildAlreadyExistsException;
 import fr.iban.guilds.exception.InsufficientPermissionException;
 import fr.iban.guilds.exception.NotGuildMemberException;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import revxrsal.commands.CommandHandler;
 import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.command.CommandActor;
+
+import java.util.List;
 
 @Command({"guild", "g"})
 public class GuildCMD {
@@ -27,19 +32,18 @@ public class GuildCMD {
     }
 
     @Subcommand("help")
-    public void help(CommandActor actor, @Default("1") int page) {
+    public void help(CommandActor actor) {
         GuildPlayer guildPlayer = guildsManager.getGuildPlayer(actor.getUniqueId());
         actor.reply("");
         actor.reply("§7§lVoici l'aide pour utiliser les guildes :");
         actor.reply("");
-        if(guildPlayer == null) {
+        if (guildPlayer == null) {
             actor.reply("§6/guild create §f→ créer une guilde.");
             actor.reply("§6/guild join <nom de la guilde> §f→ accepter l'invitation d'une guilde.");
             actor.reply("§7Davantage de commande seront affichées quand vous serez membre d'une guilde et selon votre rang dans la guilde.");
             return;
         }
-        Rank rank = guildPlayer.getRank();
-        if(guildPlayer.isGranted(Rank.MEMBER)) {
+        if (guildPlayer.isGranted(Rank.MEMBER)) {
             actor.reply("§f§lCommandes §a§lmembre §f§f:");
             actor.reply("§6/guild info §f→ informations sur la guilde.");
             actor.reply("§6/guild chat §f→ activer/désactiver le chat de guilde.");
@@ -53,7 +57,7 @@ public class GuildCMD {
             actor.reply("§f§lCommandes §b§lmodérateur §f§l:");
             actor.reply("§6/guild kick §f→ exclure un membre de grade inférieur.");
         }
-        if(guildPlayer.isGranted(Rank.ADMIN)) {
+        if (guildPlayer.isGranted(Rank.ADMIN)) {
             actor.reply("§f§lCommandes §c§ladministrateur §f§l:");
             actor.reply("§6/guild lands §f→ gérer les territoires de la guilde.");
             actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
@@ -63,7 +67,7 @@ public class GuildCMD {
             actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
             actor.reply("§6/guild bank <take> §f→ retirer de l'argent de la banque.");
         }
-        if(guildPlayer.isGranted(Rank.OWNER)) {
+        if (guildPlayer.isGranted(Rank.OWNER)) {
             actor.reply("§f§lCommandes §4§lfondateur §f§l:");
             actor.reply("§6/guild disband §f→ dissoudre sa guilde.");
         }
@@ -79,45 +83,79 @@ public class GuildCMD {
 
     @Subcommand("create")
     public void create(Player sender, @Named("nom de la guilde") String name) {
-        try {
-            guildsManager.createGuild(name, sender.getUniqueId());
-            sender.sendMessage("§aVous avez crée une guilde au nom de " + name + ".");
-        } catch (GuildAlreadyExistsException | AlreadyGuildMemberException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
-        }
+        guildsManager.createGuild(sender, name);
     }
 
     @Subcommand("disband")
     public void disband(Player sender) {
-        try {
-            guildsManager.disbandGuild(sender.getUniqueId());
-        } catch (NotGuildMemberException | InsufficientPermissionException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
-        }
+        guildsManager.disbandGuild(sender);
     }
 
     @Subcommand("chat")
     public void chat(Player sender) {
-        try {
-            GuildPlayer guildPlayer = guildsManager.getGuildPlayer(sender.getUniqueId());
-            guildsManager.toggleChatMode(sender.getUniqueId());
-            sender.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
-        } catch (NotGuildMemberException e) {
-            sender.sendMessage(ChatColor.RED + e.getMessage());
-        }
+        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(sender.getUniqueId());
+        guildsManager.toggleChatMode(sender);
     }
 
     @Subcommand("invite")
-    public void invite(Player sender, Player player) {
+    public void invite(Player sender, OfflinePlayer player) {
+        guildsManager.invite(sender, player);
     }
 
-    public void join() {
+    @Subcommand("revoke")
+    public void revoke(Player sender, OfflinePlayer player) {
+        guildsManager.revokeInvite(sender, player);
+    }
 
+    @Subcommand("join")
+    public void join(Player sender, Guild guild) {
+        guildsManager.joinGuild(sender, guild);
+    }
+
+    @Subcommand("quit")
+    public void leave(Player sender) {
+        guildsManager.quitGuild(sender);
     }
 
     @Subcommand("info")
-    public void info(Player sender) {
-        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(sender.getUniqueId());
+    public void info(BukkitCommandActor sender, @Optional Guild guild) {
+        if (guild == null) {
+            Player player = sender.getAsPlayer();
+            if (player != null) {
+                guild = guildsManager.getGuildByPlayer(player);
+                if (guild != null) {
+                    sender.reply(getInfo(guild));
+                    return;
+                }
+            }
+            sender.reply("§cVeuillez spécifier le nom d'une guilde.");
+        } else {
+            sender.reply(getInfo(guild));
+        }
+    }
 
+    private String getInfo(Guild guild) {
+        String info = "§7§lInformations sur §6§l" + guild.getName() + "\n";
+        info += "§8Créé le " + guild.getDate() + "\n";
+        List<String> admins = guild.getMembers().values().stream()
+                .filter(gp -> gp.getRank() == Rank.ADMIN)
+                .map(GuildPlayer::getName).toList();
+        List<String> mods = guild.getMembers().values().stream()
+                .filter(gp -> gp.getRank() == Rank.MODERATOR)
+                .map(GuildPlayer::getName).toList();
+        List<String> members = guild.getMembers().values().stream()
+                .filter(gp -> gp.getRank() == Rank.MEMBER)
+                .map(GuildPlayer::getName).toList();
+        info += "§4§lFondateur : §f" + guild.getOwner().getName();
+        if (!admins.isEmpty()) {
+            info += "§c§lAdministrateurs : §f" + String.join(", ", admins) + "\n";
+        }
+        if (!mods.isEmpty()) {
+            info += "§b§lModérateurs : §f" + String.join(", ", mods) + "\n";
+        }
+        if (!members.isEmpty()) {
+            info += "§b§lMembres : §f" + String.join(", ", members) + "\n";
+        }
+        return info;
     }
 }

@@ -1,17 +1,15 @@
 package fr.iban.guilds.storage;
 
 import fr.iban.common.data.sql.DbAccess;
-import fr.iban.common.teleport.SLocation;
 import fr.iban.guilds.Guild;
 import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.enums.ChatMode;
 import fr.iban.guilds.enums.Rank;
-import org.bukkit.Bukkit;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -103,7 +101,8 @@ public class SqlStorage {
                         String name = rs.getString("name");
                         double balance = rs.getDouble("balance");
                         long exp = rs.getLong("exp");
-                        Guild guild = new Guild(guildId, name, balance, exp);
+                        Date createdAt = rs.getTimestamp("createdAt");
+                        Guild guild = new Guild(guildId, name, balance, exp, createdAt);
                         guilds.add(guild);
                     }
                 }
@@ -158,7 +157,8 @@ public class SqlStorage {
                         String name = rs.getString("name");
                         double balance = rs.getDouble("balance");
                         long exp = rs.getLong("exp");
-                        return new Guild(guildId, name, balance, exp);
+                        Date createdAt = rs.getTimestamp("createdAt");
+                        return new Guild(guildId, name, balance, exp, createdAt);
                     }
                 }
             }

@@ -6,24 +6,21 @@ import fr.iban.guilds.enums.Rank;
 import fr.iban.guilds.event.GuildCreateEvent;
 import fr.iban.guilds.event.GuildDisbandEvent;
 import fr.iban.guilds.event.GuildPostDisbandEvent;
-import fr.iban.guilds.exception.AlreadyGuildMemberException;
-import fr.iban.guilds.exception.GuildAlreadyExistsException;
-import fr.iban.guilds.exception.InsufficientPermissionException;
-import fr.iban.guilds.exception.NotGuildMemberException;
 import fr.iban.guilds.storage.SqlStorage;
+import fr.iban.guilds.util.GuildRequestMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public class GuildsManager {
 
     private final GuildsPlugin plugin;
     private final SqlStorage storage;
 
-    private final Map<UUID, Guild> guilds = new ConcurrentHashMap<>();
-    private final Map<UUID, GuildPlayer> guildPlayers = new ConcurrentHashMap<>();
+    private final Map<UUID, Guild> guilds = new HashMap<>();
 
     public GuildsManager(GuildsPlugin plugin) {
         this.plugin = plugin;
@@ -31,46 +28,59 @@ public class GuildsManager {
         load();
     }
 
-    public Guild getGuild(UUID uuid) {
-        GuildPlayer guildPlayer = getGuildPlayer(uuid);
-        if (guildPlayer != null) {
-            return guilds.get(guildPlayer.getGuildId());
-        }
-        return null;
+    @Nullable
+    public Guild getGuildByPlayerId(UUID uuid) {
+        return guilds.values().stream().filter(guild -> guild.getMember(uuid) != null).findFirst().orElse(null);
     }
 
+    @Nullable
+    public Guild getGuildByPlayer(Player player) {
+        return getGuildByPlayerId(player.getUniqueId());
+    }
+
+    @Nullable
+    public Guild getGuildByName(String name) {
+        return guilds.values().stream().filter(guild -> guild.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    @Nullable
     public GuildPlayer getGuildPlayer(UUID uuid) {
-        return guildPlayers.get(uuid);
+        Guild guild = getGuildByPlayerId(uuid);
+        return guild == null ? null : guild.getMember(uuid);
     }
 
-    public boolean hasGuild(UUID uuid) {
-        return guildPlayers.containsKey(uuid);
+    public List<String> getGuildNames() {
+        return guilds.values().stream().map(Guild::getName).toList();
     }
 
-    public void createGuild(String name, UUID owner) throws GuildAlreadyExistsException, AlreadyGuildMemberException {
+    public void createGuild(Player player, String name) {
         if (guilds.values().stream().anyMatch(g -> g.getName().equalsIgnoreCase(name))) {
-            throw new GuildAlreadyExistsException("Une guilde existe déjà au nom de " + name + ".");
+            player.sendMessage("§cUne guilde existe déjà au nom de " + name + ".");
+            return;
         }
 
-        if (hasGuild(owner)) {
-            throw new AlreadyGuildMemberException("Vous êtes déjà dans une guilde !");
+        if (getGuildPlayer(player.getUniqueId()) != null) {
+            player.sendMessage("§cVous êtes déjà dans une guilde !");
+            return;
         }
 
         Guild guild = new Guild(name);
-        GuildPlayer guildPlayer = new GuildPlayer(owner, guild.getId(), Rank.OWNER, ChatMode.PUBLIC);
-        guild.getMembers().put(owner, guildPlayer);
+        GuildPlayer guildPlayer = new GuildPlayer(player.getUniqueId(), guild.getId(), Rank.OWNER, ChatMode.PUBLIC);
+        guild.getMembers().put(player.getUniqueId(), guildPlayer);
         storage.saveGuild(guild);
         storage.saveGuildPlayer(guildPlayer);
         guilds.put(guild.getId(), guild);
-        guildPlayers.put(owner, guildPlayer);
-        Bukkit.getPluginManager().callEvent(new GuildCreateEvent(guild));
+        new GuildCreateEvent(guild).callEvent();
+        saveGuildToDB(guild);
+        player.sendMessage("§aVous avez crée une guilde au nom de " + name + ".");
     }
 
-    public void toggleChatMode(UUID uuid) throws NotGuildMemberException {
-        GuildPlayer guildPlayer = getGuildPlayer(uuid);
+    public void toggleChatMode(Player player) {
+        GuildPlayer guildPlayer = getGuildPlayer(player.getUniqueId());
 
         if (guildPlayer == null) {
-            throw new NotGuildMemberException("Vous n'avez pas de guilde !");
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
         }
 
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC) {
@@ -79,47 +89,134 @@ public class GuildsManager {
             guildPlayer.setChatMode(ChatMode.PUBLIC);
         }
 
+        player.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
         saveGuildPlayerToDB(guildPlayer);
     }
 
-    public void disbandGuild(UUID ownerID) throws NotGuildMemberException, InsufficientPermissionException {
-        GuildPlayer guildPlayer = getGuildPlayer(ownerID);
-
-        if (guildPlayer == null) {
-            throw new NotGuildMemberException("Vous n'avez pas de guilde !");
+    public void disbandGuild(Player player) {
+        Guild guild = getGuildByPlayerId(player.getUniqueId());
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
         }
 
-        if (guildPlayer.isGranted(Rank.OWNER)) {
-            throw new InsufficientPermissionException("Vous devez être fondateur de la guilde pour la dissoudre.");
+        GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
+        if (!guildPlayer.isGranted(Rank.OWNER)) {
+            player.sendMessage("§cVous devez être fondateur de la guilde pour la dissoudre.");
+            return;
         }
-
-        Guild guild = getGuild(ownerID);
 
         GuildDisbandEvent disbandEvent = new GuildDisbandEvent(guild);
-        Bukkit.getPluginManager().callEvent(disbandEvent);
+        disbandEvent.callEvent();
 
-        if(!disbandEvent.isCancelled()) {
-            guild.getMembers().forEach((uuid, gp) -> {
-                gp.sendMessageIfOnline("§cVotre guilde a été dissoute.");
-                guildPlayers.remove(uuid);
-                deleteGuildPlayerFromDB(uuid);
-            });
+        if (disbandEvent.isCancelled()) return;
 
-            guilds.remove(guild.getId());
-            deleteGuildFromDB(guildPlayer.getGuildId());
-            Bukkit.getPluginManager().callEvent(new GuildPostDisbandEvent(guild));
+        guild.getMembers().forEach((uuid, gp) -> {
+            gp.sendMessageIfOnline("§cVotre guilde a été dissoute.");
+            deleteGuildPlayerFromDB(uuid);
+        });
+
+        guilds.remove(guild.getId());
+        deleteGuildFromDB(guildPlayer.getGuildId());
+        new GuildPostDisbandEvent(guild).callEvent();
+    }
+
+    public void joinGuild(Player player, Guild guild) {
+        UUID uuid = player.getUniqueId();
+        if (getGuildByPlayerId(uuid) != null) {
+            player.sendMessage("§cVous êtes déjà dans une guilde !");
+            return;
         }
+
+        if (!guild.getInvites().contains(uuid) || !player.hasPermission("guilds.bypass")) {
+            player.sendMessage("§cVous n'avez pas d'invitation à rejoindre cette guilde.");
+            return;
+        }
+
+        GuildPlayer guildPlayer = new GuildPlayer(uuid, guild.getId(), Rank.MEMBER, ChatMode.PUBLIC);
+        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a rejoint la guilde.");
+        guild.getMembers().put(uuid, guildPlayer);
+        saveGuildPlayerToDB(guildPlayer);
     }
 
-    public void joinGuild(UUID uuid, UUID guildId) {
+    public void quitGuild(Player player) {
+        Guild guild = getGuildByPlayer(player);
 
-    }
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
 
-    public void quitGuild(GuildPlayer guildPlayer) {
-        Guild guild = guilds.get(guildPlayer.getGuildId());
+        GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
+
+        if(guildPlayer.getRank() ==  Rank.OWNER) {
+            player.sendMessage("§cVous ne pouvez pas quitter la guilde en étant fondateur. Veuillez promouvoir quelqu'un fondateur ou dissoudre la guilde.");
+            return;
+        }
+
         guild.getMembers().remove(guildPlayer.getUuid());
-        guildPlayers.remove(guildPlayer.getUuid());
         deleteGuildPlayerFromDB(guildPlayer.getUuid());
+        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a quitté la guilde.");
+        player.sendMessage("§cVous avez quitté votre guilde.");
+    }
+
+    public void invite(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (!guild.getMember(player.getUniqueId()).isGranted(Rank.MODERATOR)) {
+            player.sendMessage("§cVous n'avez pas la permission d'inviter des gens dans la guilde.");
+            return;
+        }
+
+        if (guild.getInvites().contains(target.getUniqueId())) {
+            player.sendMessage("§cVous avez déjà envoyé une invitation à ce joueur.");
+            return;
+        }
+
+        if (guild.getMember(target.getUniqueId()) != null) {
+            player.sendMessage("§cCe joueur est déjà dans votre guilde.");
+            return;
+        }
+
+        guild.getInvites().add(target.getUniqueId());
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            guild.getInvites().remove(target.getUniqueId());
+        }, 2400L);
+        CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
+        core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,
+                new GuildRequestMessage(guild.getId(), target.getUniqueId()));
+        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" "+guild.getName()+"\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join "+guild.getName()+"\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join "+guild.getName()+"\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" a pour accepter.\",\"color\":\"green\"}]");
+        player.sendMessage("§aVous avez invité " + target.getName() + " à rejoindre votre guilde.");
+    }
+
+    public void revokeInvite(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (!guild.getMember(player.getUniqueId()).isGranted(Rank.MODERATOR)) {
+            player.sendMessage("§cVous n'avez pas la permission de révoquer une invitation.");
+            return;
+        }
+
+        if (!guild.getInvites().contains(target.getUniqueId())) {
+            player.sendMessage("§cCe joueur n'a pas d'invitation.");
+            return;
+        }
+
+        guild.getInvites().remove(target.getUniqueId());
+        player.sendMessage("§cVous avez révoqué l'invitation envoyée à " + target.getName() + ".");
+        CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
+        core.getPlayerManager().sendMessageIfOnline(target.getUniqueId(),
+                "§cL'invitation que vous avez reçu de §2§l" + guild.getName() + "§a a expiré.");
     }
 
     private void saveGuildToDB(Guild guild) {
@@ -150,18 +247,20 @@ public class GuildsManager {
         });
     }
 
+
     /*
     SYNC
      */
 
+
     public void syncGuild(UUID guildID) {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
-        core.getMessagingManager().sendMessageAsync(GuildsPlugin.GUILD_SYNC_CHANNEL, guildID.toString());
+        core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_SYNC_CHANNEL, guildID.toString());
     }
 
     public void syncGuildPlayer(UUID uuid) {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
-        core.getMessagingManager().sendMessageAsync(GuildsPlugin.GUILD_PLAYER_SYNC_CHANNEL, uuid.toString());
+        core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_PLAYER_SYNC_CHANNEL, uuid.toString());
     }
 
     public void reloadGuildFromDB(UUID guildId) {
@@ -170,37 +269,33 @@ public class GuildsManager {
 
         if (oldGuild != null && newGuild == null) {
             //Suppression d'une guilde
-            for (UUID uuid : oldGuild.getMembers().keySet()) {
-                guildPlayers.remove(uuid);
-            }
             guilds.remove(guildId);
         } else {
-            //Mise à jour de la guilde
+            //Ajout ou maj à jour de la guilde
             guilds.put(guildId, newGuild);
             for (GuildPlayer guildMember : storage.getGuildMembers(guildId)) {
                 newGuild.getMembers().put(guildMember.getUuid(), guildMember);
-                guildPlayers.put(guildMember.getUuid(), guildMember);
             }
         }
     }
 
     public void reloadGuildPlayerFromDB(UUID uuid) {
-        GuildPlayer oldGuildPlayer = guildPlayers.get(uuid);
+        GuildPlayer oldGuildPlayer = getGuildPlayer(uuid);
         GuildPlayer newGuildPlayer = storage.getGuildPlayer(uuid);
         if (oldGuildPlayer != null && newGuildPlayer == null) {
             //Le joueur a quitté la guilde
             guilds.get(oldGuildPlayer.getGuildId()).getMembers().remove(uuid);
-            guildPlayers.remove(uuid);
         } else {
-            //Le joueur a rejoint une guilde
-            guildPlayers.put(uuid, newGuildPlayer);
+            //Le joueur a rejoint une guilde ou a été mis à jour.
             guilds.get(newGuildPlayer.getGuildId()).getMembers().put(uuid, newGuildPlayer);
         }
     }
 
+
     /*
     LOAD
      */
+
 
     private void loadGuilds() {
         long start = System.currentTimeMillis();
@@ -212,9 +307,9 @@ public class GuildsManager {
 
     private void loadGuildPlayers() {
         long start = System.currentTimeMillis();
-        for (GuildPlayer guildPlayer : storage.getGuildPlayers()) {
+        List<GuildPlayer> guildPlayers = storage.getGuildPlayers();
+        for (GuildPlayer guildPlayer : guildPlayers) {
             UUID uuid = guildPlayer.getUuid();
-            guildPlayers.put(uuid, guildPlayer);
             guilds.get(guildPlayer.getGuildId()).getMembers().put(uuid, guildPlayer);
         }
         plugin.getLogger().info(guildPlayers.size() + " joueurs de guilde chargées en " + (System.currentTimeMillis() - start) + "ms.");
@@ -222,7 +317,6 @@ public class GuildsManager {
 
     public void load() {
         guilds.clear();
-        guildPlayers.clear();
         loadGuilds();
         loadGuildPlayers();
     }

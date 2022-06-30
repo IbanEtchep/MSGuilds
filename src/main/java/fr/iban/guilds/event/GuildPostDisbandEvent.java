@@ -17,7 +17,7 @@ public class GuildPostDisbandEvent extends Event {
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return HANDLERS;
     }
 
     public Guild getGuild() {

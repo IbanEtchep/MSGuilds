@@ -10,6 +10,7 @@ public class GuildDisbandEvent extends Event implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
     private final Guild guild;
+    private boolean cancelled;
 
     public GuildDisbandEvent(Guild guild) {
         this.guild = guild;
@@ -17,17 +18,17 @@ public class GuildDisbandEvent extends Event implements Cancellable {
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return null;
+        return HANDLERS;
     }
 
     @Override
     public boolean isCancelled() {
-        return false;
+        return cancelled;
     }
 
     @Override
     public void setCancelled(boolean cancel) {
-
+        this.cancelled = cancel;
     }
 
     public Guild getGuild() {

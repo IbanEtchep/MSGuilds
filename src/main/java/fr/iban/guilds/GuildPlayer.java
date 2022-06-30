@@ -14,6 +14,7 @@ public class GuildPlayer {
     private UUID guildId;
     private Rank rank;
     private ChatMode chatMode;
+    private String name;
 
     public GuildPlayer(UUID uuid, UUID guildId, Rank rank, ChatMode chatMode) {
         this.uuid = uuid;
@@ -50,6 +51,13 @@ public class GuildPlayer {
         this.chatMode = chatMode;
     }
 
+    public String getName() {
+        if(name == null) {
+            name = CoreBukkitPlugin.getInstance().getPlayerManager().getName(getUuid());
+        }
+        return name;
+    }
+
     public boolean isGranted(Rank comparedRank) {
         switch (rank) {
             case OWNER -> {
@@ -70,9 +78,9 @@ public class GuildPlayer {
 
     public void sendMessageIfOnline(String message) {
         Player player = Bukkit.getPlayer(uuid);
-        if(player != null) {
+        if (player != null) {
             player.sendMessage(message);
-        }else{
+        } else {
             CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(uuid, message);
         }
     }

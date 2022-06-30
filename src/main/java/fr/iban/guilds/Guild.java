@@ -2,7 +2,9 @@ package fr.iban.guilds;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.common.teleport.SLocation;
+import fr.iban.guilds.enums.Rank;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,16 +16,19 @@ public class Guild {
     private double balance;
     private long exp;
     private SLocation home;
+    private Date createdAt;
+    private final List<UUID> invites = new ArrayList<>();
 
-    public Guild(UUID id, String name, double balance, long exp) {
+    public Guild(UUID id, String name, double balance, long exp, Date createdAt) {
         this.id = id;
         this.name = name;
         this.balance = balance;
         this.exp = exp;
+        this.createdAt = createdAt;
     }
 
     public Guild(String name) {
-        this(UUID.randomUUID(), name, 0, 0);
+        this(UUID.randomUUID(), name, 0, 0, new Date());
     }
 
     public UUID getId() {
@@ -44,6 +49,19 @@ public class Guild {
 
     public Map<UUID, GuildPlayer> getMembers() {
         return members;
+    }
+
+    public GuildPlayer getOwner() {
+        for (GuildPlayer guildPlayer : getMembers().values()) {
+            if (guildPlayer.getRank() == Rank.OWNER) {
+                return guildPlayer;
+            }
+        }
+        return null;
+    }
+
+    public GuildPlayer getMember(UUID uuid) {
+        return members.get(uuid);
     }
 
     public double getBalance() {
@@ -72,5 +90,13 @@ public class Guild {
 
     public void sendMessageToOnlineMembers(String message) {
         getMembers().values().forEach(member -> member.sendMessageIfOnline(message));
+    }
+
+    public List<UUID> getInvites() {
+        return invites;
+    }
+
+    public String getDate() {
+        return new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(createdAt);
     }
 }
