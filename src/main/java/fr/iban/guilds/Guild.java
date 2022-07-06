@@ -52,12 +52,9 @@ public class Guild {
     }
 
     public GuildPlayer getOwner() {
-        for (GuildPlayer guildPlayer : getMembers().values()) {
-            if (guildPlayer.getRank() == Rank.OWNER) {
-                return guildPlayer;
-            }
-        }
-        return null;
+        return getMembers().values().stream()
+                .filter(guildPlayer -> guildPlayer.getRank() == Rank.OWNER)
+                .findFirst().orElse(null);
     }
 
     public GuildPlayer getMember(UUID uuid) {

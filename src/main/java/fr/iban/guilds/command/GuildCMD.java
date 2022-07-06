@@ -1,19 +1,18 @@
 package fr.iban.guilds.command;
 
+import fr.iban.bukkitcore.commands.annotation.Online;
 import fr.iban.guilds.Guild;
 import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.GuildsManager;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.enums.Rank;
-import fr.iban.guilds.exception.AlreadyGuildMemberException;
-import fr.iban.guilds.exception.GuildAlreadyExistsException;
-import fr.iban.guilds.exception.InsufficientPermissionException;
-import fr.iban.guilds.exception.NotGuildMemberException;
-import org.bukkit.ChatColor;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import revxrsal.commands.CommandHandler;
-import revxrsal.commands.annotation.*;
+import revxrsal.commands.annotation.Command;
+import revxrsal.commands.annotation.Named;
+import revxrsal.commands.annotation.Optional;
+import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.command.CommandActor;
@@ -50,7 +49,7 @@ public class GuildCMD {
             actor.reply("§6/guild logs §f→ voir le journal de sa guilde.");
             actor.reply("§6/guild home §f→ rejoindre la résidence de la guilde.");
             actor.reply("§6/guild bank §f→ voir le solde de la guilde");
-            actor.reply("§6/guild bank <deposit> §f→ déposer de l'argent dans la banque.");
+            actor.reply("§6/guild bank deposit <montant> §f→ déposer de l'argent dans la banque.");
             actor.reply("§6/guild leave §f→ quitter sa guilde.");
         }
         if (guildPlayer.isGranted(Rank.MODERATOR)) {
@@ -65,7 +64,7 @@ public class GuildCMD {
             actor.reply("§6/guild demote §f→ rétrograder un membre.");
             actor.reply("§6/guild sethome §f→ définir la résidence de la guilde.");
             actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
-            actor.reply("§6/guild bank <take> §f→ retirer de l'argent de la banque.");
+            actor.reply("§6/guild bank withdraw <montant> §f→ retirer de l'argent de la banque.");
         }
         if (guildPlayer.isGranted(Rank.OWNER)) {
             actor.reply("§f§lCommandes §4§lfondateur §f§l:");
@@ -98,13 +97,28 @@ public class GuildCMD {
     }
 
     @Subcommand("invite")
-    public void invite(Player sender, OfflinePlayer player) {
+    public void invite(Player sender, @Online OfflinePlayer player) {
         guildsManager.invite(sender, player);
     }
 
     @Subcommand("revoke")
     public void revoke(Player sender, OfflinePlayer player) {
         guildsManager.revokeInvite(sender, player);
+    }
+
+    @Subcommand("promote")
+    public void promote(Player sender, OfflinePlayer player) {
+        guildsManager.demote(sender, player);
+    }
+
+    @Subcommand("demote")
+    public void demote(Player sender, OfflinePlayer player) {
+        guildsManager.promote(sender, player);
+    }
+
+    @Subcommand("transfer")
+    public void transfer(Player sender, OfflinePlayer player) {
+        guildsManager.transfer(sender, player);
     }
 
     @Subcommand("join")
@@ -115,6 +129,54 @@ public class GuildCMD {
     @Subcommand("quit")
     public void leave(Player sender) {
         guildsManager.quitGuild(sender);
+    }
+
+    @Subcommand({"bank", "bank balance"})
+    public void bankBalance(Player sender) {
+        Guild guild = guildsManager.getGuildByPlayer(sender);
+        Economy economy = plugin.getEconomy();
+
+        if(economy == null) {
+            sender.sendMessage("§cLa banque n'est pas accessible.");
+            return;
+        }
+
+        if (guild == null) {
+            sender.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        sender.sendMessage("§aVotre guilde possède : §f§l" + economy.format(guild.getBalance()));
+    }
+
+    @Subcommand("bank deposit")
+    public void bankDeposit(Player sender, double amount) {
+        guildsManager.guildDeposit(sender, amount);
+    }
+
+    @Subcommand("bank withdraw")
+    public void bankWithdraw(Player sender, double amount) {
+        guildsManager.guildWithdraw(sender, amount);
+    }
+
+    @Subcommand("home")
+    public void home(Player sender) {
+        guildsManager.teleportHome(sender);
+    }
+
+    @Subcommand("delhome")
+    public void delhome(Player sender) {
+        guildsManager.delHome(sender);
+    }
+
+    @Subcommand("sethome")
+    public void sethome(Player sender) {
+        guildsManager.setHome(sender);
+    }
+
+    @Subcommand("kick")
+    public void kick(Player sender, OfflinePlayer target) {
+        guildsManager.kick(sender, target);
     }
 
     @Subcommand("info")

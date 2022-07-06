@@ -3,5 +3,7 @@ version: '${project.version}'
 main: fr.iban.guilds.GuildsPlugin
 api-version: 1.18
 depend: [ Core ]
+softdepend:
+  - Vault
 authors: [ Iban ]
 description: Guilds plugin

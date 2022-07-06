@@ -13,7 +13,7 @@
 
     <description>Guilds plugin</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -81,20 +81,11 @@
             <version>1.0</version>
             <scope>provided</scope>
         </dependency>
-            <!-- For the common module -->
-            <dependency>
-                <groupId>com.github.Revxrsal.Lamp</groupId>
-                <artifactId>common</artifactId>
-                <version>3.0.7</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <!-- For the bukkit module -->
-            <dependency>
-                <groupId>com.github.Revxrsal.Lamp</groupId>
-                <artifactId>bukkit</artifactId>
-                <version>3.0.7</version>
-                <scope>compile</scope>
-            </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

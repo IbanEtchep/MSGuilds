@@ -1,6 +1,7 @@
 package fr.iban.guilds;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
+import fr.iban.bukkitcore.utils.SLocationUtils;
 import fr.iban.guilds.enums.ChatMode;
 import fr.iban.guilds.enums.Rank;
 import fr.iban.guilds.event.GuildCreateEvent;
@@ -8,6 +9,7 @@ import fr.iban.guilds.event.GuildDisbandEvent;
 import fr.iban.guilds.event.GuildPostDisbandEvent;
 import fr.iban.guilds.storage.SqlStorage;
 import fr.iban.guilds.util.GuildRequestMessage;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -149,7 +151,7 @@ public class GuildsManager {
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
-        if(guildPlayer.getRank() ==  Rank.OWNER) {
+        if (guildPlayer.getRank() == Rank.OWNER) {
             player.sendMessage("§cVous ne pouvez pas quitter la guilde en étant fondateur. Veuillez promouvoir quelqu'un fondateur ou dissoudre la guilde.");
             return;
         }
@@ -190,7 +192,7 @@ public class GuildsManager {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,
                 new GuildRequestMessage(guild.getId(), target.getUniqueId()));
-        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" "+guild.getName()+"\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join "+guild.getName()+"\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join "+guild.getName()+"\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" a pour accepter.\",\"color\":\"green\"}]");
+        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" a pour accepter.\",\"color\":\"green\"}]");
         player.sendMessage("§aVous avez invité " + target.getName() + " à rejoindre votre guilde.");
     }
 
@@ -218,6 +220,276 @@ public class GuildsManager {
         core.getPlayerManager().sendMessageIfOnline(target.getUniqueId(),
                 "§cL'invitation que vous avez reçu de §2§l" + guild.getName() + "§a a expiré.");
     }
+
+    public void guildDeposit(Player player, double amount) {
+        Guild guild = getGuildByPlayer(player);
+        Economy economy = plugin.getEconomy();
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (economy == null) {
+            player.sendMessage("§cLa banque n'est pas accessible.");
+            return;
+        }
+
+        double playerBalance = economy.getBalance(player);
+        if (playerBalance < amount) {
+            player.sendMessage("§cVous n'avez pas " + economy.format(amount) + "§c.");
+            return;
+        }
+
+        economy.withdrawPlayer(player, amount);
+        guild.setBalance(guild.getBalance() + amount);
+        player.sendMessage("§aVous avez déposé " + economy.format(amount) + " §adans la banque de votre guilde. " +
+                "Nouveau solde :" + economy.format(guild.getBalance()));
+        saveGuildToDB(guild);
+    }
+
+    public void guildWithdraw(Player player, double amount) {
+        Guild guild = getGuildByPlayer(player);
+        Economy economy = plugin.getEconomy();
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (economy == null) {
+            player.sendMessage("§cLa banque n'est pas accessible.");
+            return;
+        }
+
+        if (!guild.getMember(player.getUniqueId()).isGranted(Rank.ADMIN)) {
+            player.sendMessage("§cVous n'avez pas la permission de retirer de l'argent.");
+            return;
+        }
+
+        double currentBalance = guild.getBalance();
+        if (currentBalance < amount) {
+            player.sendMessage("§cIl n'y a pas assez d'argent dans la banque.");
+            return;
+        }
+
+        economy.depositPlayer(player, amount);
+        guild.setBalance(currentBalance - amount);
+        player.sendMessage("§aVous avez retiré " + economy.format(amount) + " §ade la banque de votre guilde. " +
+                "Nouveau solde :" + economy.format(guild.getBalance()));
+        saveGuildToDB(guild);
+    }
+
+    public void teleportHome(Player player) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (guild.getHome() == null) {
+            player.sendMessage("§cVotre guilde n'a pas de résidence.");
+            return;
+        }
+
+        CoreBukkitPlugin.getInstance().getTeleportManager().teleport(player, guild.getHome());
+    }
+
+    public void setHome(Player player) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        guild.setHome(SLocationUtils.getSLocation(player.getLocation()));
+        saveGuildToDB(guild);
+        player.sendMessage("§aVous avez redéfini la position de la résidence de votre guilde.");
+    }
+
+    public void delHome(Player player) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        guild.setHome(null);
+        saveGuildToDB(guild);
+        player.sendMessage("§aVous supprimé la résidence de votre guilde.");
+    }
+
+    public void kick(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (player.getUniqueId().equals(target.getUniqueId())) {
+            player.sendMessage("§cVous ne pouvez pas vous exclure vous même !");
+            return;
+        }
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (!guild.getMember(player.getUniqueId()).isGranted(Rank.ADMIN)) {
+            player.sendMessage("§cVous n'avez pas la permission d'exclure des membres de la guilde.");
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMember(target.getUniqueId());
+        if (guildPlayer == null) {
+            player.sendMessage("§cCe joueur n'est pas dans votre guilde.");
+            return;
+        }
+
+        guild.getMembers().remove(guildPlayer.getUuid());
+        deleteGuildPlayerFromDB(guildPlayer.getUuid());
+        guild.sendMessageToOnlineMembers("§c" + player.getName() + " a été exclu de la guilde.");
+        guildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
+    }
+
+    public void demote(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (player.getUniqueId().equals(target.getUniqueId())) {
+            player.sendMessage("§cVous ne pouvez pas vous rétrograder vous même !");
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMember(target.getUniqueId());
+        if (guildPlayer == null) {
+            player.sendMessage("§cCe joueur n'est pas dans votre guilde.");
+            return;
+        }
+
+        switch (guildPlayer.getRank()) {
+            case MEMBER -> {
+                player.sendMessage("§cCe joueur est au rang le plus bas.");
+                return;
+            }
+            case MODERATOR -> {
+                if (guild.getMember(player.getUniqueId()).isGranted(Rank.ADMIN)) {
+                    guildPlayer.setRank(Rank.MEMBER);
+                } else {
+                    player.sendMessage("§cIl faut être au moins administrateur pour retrograder un modérateur.");
+                    return;
+                }
+            }
+            case ADMIN -> {
+                if (guild.getMember(player.getUniqueId()).isGranted(Rank.OWNER)) {
+                    guildPlayer.setRank(Rank.MODERATOR);
+                } else {
+                    player.sendMessage("§cIl faut être fondateur pour rétrograder un administrateur.");
+                    return;
+                }
+            }
+            case OWNER -> {
+                player.sendMessage("§cLe fondateur ne peut pas être rétrogradé.");
+                return;
+            }
+        }
+
+        saveGuildPlayerToDB(guildPlayer);
+        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + ".");
+    }
+
+    public void promote(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        if (player.getUniqueId().equals(target.getUniqueId())) {
+            player.sendMessage("§cVous ne pouvez pas vous rétrograder vous même !");
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMember(target.getUniqueId());
+        if (guildPlayer == null) {
+            player.sendMessage("§cCe joueur n'est pas dans votre guilde.");
+            return;
+        }
+
+        switch (guildPlayer.getRank()) {
+            case MEMBER -> {
+                if (guild.getMember(player.getUniqueId()).isGranted(Rank.ADMIN)) {
+                    guildPlayer.setRank(Rank.MODERATOR);
+                } else {
+                    player.sendMessage("§cIl faut être au moins administrateur pour promouvoir quelqu'un modérateur.");
+                    return;
+                }
+            }
+            case MODERATOR -> {
+                if (guild.getMember(player.getUniqueId()).isGranted(Rank.OWNER)) {
+                    guildPlayer.setRank(Rank.ADMIN);
+                } else {
+                    player.sendMessage("§cIl faut être le fondateur pour promouvoir quelqu'un administrateur.");
+                    return;
+                }
+            }
+            case ADMIN -> {
+                player.sendMessage("§cVous ne pouvez pas promouvoir un administrateur.");
+                if (guild.getMember(player.getUniqueId()).isGranted(Rank.OWNER)) {
+                    player.sendMessage("Utilisez /guild transfer pour donner le propriété de la guilde à cette personne.");
+                }
+                return;
+            }
+            case OWNER -> {
+                player.sendMessage("§cLe fondateur ne peut pas être promu.");
+                return;
+            }
+        }
+
+        saveGuildPlayerToDB(guildPlayer);
+        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été promu " + guildPlayer.getRank().getName() + ".");
+    }
+
+    public void transfer(Player player, OfflinePlayer target) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage("§cVous n'avez pas de guilde !");
+            return;
+        }
+
+        GuildPlayer guildOwner = guild.getOwner();
+        if (guildOwner.getUuid().equals(player.getUniqueId())) {
+            player.sendMessage("§cIl faut être le fondateur pour transférer la proprieté de la guilde.");
+            return;
+        }
+
+        if (player.getUniqueId().equals(target.getUniqueId())) {
+            player.sendMessage("§cLa guilde vous appartient déjà.");
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMember(target.getUniqueId());
+        if (guildPlayer == null) {
+            player.sendMessage("§cCe joueur n'est pas dans votre guilde.");
+            return;
+        }
+
+        guildPlayer.setRank(Rank.OWNER);
+        guildOwner.setRank(Rank.ADMIN);
+        saveGuildPlayerToDB(guildPlayer);
+        saveGuildPlayerToDB(guildOwner);
+        guild.sendMessageToOnlineMembers("§7§l" + player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
+    }
+
+    /*
+    DB UPDATES
+     */
 
     private void saveGuildToDB(Guild guild) {
         plugin.runAsyncQueued(() -> {
