@@ -1,24 +1,20 @@
 package fr.iban.guilds;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
-import fr.iban.bukkitcore.commands.CoreCommandHandlerVisitor;
-import fr.iban.bukkitcore.manager.BukkitPlayerManager;
 import fr.iban.guilds.command.GuildCMD;
 import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.GuildListeners;
+import fr.iban.guilds.listener.ServiceListeners;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import revxrsal.commands.autocomplete.SuggestionProvider;
-import revxrsal.commands.autocomplete.SuggestionProviderFactory;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.exception.CommandErrorException;
 
-import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,14 +26,18 @@ public final class GuildsPlugin extends JavaPlugin {
     public static final String GUILD_INVITE_ADD = "AddGuildInviteChannel";
     public static final String GUILD_INVITE_REVOKE = "RevokeGuildInviteSyncChannel";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private Economy economy;
+    private Economy econ = null;
 
     @Override
     public void onEnable() {
         this.guildsManager = new GuildsManager(this);
         registerCommands();
         setupEconomy();
-        registerListeners(new CoreMessageListener(this), new GuildListeners(this));
+        registerListeners(
+                new CoreMessageListener(this),
+                new GuildListeners(this),
+                new ServiceListeners(this)
+        );
     }
 
     @Override
@@ -71,24 +71,23 @@ public final class GuildsPlugin extends JavaPlugin {
         commandHandler.registerBrigadier();
     }
 
-    private boolean setupEconomy() {
+    public void runAsyncQueued(Runnable runnable) {
+        executor.execute(runnable);
+    }
+
+    public void setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
+            return;
         }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            return false;
+            return;
         }
-        economy = rsp.getProvider();
-        return economy != null;
+        econ = rsp.getProvider();
     }
 
     public Economy getEconomy() {
-        return economy;
-    }
-
-    public void runAsyncQueued(Runnable runnable) {
-        executor.execute(runnable);
+        return econ;
     }
 
     public GuildsManager getGuildsManager() {

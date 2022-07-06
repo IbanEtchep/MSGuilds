@@ -43,8 +43,8 @@ public class SqlStorage {
                 "CREATE TABLE IF NOT EXISTS guilds_logs(" +
                         "id INTEGER PRIMARY KEY AUTO_INCREMENT ," +
                         "guild_id INTEGER ," +
-                        "createdAt DATETIME DEFAULT NOW()," +
                         "log TEXT," +
+                        "createdAt DATETIME DEFAULT NOW()," +
                         "FOREIGN KEY (guild_id) REFERENCES guilds(id)" +
                         ");",
                 "CREATE TABLE IF NOT EXISTS guilds_members(" +
@@ -301,6 +301,20 @@ public class SqlStorage {
         try (Connection connection = ds.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
                 preparedStatement.setString(1, uuid.toString());
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addLog(Guild guild, String text) {
+        String insertStatement = "INSERT INTO guilds_logs(guild_id, log) VALUES (" +
+                "(SELECT id FROM guilds WHERE guild_uuid=?), ?);";
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertStatement)) {
+                preparedStatement.setString(1, guild.getId().toString());
+                preparedStatement.setString(2, text);
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {

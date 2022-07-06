@@ -9,6 +9,7 @@ import fr.iban.guilds.event.GuildDisbandEvent;
 import fr.iban.guilds.event.GuildPostDisbandEvent;
 import fr.iban.guilds.storage.SqlStorage;
 import fr.iban.guilds.util.GuildRequestMessage;
+import fr.iban.guilds.util.Lang;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -57,12 +58,12 @@ public class GuildsManager {
 
     public void createGuild(Player player, String name) {
         if (guilds.values().stream().anyMatch(g -> g.getName().equalsIgnoreCase(name))) {
-            player.sendMessage("§cUne guilde existe déjà au nom de " + name + ".");
+            player.sendMessage(Lang.GUILD_ALREADY_EXISTS.replace("{name}", name));
             return;
         }
 
         if (getGuildPlayer(player.getUniqueId()) != null) {
-            player.sendMessage("§cVous êtes déjà dans une guilde !");
+            player.sendMessage(Lang.ALREADY_GUILD_MEMBER.toString());
             return;
         }
 
@@ -74,14 +75,14 @@ public class GuildsManager {
         guilds.put(guild.getId(), guild);
         new GuildCreateEvent(guild).callEvent();
         saveGuildToDB(guild);
-        player.sendMessage("§aVous avez crée une guilde au nom de " + name + ".");
+        player.sendMessage(Lang.GUILD_CREATED.replace("{name}", name));
     }
 
     public void toggleChatMode(Player player) {
         GuildPlayer guildPlayer = getGuildPlayer(player.getUniqueId());
 
         if (guildPlayer == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -98,7 +99,7 @@ public class GuildsManager {
     public void disbandGuild(Player player) {
         Guild guild = getGuildByPlayerId(player.getUniqueId());
         if (guild == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -145,7 +146,7 @@ public class GuildsManager {
         Guild guild = getGuildByPlayer(player);
 
         if (guild == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -166,7 +167,7 @@ public class GuildsManager {
         Guild guild = getGuildByPlayer(player);
 
         if (guild == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -200,7 +201,7 @@ public class GuildsManager {
         Guild guild = getGuildByPlayer(player);
 
         if (guild == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -226,7 +227,7 @@ public class GuildsManager {
         Economy economy = plugin.getEconomy();
 
         if (guild == null) {
-            player.sendMessage("§cVous n'avez pas de guilde !");
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
@@ -350,6 +351,7 @@ public class GuildsManager {
         deleteGuildPlayerFromDB(guildPlayer.getUuid());
         guild.sendMessageToOnlineMembers("§c" + player.getName() + " a été exclu de la guilde.");
         guildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
+        addLog(guild, player.getName() + " a été exclu de la guilde.");
     }
 
     public void demote(Player player, OfflinePlayer target) {
@@ -400,6 +402,7 @@ public class GuildsManager {
 
         saveGuildPlayerToDB(guildPlayer);
         guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + ".");
+        addLog(guild, player.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + " par " + player.getName());
     }
 
     public void promote(Player player, OfflinePlayer target) {
@@ -452,7 +455,8 @@ public class GuildsManager {
         }
 
         saveGuildPlayerToDB(guildPlayer);
-        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été promu " + guildPlayer.getRank().getName() + ".");
+        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName() + ".");
+        addLog(guild, player.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName());
     }
 
     public void transfer(Player player, OfflinePlayer target) {
@@ -485,6 +489,7 @@ public class GuildsManager {
         saveGuildPlayerToDB(guildPlayer);
         saveGuildPlayerToDB(guildOwner);
         guild.sendMessageToOnlineMembers("§7§l" + player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
+        addLog(guild, player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
     }
 
     /*
@@ -516,6 +521,12 @@ public class GuildsManager {
         plugin.runAsyncQueued(() -> {
             storage.deleteGuildPlayer(uuid);
             syncGuildPlayer(uuid);
+        });
+    }
+
+    public void addLog(Guild guild, String log) {
+        plugin.runAsyncQueued(() -> {
+            storage.addLog(guild, log);
         });
     }
 
