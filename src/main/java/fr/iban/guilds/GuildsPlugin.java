@@ -2,6 +2,7 @@ package fr.iban.guilds;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.guilds.command.GuildCMD;
+import fr.iban.guilds.listener.ChatListeners;
 import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.GuildListeners;
 import fr.iban.guilds.listener.ServiceListeners;
@@ -36,7 +37,8 @@ public final class GuildsPlugin extends JavaPlugin {
         registerListeners(
                 new CoreMessageListener(this),
                 new GuildListeners(this),
-                new ServiceListeners(this)
+                new ServiceListeners(this),
+                new ChatListeners(this)
         );
     }
 

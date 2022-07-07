@@ -6,6 +6,7 @@ import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.GuildsManager;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.enums.Rank;
+import fr.iban.guilds.util.Lang;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -137,12 +138,12 @@ public class GuildCMD {
         Economy economy = plugin.getEconomy();
 
         if(economy == null) {
-            sender.sendMessage("§cLa banque n'est pas accessible.");
+            sender.sendMessage(Lang.ECONOMY_DISABLED.toString());
             return;
         }
 
         if (guild == null) {
-            sender.sendMessage("§cVous n'avez pas de guilde !");
+            sender.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
 
