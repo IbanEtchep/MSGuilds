@@ -249,9 +249,9 @@ public class GuildsManager {
         economy.withdrawPlayer(player, amount);
         guild.setBalance(guild.getBalance() + amount);
         player.sendMessage("§aVous avez déposé " + economy.format(amount) + " §adans la banque de votre guilde. " +
-                "Nouveau solde :" + economy.format(guild.getBalance()));
-        addLog(guild, player.getName() + " a déposé " + economy.format(amount) + " §adans la banque de votre guilde. " +
-                "Nouveau solde :" + economy.format(guild.getBalance()));
+                "Nouveau solde : " + economy.format(guild.getBalance()));
+        addLog(guild, player.getName() + " a déposé " + economy.format(amount) + " dans la banque de votre guilde. " +
+                "Nouveau solde : " + economy.format(guild.getBalance()));
         saveGuildToDB(guild);
     }
 
@@ -283,10 +283,10 @@ public class GuildsManager {
         economy.depositPlayer(player, amount);
         guild.setBalance(currentBalance - amount);
         player.sendMessage("§aVous avez retiré " + economy.format(amount) + " §ade la banque de votre guilde. " +
-                "Nouveau solde :" + economy.format(guild.getBalance()));
+                "Nouveau solde : " + economy.format(guild.getBalance()));
         saveGuildToDB(guild);
-        addLog(guild, player.getName() + " a retiré " + economy.format(amount) + " §ade la banque de votre guilde. " +
-                "Nouveau solde :" + economy.format(guild.getBalance()));
+        addLog(guild, player.getName() + " a retiré " + economy.format(amount) + " de la banque de votre guilde. " +
+                "Nouveau solde : " + economy.format(guild.getBalance()));
     }
 
     public void teleportHome(Player player) {
@@ -302,7 +302,7 @@ public class GuildsManager {
             return;
         }
 
-        CoreBukkitPlugin.getInstance().getTeleportManager().teleport(player, guild.getHome());
+        CoreBukkitPlugin.getInstance().getTeleportManager().teleport(player, guild.getHome(), 3);
     }
 
     public void setHome(Player player) {

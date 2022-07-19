@@ -1,6 +1,9 @@
 package fr.iban.guilds.storage;
 
+import com.google.gson.Gson;
+import fr.iban.bukkitcore.utils.SLocationUtils;
 import fr.iban.common.data.sql.DbAccess;
+import fr.iban.common.teleport.SLocation;
 import fr.iban.guilds.Guild;
 import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.enums.ChatMode;
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class SqlStorage {
 
     private final DataSource ds = DbAccess.getDataSource();
+    private final Gson gson = new Gson();
 
     public SqlStorage() {
         init();
@@ -101,8 +105,12 @@ public class SqlStorage {
                         String name = rs.getString("name");
                         double balance = rs.getDouble("balance");
                         long exp = rs.getLong("exp");
+                        String sloc = rs.getString("home");
                         Date createdAt = rs.getTimestamp("createdAt");
                         Guild guild = new Guild(guildId, name, balance, exp, createdAt);
+                        if(sloc != null) {
+                            guild.setHome(gson.fromJson(sloc, SLocation.class));
+                        }
                         guilds.add(guild);
                     }
                 }
@@ -147,7 +155,7 @@ public class SqlStorage {
     }
 
     public Guild getGuild(UUID guildId) {
-        String sql = "SELECT name, balance, exp FROM guilds WHERE guild_uuid=?;";
+        String sql = "SELECT * FROM guilds WHERE guild_uuid=?;";
 
         try (Connection connection = ds.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -157,8 +165,13 @@ public class SqlStorage {
                         String name = rs.getString("name");
                         double balance = rs.getDouble("balance");
                         long exp = rs.getLong("exp");
+                        String sloc = rs.getString("home");
                         Date createdAt = rs.getTimestamp("createdAt");
-                        return new Guild(guildId, name, balance, exp, createdAt);
+                        Guild guild = new Guild(guildId, name, balance, exp, createdAt);
+                        if(sloc != null) {
+                            guild.setHome(gson.fromJson(sloc, SLocation.class));
+                        }
+                        return guild;
                     }
                 }
             }
@@ -226,7 +239,7 @@ public class SqlStorage {
                 if (guild.getHome() == null) {
                     ps.setNull(5, Types.VARCHAR);
                 } else {
-                    ps.setString(5, guild.getHome().serialize());
+                    ps.setString(5, gson.toJson(guild.getHome()));
                 }
                 ps.executeUpdate();
             }

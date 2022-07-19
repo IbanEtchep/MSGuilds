@@ -10,10 +10,7 @@ import fr.iban.guilds.util.Lang;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import revxrsal.commands.annotation.Command;
-import revxrsal.commands.annotation.Named;
-import revxrsal.commands.annotation.Optional;
-import revxrsal.commands.annotation.Subcommand;
+import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.command.CommandActor;
@@ -40,7 +37,7 @@ public class GuildCMD {
         if (guildPlayer == null) {
             actor.reply("§6/guild create §f→ créer une guilde.");
             actor.reply("§6/guild join <nom de la guilde> §f→ accepter l'invitation d'une guilde.");
-            actor.reply("§7Davantage de commande seront affichées quand vous serez membre d'une guilde et selon votre rang dans la guilde.");
+            actor.reply("§7Davantage de commandes seront affichées quand vous serez membre d'une guilde et selon votre rang dans la guilde.");
             return;
         }
         if (guildPlayer.isGranted(Rank.MEMBER)) {
@@ -132,7 +129,13 @@ public class GuildCMD {
         guildsManager.quitGuild(sender);
     }
 
-    @Subcommand({"bank", "bank balance"})
+    @Subcommand("bank")
+    @Default
+    public void bank(Player sender) {
+        bankBalance(sender);
+    }
+
+    @Subcommand("bank balance")
     public void bankBalance(Player sender) {
         Guild guild = guildsManager.getGuildByPlayer(sender);
         Economy economy = plugin.getEconomy();
@@ -151,12 +154,12 @@ public class GuildCMD {
     }
 
     @Subcommand("bank deposit")
-    public void bankDeposit(Player sender, double amount) {
+    public void bankDeposit(Player sender, @Named("le montant") double amount) {
         guildsManager.guildDeposit(sender, amount);
     }
 
     @Subcommand("bank withdraw")
-    public void bankWithdraw(Player sender, double amount) {
+    public void bankWithdraw(Player sender, @Named("le montant") double amount) {
         guildsManager.guildWithdraw(sender, amount);
     }
 
