@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 
 public final class GuildsPlugin extends JavaPlugin {
 
+    private static GuildsPlugin instance;
     private GuildsManager guildsManager;
     public static final String GUILD_SYNC_CHANNEL = "GuildSyncChannel";
     public static final String GUILD_PLAYER_SYNC_CHANNEL = "GuildPlayerSyncChannel";
@@ -31,6 +32,7 @@ public final class GuildsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        instance = this;
         this.guildsManager = new GuildsManager(this);
         registerCommands();
         setupEconomy();
@@ -45,6 +47,10 @@ public final class GuildsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         executor.shutdown();
+    }
+
+    public static GuildsPlugin getInstance() {
+        return instance;
     }
 
     private void registerListeners(Listener... listeners) {
@@ -70,7 +76,7 @@ public final class GuildsPlugin extends JavaPlugin {
         });
 
         commandHandler.register(new GuildCMD(this));
-        commandHandler.registerBrigadier();
+        //commandHandler.registerBrigadier();
     }
 
     public void runAsyncQueued(Runnable runnable) {
