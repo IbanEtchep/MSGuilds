@@ -76,9 +76,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>fr.iban</groupId>
+            <groupId>com.github.IbanEtchep.ServerCore</groupId>
             <artifactId>CorePaper</artifactId>
-            <version>1.0</version>
+            <version>v1.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
