@@ -20,7 +20,12 @@ public class GuildPostDisbandEvent extends Event {
         return HANDLERS;
     }
 
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
     public Guild getGuild() {
         return guild;
     }
+
 }

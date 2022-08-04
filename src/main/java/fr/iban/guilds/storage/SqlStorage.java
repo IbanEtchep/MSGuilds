@@ -49,7 +49,7 @@ public class SqlStorage {
                         "guild_id INTEGER ," +
                         "log TEXT," +
                         "createdAt DATETIME DEFAULT NOW()," +
-                        "FOREIGN KEY (guild_id) REFERENCES guilds(id)" +
+                        "FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE" +
                         ");",
                 "CREATE TABLE IF NOT EXISTS guilds_members(" +
                         "guild_id INTEGER ," +
@@ -328,6 +328,18 @@ public class SqlStorage {
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertStatement)) {
                 preparedStatement.setString(1, guild.getId().toString());
                 preparedStatement.setString(2, text);
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteLogs(Guild guild) {
+        String insertStatement = "DELETE FROM guilds_logs WHERE guild_id=(SELECT id FROM guilds WHERE guild_uuid=?);";
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(insertStatement)) {
+                preparedStatement.setString(1, guild.getId().toString());
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {

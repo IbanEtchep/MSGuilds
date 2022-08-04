@@ -16,7 +16,7 @@ public enum Lang {
     ALREADY_GUILD_MEMBER("&cVous êtes déjà membre d'une guilde !"),
     GUILD_ALREADY_EXISTS("&cUne guilde existe déjà au nom de {name} !"),
     NOT_GRANTED("&cVous n'avez pas la permission de {action} !"),
-    GUILD_CREATED("&cVous avez crée une guilde au nom de {name}."),
+    GUILD_CREATED("&aVous avez crée une guilde au nom de {name}."),
     ALREADY_GUILD_OWNER("&cCette guilde vous appartient déjà !"),
     PLAYER_JOINED_GUILD("&7{name} a rejoint la guilde."),
     PLAYER_LEFT_GUILD("&7{name} a quitté la guilde."),

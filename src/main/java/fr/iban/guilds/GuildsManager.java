@@ -47,6 +47,11 @@ public class GuildsManager {
     }
 
     @Nullable
+    public Guild getGuildById(UUID uuid) {
+        return guilds.get(uuid);
+    }
+
+    @Nullable
     public GuildPlayer getGuildPlayer(UUID uuid) {
         Guild guild = getGuildByPlayerId(uuid);
         return guild == null ? null : guild.getMember(uuid);
@@ -121,9 +126,9 @@ public class GuildsManager {
         });
 
         guilds.remove(guild.getId());
+        addLog(guild, "Dissolution de la guilde " + guild.getName() + " par " + player.getName());
         deleteGuildFromDB(guildPlayer.getGuildId());
         new GuildPostDisbandEvent(guild).callEvent();
-        addLog(guild, "Dissolution de la guilde par " + player.getName());
     }
 
     public void joinGuild(Player player, Guild guild) {
