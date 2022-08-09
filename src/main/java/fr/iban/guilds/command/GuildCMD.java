@@ -15,6 +15,7 @@ import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.command.CommandActor;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Command({"guild", "g"})
@@ -26,6 +27,12 @@ public class GuildCMD {
     public GuildCMD(GuildsPlugin plugin) {
         this.plugin = plugin;
         this.guildsManager = plugin.getGuildsManager();
+    }
+
+    @Command({"guild", "g"})
+    @Default
+    public void guild(CommandActor actor) {
+        help(actor);
     }
 
     @Subcommand("help")
@@ -106,12 +113,12 @@ public class GuildCMD {
 
     @Subcommand("promote")
     public void promote(Player sender, OfflinePlayer player) {
-        guildsManager.demote(sender, player);
+        guildsManager.promote(sender, player);
     }
 
     @Subcommand("demote")
     public void demote(Player sender, OfflinePlayer player) {
-        guildsManager.promote(sender, player);
+        guildsManager.demote(sender, player);
     }
 
     @Subcommand("transfer")
@@ -124,7 +131,7 @@ public class GuildCMD {
         guildsManager.joinGuild(sender, guild);
     }
 
-    @Subcommand("quit")
+    @Subcommand("leave")
     public void leave(Player sender) {
         guildsManager.quitGuild(sender);
     }
@@ -140,7 +147,7 @@ public class GuildCMD {
         Guild guild = guildsManager.getGuildByPlayer(sender);
         Economy economy = plugin.getEconomy();
 
-        if(economy == null) {
+        if (economy == null) {
             sender.sendMessage(Lang.ECONOMY_DISABLED.toString());
             return;
         }
@@ -183,6 +190,11 @@ public class GuildCMD {
         guildsManager.kick(sender, target);
     }
 
+    @Subcommand("lands")
+    public void lands(Player sender) {
+        sender.performCommand("lands guild");
+    }
+
     @Subcommand("info")
     public void info(BukkitCommandActor sender, @Optional Guild guild) {
         if (guild == null) {
@@ -212,17 +224,90 @@ public class GuildCMD {
         List<String> members = guild.getMembers().values().stream()
                 .filter(gp -> gp.getRank() == Rank.MEMBER)
                 .map(GuildPlayer::getName).toList();
-        info += "§4§lFondateur : §f" + guild.getOwner().getName();
+        info += "§4§lFondateur : §f" + guild.getOwner().getName() + "\n";
         if (!admins.isEmpty()) {
             info += "§c§lAdministrateurs : §f" + String.join(", ", admins) + "\n";
         }
         if (!mods.isEmpty()) {
-            info += "§b§lModérateurs : §f" + String.join(", ", mods) + "\n";
+            info += "§a§lModérateurs : §f" + String.join(", ", mods) + "\n";
         }
         if (!members.isEmpty()) {
             info += "§b§lMembres : §f" + String.join(", ", members) + "\n";
         }
         return info;
+    }
+
+    @Subcommand("list")
+    public void list(CommandActor actor, @Default("1") @Range(min = 1) @Named("page") int page) {
+        List<Guild> onlineGuilds = guildsManager.getOnlineGuilds();
+        int maxpages = (int) Math.ceil(onlineGuilds.size() / 10D);
+
+        if (page > maxpages) {
+            actor.reply("§cLe liste va jusqu'à la page " + maxpages);
+            return;
+        }
+
+        int startPos = (page - 1) * 10;
+        int endPos = startPos + 10;
+
+        actor.reply(getCentered("§6§lListe des guildes en ligne (§f§l" + page + "§6§l/§f§l " + maxpages + "§6§l)", 54));
+        for (int i = startPos; i < endPos && i < onlineGuilds.size(); i++) {
+            Guild guild = onlineGuilds.get(i);
+            actor.reply("§f§l " + guild.getName() + " §e - §f" + guild.getOnlinePlayerAmount()+"/"+guild.getMembers().size() + " joueurs en ligne.");
+        }
+        actor.reply(getLine(40));
+    }
+
+    @Subcommand("logs")
+    public void logs(BukkitCommandActor sender, @Default("1") @Range(min = 1) @Named("page") int page, @Optional Guild guild) {
+        if (guild == null && sender.isPlayer()) {
+            Player player = sender.getAsPlayer();
+            if (player != null) {
+                guild = guildsManager.getGuildByPlayer(player);
+            }
+            sender.reply("§cVeuillez spécifier le nom d'une guilde.");
+        }
+
+        if(guild == null) {
+            sender.reply(Lang.NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        guildsManager.getLogsAsync(guild).thenAccept(logs -> {
+            int maxpages = (int) Math.ceil(logs.size() / 10D);
+
+            if (page > maxpages) {
+                sender.reply("§cLe liste va jusqu'à la page " + maxpages);
+                return;
+            }
+
+            int startPos = (page - 1) * 10;
+            int endPos = startPos + 10;
+
+            sender.reply(getCentered("§6§lJournal de la guilde (§f§l" + page + "§6§l/§f§l " + maxpages + "§6§l)", 54));
+            for (int i = startPos; i < endPos && i < logs.size(); i++) {
+                sender.reply("§e - §f" + logs.get(i));
+            }
+            sender.reply(getLine(40));
+        });
+    }
+
+    private String getLine(int length) {
+        StringBuilder sb = new StringBuilder("§6§m");
+        for (int i = 0; i < length; i++) {
+            sb.append("-");
+        }
+        return sb.toString();
+    }
+
+    private String getCentered(String string, int lineLength) {
+        StringBuilder sb = new StringBuilder("§6§m");
+        int line = (lineLength - string.length()) / 2 + 2;
+        sb.append("-".repeat(Math.max(0, line)));
+        sb.append("§f ").append(string).append(" ");
+        sb.append("§6§m");
+        sb.append("-".repeat(Math.max(0, line)));
+        return sb.toString();
     }
 
 }

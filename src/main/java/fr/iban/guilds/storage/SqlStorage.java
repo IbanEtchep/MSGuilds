@@ -1,7 +1,6 @@
 package fr.iban.guilds.storage;
 
 import com.google.gson.Gson;
-import fr.iban.bukkitcore.utils.SLocationUtils;
 import fr.iban.common.data.sql.DbAccess;
 import fr.iban.common.teleport.SLocation;
 import fr.iban.guilds.Guild;
@@ -11,6 +10,7 @@ import fr.iban.guilds.enums.Rank;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -333,6 +333,27 @@ public class SqlStorage {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> getLogs(UUID guildId) {
+        List<String> logs = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yy HH:mm:ss");
+        String sql = "SELECT * FROM guilds_logs WHERE guild_id=(SELECT id FROM guilds WHERE guild_uuid=?) ORDER BY createdAt DESC;";
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, guildId.toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        Date createdAt = rs.getTimestamp("createdAt");
+                        String log = rs.getString("log");
+                        logs.add(dateFormat.format(createdAt) + " : " + log);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return logs;
     }
 
     public void deleteLogs(Guild guild) {

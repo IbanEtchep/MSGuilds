@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class GuildsManager {
 
@@ -29,6 +30,10 @@ public class GuildsManager {
         this.plugin = plugin;
         this.storage = new SqlStorage();
         load();
+    }
+
+    public Map<UUID, Guild> getGuilds() {
+        return guilds;
     }
 
     @Nullable
@@ -59,6 +64,11 @@ public class GuildsManager {
 
     public List<String> getGuildNames() {
         return guilds.values().stream().map(Guild::getName).toList();
+    }
+
+    public List<Guild> getOnlineGuilds() {
+        return guilds.values().stream().filter(guild -> guild.getOnlinePlayers().size() > 0)
+                .sorted(Comparator.comparingInt(Guild::getOnlinePlayerAmount)).toList();
     }
 
     public void createGuild(Player player, String name) {
@@ -138,7 +148,7 @@ public class GuildsManager {
             return;
         }
 
-        if (!guild.getInvites().contains(uuid) || !player.hasPermission("guilds.bypass")) {
+        if (!guild.getInvites().contains(uuid) && !player.hasPermission("guilds.bypass")) {
             player.sendMessage("§cVous n'avez pas d'invitation à rejoindre cette guilde.");
             return;
         }
@@ -146,6 +156,8 @@ public class GuildsManager {
         GuildPlayer guildPlayer = new GuildPlayer(uuid, guild.getId(), Rank.MEMBER, ChatMode.PUBLIC);
         guild.sendMessageToOnlineMembers(Lang.PLAYER_JOINED_GUILD.replace("{name}", player.getName()));
         addLog(guild, Lang.PLAYER_JOINED_GUILD.getWithoutColor().replace("{name}", player.getName()));
+        player.sendMessage("§aVous avez rejoint la guilde " + guild.getName() + ".");
+        guild.getInvites().remove(uuid);
         guild.getMembers().put(uuid, guildPlayer);
         saveGuildPlayerToDB(guildPlayer);
     }
@@ -202,7 +214,7 @@ public class GuildsManager {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,
                 new GuildRequestMessage(guild.getId(), target.getUniqueId()));
-        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" a pour accepter.\",\"color\":\"green\"}]");
+        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" pour accepter.\",\"color\":\"green\"}]");
         player.sendMessage("§aVous avez invité " + target.getName() + " à rejoindre votre guilde.");
     }
 
@@ -228,7 +240,7 @@ public class GuildsManager {
         player.sendMessage("§cVous avez révoqué l'invitation envoyée à " + target.getName() + ".");
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getPlayerManager().sendMessageIfOnline(target.getUniqueId(),
-                "§cL'invitation que vous avez reçu de §2§l" + guild.getName() + "§a a expiré.");
+                "§cL'invitation que vous avez reçu de §2§l" + guild.getName() + "§c a expiré.");
     }
 
     public void guildDeposit(Player player, double amount) {
@@ -292,6 +304,32 @@ public class GuildsManager {
         saveGuildToDB(guild);
         addLog(guild, player.getName() + " a retiré " + economy.format(amount) + " de la banque de votre guilde. " +
                 "Nouveau solde : " + economy.format(guild.getBalance()));
+    }
+
+    public boolean guildWithdraw(Guild guild, double amount) {
+        double currentBalance = guild.getBalance();
+
+        if (currentBalance < amount) {
+            return false;
+        }
+
+        guild.setBalance(currentBalance - amount);
+        saveGuildToDB(guild);
+        return true;
+    }
+
+    public boolean guildWithdraw(Guild guild, double amount, String reason) {
+        Economy economy = plugin.getEconomy();
+        if (economy == null) {
+            return false;
+        }
+
+        boolean result = guildWithdraw(guild, amount);
+        if(result) {
+            addLog(guild, economy.format(amount) + " ont été prélevés de la banque de votre guilde pour " + reason + ". " +
+                    "Nouveau solde : " + economy.format(guild.getBalance()));
+        }
+        return result;
     }
 
     public void teleportHome(Player player) {
@@ -429,7 +467,7 @@ public class GuildsManager {
         }
 
         if (player.getUniqueId().equals(target.getUniqueId())) {
-            player.sendMessage("§cVous ne pouvez pas vous rétrograder vous même !");
+            player.sendMessage("§cVous ne pouvez pas vous promouvoir vous même !");
             return;
         }
 
@@ -483,7 +521,7 @@ public class GuildsManager {
         }
 
         GuildPlayer guildOwner = guild.getOwner();
-        if (guildOwner.getUuid().equals(player.getUniqueId())) {
+        if (!guildOwner.getUuid().equals(player.getUniqueId())) {
             player.sendMessage("§cIl faut être le fondateur pour transférer la proprieté de la guilde.");
             return;
         }
@@ -540,8 +578,16 @@ public class GuildsManager {
     }
 
     public void addLog(Guild guild, String log) {
-        plugin.runAsyncQueued(() -> {
-            storage.addLog(guild, log);
+        guild.invalidateLogs();
+        plugin.runAsyncQueued(() -> storage.addLog(guild, log));
+    }
+
+    public CompletableFuture<List<String>> getLogsAsync(Guild guild) {
+        return CompletableFuture.supplyAsync(() -> {
+            if (guild.getCachedLogs() == null) {
+                guild.setCachedLogs(storage.getLogs(guild.getId()));
+            }
+            return guild.getCachedLogs();
         });
     }
 
@@ -582,7 +628,10 @@ public class GuildsManager {
         GuildPlayer newGuildPlayer = storage.getGuildPlayer(uuid);
         if (oldGuildPlayer != null && newGuildPlayer == null) {
             //Le joueur a quitté la guilde
-            guilds.get(oldGuildPlayer.getGuildId()).getMembers().remove(uuid);
+            Guild guild = getGuildById(oldGuildPlayer.getGuildId());
+            if (guild != null) {
+                guild.getMembers().remove(uuid);
+            }
         } else {
             //Le joueur a rejoint une guilde ou a été mis à jour.
             guilds.get(newGuildPlayer.getGuildId()).getMembers().put(uuid, newGuildPlayer);

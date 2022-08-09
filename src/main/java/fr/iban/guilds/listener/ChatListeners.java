@@ -28,12 +28,14 @@ public class ChatListeners implements Listener {
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !e.getMessage().startsWith("!")) {
-            guild.sendMessageToOnlineMembers(player.getName() + " : " + e.getMessage());
+            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage());
+            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage());
             e.setCancelled(true);
         }
 
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
-            guild.sendMessageToOnlineMembers(player.getName() + " : " + e.getMessage());
+            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage().replaceFirst("!", ""));
+            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage().replaceFirst("!", ""));
             e.setCancelled(true);
         }
     }

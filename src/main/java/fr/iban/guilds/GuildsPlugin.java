@@ -11,8 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import revxrsal.commands.autocomplete.SuggestionProvider;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.exception.CommandErrorException;
 
@@ -34,6 +34,7 @@ public final class GuildsPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.guildsManager = new GuildsManager(this);
+        getServer().getServicesManager().register(GuildsManager.class, guildsManager, this, ServicePriority.Normal);
         registerCommands();
         setupEconomy();
         registerListeners(
@@ -65,7 +66,7 @@ public final class GuildsPlugin extends JavaPlugin {
         commandHandler.accept(CoreBukkitPlugin.getInstance().getCommandHandlerVisitor());
 
         //Guild resolver
-        commandHandler.getAutoCompleter().registerParameterSuggestions(Guild.class, SuggestionProvider.of(guildsManager.getGuildNames()));
+        commandHandler.getAutoCompleter().registerParameterSuggestions(Guild.class, (args, sender, command) -> guildsManager.getGuildNames());
         commandHandler.registerValueResolver(Guild.class, context -> {
             String value = context.arguments().pop();
             Guild guild = guildsManager.getGuildByName(value);

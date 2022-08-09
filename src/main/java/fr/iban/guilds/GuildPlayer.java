@@ -52,13 +52,17 @@ public class GuildPlayer {
     }
 
     public String getName() {
-        if(name == null) {
+        if (name == null) {
             name = CoreBukkitPlugin.getInstance().getPlayerManager().getName(getUuid());
         }
         return name;
     }
 
     public boolean isGranted(Rank comparedRank) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null && player.hasPermission("guilds.bypass")) {
+            return true;
+        }
         switch (rank) {
             case OWNER -> {
                 return true;

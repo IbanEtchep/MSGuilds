@@ -39,7 +39,7 @@ public class CoreMessageListener implements Listener {
 
     private void consumeAddInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildsManager().getGuildByPlayerId(requestMessage.getGuildID());
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getGuildID());
         if (guild != null) {
             if (!guild.getInvites().contains(requestMessage.getPlayerID())) {
                 guild.getInvites().add(requestMessage.getPlayerID());
@@ -51,7 +51,7 @@ public class CoreMessageListener implements Listener {
 
     private void consumeRevokeInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildsManager().getGuildByPlayerId(requestMessage.getGuildID());
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getGuildID());
         if (guild != null) {
             guild.getInvites().remove(requestMessage.getPlayerID());
         }

@@ -3,6 +3,7 @@ package fr.iban.guilds;
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.common.teleport.SLocation;
 import fr.iban.guilds.enums.Rank;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,6 +18,7 @@ public class Guild {
     private long exp;
     private SLocation home;
     private Date createdAt;
+    private @Nullable List<String> cachedLogs;
     private final List<UUID> invites = new ArrayList<>();
 
     public Guild(UUID id, String name, double balance, long exp, Date createdAt) {
@@ -96,4 +98,26 @@ public class Guild {
     public String getDate() {
         return new SimpleDateFormat("dd/MM/yy HH:mm:ss").format(createdAt);
     }
+
+    public List<UUID> getOnlinePlayers() {
+        return CoreBukkitPlugin.getInstance().getPlayerManager().getOnlinePlayers().keySet().stream()
+                .filter(uuid -> getMembers().containsKey(uuid)).toList();
+    }
+
+    public int getOnlinePlayerAmount() {
+        return getOnlinePlayers().size();
+    }
+
+    public List<String> getCachedLogs() {
+        return cachedLogs;
+    }
+
+    public void setCachedLogs(List<String> cachedLogs) {
+        this.cachedLogs = cachedLogs;
+    }
+
+    public void invalidateLogs() {
+        this.cachedLogs = null;
+    }
+
 }
