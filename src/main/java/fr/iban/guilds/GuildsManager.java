@@ -68,7 +68,7 @@ public class GuildsManager {
 
     public List<Guild> getOnlineGuilds() {
         return guilds.values().stream().filter(guild -> guild.getOnlinePlayers().size() > 0)
-                .sorted(Comparator.comparingInt(Guild::getOnlinePlayerAmount)).toList();
+                .sorted(Comparator.comparingInt(Guild::getOnlinePlayerAmount).reversed()).toList();
     }
 
     public void createGuild(Player player, String name) {

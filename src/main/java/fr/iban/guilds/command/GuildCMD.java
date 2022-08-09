@@ -64,7 +64,6 @@ public class GuildCMD {
         if (guildPlayer.isGranted(Rank.ADMIN)) {
             actor.reply("§f§lCommandes §c§ladministrateur §f§l:");
             actor.reply("§6/guild lands §f→ gérer les territoires de la guilde.");
-            actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
             actor.reply("§6/guild promote §f→ promouvoir un membre.");
             actor.reply("§6/guild demote §f→ rétrograder un membre.");
             actor.reply("§6/guild sethome §f→ définir la résidence de la guilde.");
