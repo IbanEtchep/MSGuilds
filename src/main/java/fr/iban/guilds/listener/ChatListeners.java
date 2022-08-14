@@ -29,7 +29,7 @@ public class ChatListeners implements Listener {
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !e.getMessage().startsWith("!")) {
             guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage());
-            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage());
+            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage().replaceFirst("!", ""));
             e.setCancelled(true);
         }
 
