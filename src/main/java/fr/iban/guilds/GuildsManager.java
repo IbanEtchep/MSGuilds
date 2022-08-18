@@ -257,6 +257,11 @@ public class GuildsManager {
             return;
         }
 
+        if(amount <= 0) {
+            player.sendMessage("§cVous ne pouvez pas déposer une valeur négative !");
+            return;
+        }
+
         double playerBalance = economy.getBalance(player);
         if (playerBalance < amount) {
             player.sendMessage("§cVous n'avez pas " + economy.format(amount) + "§c.");
@@ -291,6 +296,11 @@ public class GuildsManager {
             return;
         }
 
+        if(amount <= 0) {
+            player.sendMessage("§cVous ne pouvez pas retirer une valeur négative !");
+            return;
+        }
+
         double currentBalance = guild.getBalance();
         if (currentBalance < amount) {
             player.sendMessage(Lang.BALANCE_NOT_ENOUGHT_MONEY.toString());
@@ -309,7 +319,7 @@ public class GuildsManager {
     public boolean guildWithdraw(Guild guild, double amount) {
         double currentBalance = guild.getBalance();
 
-        if (currentBalance < amount) {
+        if (currentBalance < amount || amount <= 0) {
             return false;
         }
 
