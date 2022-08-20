@@ -76,7 +76,7 @@ public final class GuildsPlugin extends JavaPlugin {
             String value = context.arguments().pop();
             Guild guild = guildsManager.getGuildByName(value);
             if (guild == null) {
-                throw new CommandErrorException("La guilde " + value + " n'existe pas.");
+                throw new CommandErrorException("La guilde " + value + " n''existe pas.");
             }
             return guild;
         });
