@@ -82,7 +82,7 @@ public final class GuildsPlugin extends JavaPlugin {
         });
 
         commandHandler.register(new GuildCMD(this));
-        //commandHandler.registerBrigadier();
+        commandHandler.registerBrigadier();
     }
 
     public void runAsyncQueued(Runnable runnable) {
