@@ -277,6 +277,18 @@ public class GuildsManager {
         saveGuildToDB(guild);
     }
 
+    public boolean guildDeposit(Guild guild, double amount) {
+        double currentBalance = guild.getBalance();
+
+        if (amount <= 0) {
+            return false;
+        }
+
+        guild.setBalance(currentBalance + amount);
+        saveGuildToDB(guild);
+        return true;
+    }
+
     public void guildWithdraw(Player player, double amount) {
         Guild guild = getGuildByPlayer(player);
         Economy economy = plugin.getEconomy();
