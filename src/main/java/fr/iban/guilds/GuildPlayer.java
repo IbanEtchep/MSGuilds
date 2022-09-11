@@ -53,7 +53,7 @@ public class GuildPlayer {
 
     public String getName() {
         if (name == null) {
-            name = CoreBukkitPlugin.getInstance().getPlayerManager().getName(getUuid());
+            name = CoreBukkitPlugin.getInstance().getPlayerManager().getName(uuid);
         }
         return name;
     }
