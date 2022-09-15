@@ -424,9 +424,9 @@ public class GuildsManager {
 
         guild.getMembers().remove(guildPlayer.getUuid());
         deleteGuildPlayerFromDB(guildPlayer.getUuid());
-        guild.sendMessageToOnlineMembers("§c" + player.getName() + " a été exclu de la guilde.");
+        guild.sendMessageToOnlineMembers("§c" + target.getName() + " a été exclu de la guilde.");
         guildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
-        addLog(guild, player.getName() + " a été exclu de la guilde.");
+        addLog(guild, target.getName() + " a été exclu de la guilde.");
     }
 
     public void demote(Player player, OfflinePlayer target) {
