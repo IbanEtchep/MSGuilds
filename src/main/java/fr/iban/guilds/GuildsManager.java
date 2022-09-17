@@ -530,8 +530,8 @@ public class GuildsManager {
         }
 
         saveGuildPlayerToDB(guildPlayer);
-        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName() + ".");
-        addLog(guild, player.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName());
+        guild.sendMessageToOnlineMembers("§7" + target.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName() + ".");
+        addLog(guild, target.getName() + " a été promu " + guildPlayer.getRank().getName() + " par " + player.getName());
     }
 
     public void transfer(Player player, OfflinePlayer target) {
