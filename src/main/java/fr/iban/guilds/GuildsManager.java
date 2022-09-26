@@ -77,6 +77,16 @@ public class GuildsManager {
             return;
         }
 
+        if(name.contains(" ")) {
+            player.sendMessage("§cLe nom de la guilde ne doit pas contenir d'espace.");
+            return;
+        }
+
+        if(name.length() > 30) {
+            player.sendMessage("§cLe nom de la guilde ne doit pas dépasser 30 caractères.");
+            return;
+        }
+
         if (getGuildPlayer(player.getUniqueId()) != null) {
             player.sendMessage(Lang.ALREADY_GUILD_MEMBER.toString());
             return;
