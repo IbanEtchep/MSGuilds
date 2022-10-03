@@ -17,7 +17,7 @@ public class Guild {
     private double balance;
     private long exp;
     private SLocation home;
-    private Date createdAt;
+    private final Date createdAt;
     private @Nullable List<String> cachedLogs;
     private final List<UUID> invites = new ArrayList<>();
 
