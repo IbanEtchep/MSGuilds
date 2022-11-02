@@ -29,15 +29,22 @@ public class ChatListeners implements Listener {
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !e.getMessage().startsWith("!")) {
             guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage());
-            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage().replaceFirst("!", ""));
+            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage());
             e.setCancelled(true);
         }
 
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
-            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage().replaceFirst("!", ""));
-            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage().replaceFirst("!", ""));
+            String msg = e.getMessage().replaceFirst("!", "");
+            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + msg);
+            plugin.getLogger().info("Chat ("+player.getName()+") : " + msg);
             e.setCancelled(true);
         }
+
+        if (guildPlayer.getChatMode() == ChatMode.GUILD && e.getMessage().startsWith("!")) {
+            String msg = e.getMessage().replaceFirst("!", "");
+            e.setMessage(msg);
+        }
+
     }
 
 }
