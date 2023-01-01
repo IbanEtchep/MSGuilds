@@ -30,6 +30,11 @@ public class GuildPlaceHolders extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean persist() {
+        return true; // This is required or else PlaceholderAPI will unregister the Expansion on reload
+    }
+
+    @Override
     public String onPlaceholderRequest(Player player, String identifier) {
 
         if (player == null) {

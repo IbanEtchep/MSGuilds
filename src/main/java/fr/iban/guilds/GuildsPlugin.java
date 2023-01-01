@@ -7,6 +7,7 @@ import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.GuildListeners;
 import fr.iban.guilds.listener.ServiceListeners;
 import fr.iban.guilds.util.GuildPlaceHolders;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;

@@ -486,8 +486,8 @@ public class GuildsManager {
         }
 
         saveGuildPlayerToDB(guildPlayer);
-        guild.sendMessageToOnlineMembers("§7" + player.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + ".");
-        addLog(guild, player.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + " par " + player.getName());
+        guild.sendMessageToOnlineMembers("§7" + target.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + ".");
+        addLog(guild, target.getName() + " a été rétrogradé " + guildPlayer.getRank().getName() + " par " + player.getName());
     }
 
     public void promote(Player player, OfflinePlayer target) {
