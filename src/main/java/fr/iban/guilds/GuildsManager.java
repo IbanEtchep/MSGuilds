@@ -426,9 +426,15 @@ public class GuildsManager {
             return;
         }
 
-        GuildPlayer guildPlayer = guild.getMember(target.getUniqueId());
-        if (guildPlayer == null) {
+        GuildPlayer targetGuildPlayer = guild.getMember(target.getUniqueId());
+        if (targetGuildPlayer == null) {
             player.sendMessage(Lang.TARGET_NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
+        if (guildPlayer.getRank().ordinal() <= targetGuildPlayer.getRank().ordinal()) {
+            player.sendMessage("§cVous ne pouvez pas exclure quelqu'un de plus gradé que vous.");
             return;
         }
 
