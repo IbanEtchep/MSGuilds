@@ -559,7 +559,7 @@ public class GuildsManager {
         }
 
         GuildPlayer guildOwner = guild.getOwner();
-        if (!guildOwner.getUuid().equals(player.getUniqueId())) {
+        if ((guildOwner != null && !guildOwner.getUuid().equals(player.getUniqueId())) || !player.hasPermission("guilds.admin")) {
             player.sendMessage("§cIl faut être le fondateur pour transférer la proprieté de la guilde.");
             return;
         }
@@ -575,10 +575,13 @@ public class GuildsManager {
             return;
         }
 
+        if(guildOwner != null) {
+            guildOwner.setRank(Rank.ADMIN);
+            saveGuildPlayerToDB(guildOwner);
+        }
+
         guildPlayer.setRank(Rank.OWNER);
-        guildOwner.setRank(Rank.ADMIN);
         saveGuildPlayerToDB(guildPlayer);
-        saveGuildPlayerToDB(guildOwner);
         guild.sendMessageToOnlineMembers("§7§l" + player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
         addLog(guild, player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
     }
