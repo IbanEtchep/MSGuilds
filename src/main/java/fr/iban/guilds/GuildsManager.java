@@ -433,8 +433,8 @@ public class GuildsManager {
         }
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
-        if (guildPlayer.getRank().ordinal() <= targetGuildPlayer.getRank().ordinal()) {
-            player.sendMessage("§cVous ne pouvez pas exclure quelqu'un de plus gradé que vous.");
+        if (guildPlayer.getRank().ordinal() > targetGuildPlayer.getRank().ordinal()) {
+            player.sendMessage("§cVous devez être plus gradé que la personne que vous voulez exclure.");
             return;
         }
 
