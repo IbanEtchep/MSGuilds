@@ -438,11 +438,11 @@ public class GuildsManager {
             return;
         }
 
-        guild.getMembers().remove(guildPlayer.getUuid());
-        deleteGuildPlayerFromDB(guildPlayer.getUuid());
+        guild.getMembers().remove(targetGuildPlayer.getUuid());
         guild.sendMessageToOnlineMembers("§c" + target.getName() + " a été exclu de la guilde.");
-        guildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
+        targetGuildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
         addLog(guild, target.getName() + " a été exclu de la guilde.");
+        deleteGuildPlayerFromDB(targetGuildPlayer.getUuid());
     }
 
     public void demote(Player player, OfflinePlayer target) {
