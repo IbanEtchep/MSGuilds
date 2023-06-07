@@ -559,7 +559,7 @@ public class GuildsManager {
         }
 
         GuildPlayer guildOwner = guild.getOwner();
-        if ((guildOwner != null && !guildOwner.getUuid().equals(player.getUniqueId())) || !player.hasPermission("guilds.admin")) {
+        if ((guildOwner != null && !guildOwner.getUuid().equals(player.getUniqueId())) && !player.hasPermission("guilds.admin")) {
             player.sendMessage("§cIl faut être le fondateur pour transférer la proprieté de la guilde.");
             return;
         }
