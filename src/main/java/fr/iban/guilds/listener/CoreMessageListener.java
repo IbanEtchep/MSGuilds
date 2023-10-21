@@ -9,7 +9,6 @@ import fr.iban.guilds.util.GuildRequestMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.messaging.Messenger;
 
 import java.util.UUID;
 
@@ -34,26 +33,57 @@ public class CoreMessageListener implements Listener {
                     plugin.getGuildsManager().reloadGuildPlayerFromDB(UUID.fromString(message.getMessage())));
             case GuildsPlugin.GUILD_INVITE_ADD -> consumeAddInviteMessage(message);
             case GuildsPlugin.GUILD_INVITE_REVOKE -> consumeRevokeInviteMessage(message);
+            case GuildsPlugin.GUILD_ALLIANCE_REQUEST -> consumeAllianceRequestMessage(message);
+            case GuildsPlugin.GUILD_ALLIANCE_ACCEPT -> consumeAllianceAcceptMessage(message);
+            case GuildsPlugin.GUILD_ALLIANCE_REVOKE -> consumeAllianceRevokeMessage(message);
         }
     }
 
     private void consumeAddInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getGuildID());
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getSenderID());
         if (guild != null) {
-            if (!guild.getInvites().contains(requestMessage.getPlayerID())) {
-                guild.getInvites().add(requestMessage.getPlayerID());
+            if (!guild.getInvites().contains(requestMessage.getTargetID())) {
+                guild.getInvites().add(requestMessage.getTargetID());
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> guild.getInvites().remove(requestMessage.getPlayerID()), 2400L);
+                        () -> guild.getInvites().remove(requestMessage.getTargetID()), 2400L);
             }
         }
     }
 
     private void consumeRevokeInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getGuildID());
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getSenderID());
         if (guild != null) {
-            guild.getInvites().remove(requestMessage.getPlayerID());
+            guild.getInvites().remove(requestMessage.getTargetID());
+        }
+    }
+
+    private void consumeAllianceRequestMessage(Message message) {
+        GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getSenderID());
+        if (guild != null) {
+            if (!guild.getAllianceInvites().contains(requestMessage.getTargetID())) {
+                guild.getAllianceInvites().add(requestMessage.getTargetID());
+                Bukkit.getScheduler().runTaskLater(plugin,
+                        () -> guild.getAllianceInvites().remove(requestMessage.getTargetID()), 2400L);
+            }
+        }
+    }
+
+    private void consumeAllianceAcceptMessage(Message message) {
+        GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getSenderID());
+        if (guild != null) {
+            guild.getAlliances().add(plugin.getGuildsManager().getGuildById(requestMessage.getTargetID()));
+        }
+    }
+
+    private void consumeAllianceRevokeMessage(Message message) {
+        GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
+        Guild guild = plugin.getGuildsManager().getGuildById(requestMessage.getSenderID());
+        if (guild != null) {
+            guild.getAlliances().remove(plugin.getGuildsManager().getGuildById(requestMessage.getTargetID()));
         }
     }
 }

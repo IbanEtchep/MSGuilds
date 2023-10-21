@@ -1,6 +1,7 @@
 package fr.iban.guilds;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
+import fr.iban.bukkitcore.manager.BukkitPlayerManager;
 import fr.iban.guilds.enums.ChatMode;
 import fr.iban.guilds.enums.Rank;
 import org.bukkit.Bukkit;
@@ -80,12 +81,22 @@ public class GuildPlayer {
         return false;
     }
 
-    public void sendMessageIfOnline(String message) {
+    public void sendMessageIfOnline(String message, boolean raw) {
         Player player = Bukkit.getPlayer(uuid);
-        if (player != null) {
-            player.sendMessage(message);
+        BukkitPlayerManager playerManager = CoreBukkitPlugin.getInstance().getPlayerManager();
+
+        if (!raw) {
+            if (player != null) {
+                player.sendMessage(message);
+            } else {
+                playerManager.sendMessageIfOnline(uuid, message);
+            }
         } else {
-            CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(uuid, message);
+            playerManager.sendMessageRawIfOnline(uuid, message);
         }
+    }
+
+    public void sendMessageIfOnline(String message) {
+        sendMessageIfOnline(message, false);
     }
 }

@@ -29,22 +29,28 @@ public class ChatListeners implements Listener {
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !e.getMessage().startsWith("!")) {
             guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage());
-            plugin.getLogger().info("Chat ("+player.getName()+") : " + e.getMessage());
+            plugin.getLogger().info("Chat (" + player.getName() + ") : " + e.getMessage());
             e.setCancelled(true);
         }
 
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
             String msg = e.getMessage().replaceFirst("!", "");
             guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + msg);
-            plugin.getLogger().info("Chat ("+player.getName()+") : " + msg);
+            plugin.getLogger().info("§7[Guilde] Chat (" + player.getName() + ") : " + msg);
             e.setCancelled(true);
         }
 
-        if (guildPlayer.getChatMode() == ChatMode.GUILD && e.getMessage().startsWith("!")) {
+        if (guildPlayer.getChatMode() == ChatMode.ALLY && !e.getMessage().startsWith("!")) {
+            String msg = e.getMessage();
+            guild.sendMessageToAllies("§7[Alliance] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + msg);
+            plugin.getLogger().info("[Alliance] Chat (" + player.getName() + ") : " + msg);
+            e.setCancelled(true);
+        }
+
+        if (guildPlayer.getChatMode() != ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
             String msg = e.getMessage().replaceFirst("!", "");
             e.setMessage(msg);
         }
-
     }
 
 }

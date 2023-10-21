@@ -20,6 +20,9 @@ public class Guild {
     private final Date createdAt;
     private @Nullable List<String> cachedLogs;
     private final List<UUID> invites = new ArrayList<>();
+    private final List<UUID> allianceInvites = new ArrayList<>();
+
+    private final List<Guild> alliances = new ArrayList<>();
 
     public Guild(UUID id, String name, double balance, long exp, Date createdAt) {
         this.id = id;
@@ -87,8 +90,23 @@ public class Guild {
         this.home = home;
     }
 
+    public void sendMessageToOnlineMembers(String message, boolean raw) {
+        getMembers().values().forEach(member -> member.sendMessageIfOnline(message, raw));
+    }
+
     public void sendMessageToOnlineMembers(String message) {
-        getMembers().values().forEach(member -> member.sendMessageIfOnline(message));
+        sendMessageToOnlineMembers(message, false);
+    }
+
+    public void sendMessageToAllies(String message) {
+        getAlliances().forEach(guild -> guild.sendMessageToOnlineMembers(message));
+        sendMessageToOnlineMembers(message);
+    }
+
+    public void sendMessageToOnlineMembers(String message, Rank minRank, boolean raw) {
+        getMembers().values().stream()
+                .filter(member -> member.isGranted(minRank))
+                .forEach(member -> member.sendMessageIfOnline(message, raw));
     }
 
     public List<UUID> getInvites() {
@@ -120,4 +138,11 @@ public class Guild {
         this.cachedLogs = null;
     }
 
+    public List<UUID> getAllianceInvites() {
+        return allianceInvites;
+    }
+
+    public List<Guild> getAlliances() {
+        return alliances;
+    }
 }

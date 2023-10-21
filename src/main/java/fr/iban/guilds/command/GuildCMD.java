@@ -5,6 +5,7 @@ import fr.iban.guilds.Guild;
 import fr.iban.guilds.GuildPlayer;
 import fr.iban.guilds.GuildsManager;
 import fr.iban.guilds.GuildsPlugin;
+import fr.iban.guilds.enums.ChatMode;
 import fr.iban.guilds.enums.Rank;
 import fr.iban.guilds.util.Lang;
 import net.milkbowl.vault.economy.Economy;
@@ -15,7 +16,6 @@ import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.command.CommandActor;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 @Command({"guild", "g"})
@@ -29,13 +29,8 @@ public class GuildCMD {
         this.guildsManager = plugin.getGuildsManager();
     }
 
-    @Command({"guild", "g"})
-    @Default
-    public void guild(CommandActor actor) {
-        help(actor);
-    }
-
     @Subcommand("help")
+    @DefaultFor({"guild", "g"})
     public void help(CommandActor actor) {
         GuildPlayer guildPlayer = guildsManager.getGuildPlayer(actor.getUniqueId());
         actor.reply("");
@@ -69,6 +64,9 @@ public class GuildCMD {
             actor.reply("§6/guild sethome §f→ définir la résidence de la guilde.");
             actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
             actor.reply("§6/guild bank withdraw <montant> §f→ retirer de l'argent de la banque.");
+            actor.reply("§6/guild alliance invite <nom de la guilde> §f→ proposer une alliance à une guilde.");
+            actor.reply("§6/guild alliance accept <nom de la guilde> §f→ accepter une alliance.");
+            actor.reply("§6/guild alliance remove <nom de la guilde> §f→ rompre une alliance.");
         }
         if (guildPlayer.isGranted(Rank.OWNER)) {
             actor.reply("§f§lCommandes §4§lfondateur §f§l:");
@@ -95,9 +93,12 @@ public class GuildCMD {
     }
 
     @Subcommand("chat")
-    public void chat(Player sender) {
-        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(sender.getUniqueId());
-        guildsManager.toggleChatMode(sender);
+    public void chat(Player sender, @Optional ChatMode chatMode) {
+        if (chatMode == null) {
+            guildsManager.toggleChatMode(sender);
+        } else {
+            guildsManager.setChatMode(sender, chatMode);
+        }
     }
 
     @Subcommand("invite")
@@ -135,13 +136,8 @@ public class GuildCMD {
         guildsManager.quitGuild(sender);
     }
 
-    @Subcommand("bank")
-    @Default
-    public void bank(Player sender) {
-        bankBalance(sender);
-    }
-
     @Subcommand("bank balance")
+    @DefaultFor({"g bank", "guild bank"})
     public void bankBalance(Player sender) {
         Guild guild = guildsManager.getGuildByPlayer(sender);
         Economy economy = plugin.getEconomy();
@@ -223,6 +219,7 @@ public class GuildCMD {
         List<String> members = guild.getMembers().values().stream()
                 .filter(gp -> gp.getRank() == Rank.MEMBER)
                 .map(GuildPlayer::getName).toList();
+        List<String> alliances = guild.getAlliances().stream().map(Guild::getName).toList();
         info += "§4§lFondateur : §f" + guild.getOwner().getName() + "\n";
         if (!admins.isEmpty()) {
             info += "§c§lAdministrateurs : §f" + String.join(", ", admins) + "\n";
@@ -233,6 +230,10 @@ public class GuildCMD {
         if (!members.isEmpty()) {
             info += "§b§lMembres : §f" + String.join(", ", members) + "\n";
         }
+        if (!alliances.isEmpty()) {
+            info += "§6§lAlliances : §f" + String.join(", ", alliances) + "\n";
+        }
+
         return info;
     }
 
@@ -252,7 +253,7 @@ public class GuildCMD {
         actor.reply(getCentered("§6§lListe des guildes en ligne (§f§l" + page + "§6§l/§f§l " + maxpages + "§6§l)", 54));
         for (int i = startPos; i < endPos && i < onlineGuilds.size(); i++) {
             Guild guild = onlineGuilds.get(i);
-            actor.reply("§f§l " + guild.getName() + " §e - §f" + guild.getOnlinePlayerAmount()+"/"+guild.getMembers().size() + " joueurs en ligne.");
+            actor.reply("§f§l " + guild.getName() + " §e - §f" + guild.getOnlinePlayerAmount() + "/" + guild.getMembers().size() + " joueurs en ligne.");
         }
         actor.reply(getLine(40));
     }
@@ -267,7 +268,7 @@ public class GuildCMD {
             sender.reply("§cVeuillez spécifier le nom d'une guilde.");
         }
 
-        if(guild == null) {
+        if (guild == null) {
             sender.reply(Lang.NOT_GUILD_MEMBER.toString());
             return;
         }
@@ -291,6 +292,21 @@ public class GuildCMD {
         });
     }
 
+    @Subcommand("alliance invite")
+    public void allianceInvite(Player sender, Guild guild) {
+        guildsManager.sendAllianceRequest(sender, guild);
+    }
+
+    @Subcommand("alliance accept")
+    public void allianceAccept(Player sender, Guild guild) {
+        guildsManager.acceptAllianceRequest(sender, guild);
+    }
+
+    @Subcommand("alliance remove")
+    public void allianceRevoke(Player sender, Guild guild) {
+        guildsManager.revokeAlliance(sender, guild);
+    }
+
     private String getLine(int length) {
         StringBuilder sb = new StringBuilder("§6§m");
         for (int i = 0; i < length; i++) {
@@ -307,6 +323,14 @@ public class GuildCMD {
         sb.append("§6§m");
         sb.append("-".repeat(Math.max(0, line)));
         return sb.toString();
+    }
+
+    private Guild getActorGuild(BukkitCommandActor actor) {
+        Player player = actor.getAsPlayer();
+        if (player != null) {
+            return guildsManager.getGuildByPlayer(player);
+        }
+        return null;
     }
 
 }

@@ -60,7 +60,15 @@ public class SqlStorage {
                         "FOREIGN KEY (guild_id) REFERENCES guilds(id)," +
                         "FOREIGN KEY (rank_id) REFERENCES guilds_ranks(id)," +
                         "FOREIGN KEY (chatmode_id) REFERENCES guilds_chatmode(id)" +
-                        ");"
+                        ");",
+                "CREATE TABLE IF NOT EXISTS guilds_alliances(" +
+                        "guild_a_id INTEGER ," +
+                        "guild_b_id INTEGER ," +
+                        "PRIMARY KEY (guild_a_id, guild_b_id)," +
+                        "FOREIGN KEY (guild_a_id) REFERENCES guilds(id)," +
+                        "FOREIGN KEY (guild_b_id) REFERENCES guilds(id)" +
+                        ");",
+
         };
 
         String addRankStatement = "INSERT INTO guilds_ranks(label) VALUES (?) ON DUPLICATE KEY UPDATE label=VALUES(label)";
@@ -108,9 +116,10 @@ public class SqlStorage {
                         String sloc = rs.getString("home");
                         Date createdAt = rs.getTimestamp("createdAt");
                         Guild guild = new Guild(guildId, name, balance, exp, createdAt);
-                        if(sloc != null) {
+                        if (sloc != null) {
                             guild.setHome(gson.fromJson(sloc, SLocation.class));
                         }
+
                         guilds.add(guild);
                     }
                 }
@@ -168,9 +177,10 @@ public class SqlStorage {
                         String sloc = rs.getString("home");
                         Date createdAt = rs.getTimestamp("createdAt");
                         Guild guild = new Guild(guildId, name, balance, exp, createdAt);
-                        if(sloc != null) {
+                        if (sloc != null) {
                             guild.setHome(gson.fromJson(sloc, SLocation.class));
                         }
+
                         return guild;
                     }
                 }
@@ -362,6 +372,68 @@ public class SqlStorage {
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertStatement)) {
                 preparedStatement.setString(1, guild.getId().toString());
                 preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<UUID> getAlliances(Guild guild) {
+        String sql = "SELECT guilds_a.guild_uuid AS guild_a_uuid, guilds_b.guild_uuid AS guild_b_uuid " +
+                "FROM guilds_alliances " +
+                "JOIN guilds AS guilds_a ON guilds_alliances.guild_a_id = guilds_a.id " +
+                "JOIN guilds AS guilds_b ON guilds_alliances.guild_b_id = guilds_b.id " +
+                "WHERE guilds_a.guild_uuid = ? OR guilds_b.guild_uuid = ?;";
+        List<UUID> alliances = new ArrayList<>();
+
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, guild.getId().toString());
+                ps.setString(2, guild.getId().toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        UUID guildAId = UUID.fromString(rs.getString("guild_a_uuid"));
+                        UUID guildBId = UUID.fromString(rs.getString("guild_b_uuid"));
+
+                        if (guildAId.equals(guild.getId())) {
+                            alliances.add(guildBId);
+                        } else {
+                            alliances.add(guildAId);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return alliances;
+    }
+
+    public void addAlliance(Guild guild, Guild ally) {
+        String sql = "INSERT INTO guilds_alliances(guild_a_id, guild_b_id) VALUES (" +
+                "(SELECT id FROM guilds WHERE guild_uuid=?)," +
+                "(SELECT id FROM guilds WHERE guild_uuid=?));";
+
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, guild.getId().toString());
+                ps.setString(2, ally.getId().toString());
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeAlliance(Guild guild, Guild ally) {
+        String sql = "DELETE FROM guilds_alliances WHERE guild_a_id=(SELECT id FROM guilds WHERE guild_uuid=?) AND guild_b_id=(SELECT id FROM guilds WHERE guild_uuid=?);";
+
+        try (Connection connection = ds.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, guild.getId().toString());
+                ps.setString(2, ally.getId().toString());
+                ps.executeUpdate();
             }
         } catch (SQLException e) {
             e.printStackTrace();

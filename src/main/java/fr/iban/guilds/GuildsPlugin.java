@@ -7,7 +7,6 @@ import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.GuildListeners;
 import fr.iban.guilds.listener.ServiceListeners;
 import fr.iban.guilds.util.GuildPlaceHolders;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -29,6 +28,9 @@ public final class GuildsPlugin extends JavaPlugin {
     public static final String GUILD_PLAYER_SYNC_CHANNEL = "GuildPlayerSyncChannel";
     public static final String GUILD_INVITE_ADD = "AddGuildInviteChannel";
     public static final String GUILD_INVITE_REVOKE = "RevokeGuildInviteSyncChannel";
+    public static final String GUILD_ALLIANCE_REQUEST = "GuildAllianceRequestChannel";
+    public static final String GUILD_ALLIANCE_ACCEPT = "AddGuildAllianceAcceptChannel";
+    public static final String GUILD_ALLIANCE_REVOKE = "AddGuildAllianceRevokeChannel";
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private Economy econ = null;
 
@@ -46,7 +48,7 @@ public final class GuildsPlugin extends JavaPlugin {
                 new ChatListeners(this)
         );
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new GuildPlaceHolders(this).register();
         }
     }

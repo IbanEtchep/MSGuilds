@@ -4,27 +4,27 @@ import java.util.UUID;
 
 public class GuildRequestMessage {
 
-    private UUID guildID;
-    private UUID playerID;
+    private UUID senderID;
+    private UUID targetID;
 
     public GuildRequestMessage(UUID guildID, UUID playerID) {
-        this.guildID = guildID;
-        this.playerID = playerID;
+        this.senderID = guildID;
+        this.targetID = playerID;
     }
 
-    public UUID getGuildID() {
-        return guildID;
+    public UUID getSenderID() {
+        return senderID;
     }
 
-    public void setGuildID(UUID guildID) {
-        this.guildID = guildID;
+    public void setSenderID(UUID senderID) {
+        this.senderID = senderID;
     }
 
-    public UUID getPlayerID() {
-        return playerID;
+    public UUID getTargetID() {
+        return targetID;
     }
 
-    public void setPlayerID(UUID playerID) {
-        this.playerID = playerID;
+    public void setTargetID(UUID targetID) {
+        this.targetID = targetID;
     }
 }

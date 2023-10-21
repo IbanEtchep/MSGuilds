@@ -22,6 +22,8 @@ import java.util.concurrent.CompletableFuture;
 public class GuildsManager {
 
     private final GuildsPlugin plugin;
+    CoreBukkitPlugin corePlugin;
+
     private final SqlStorage storage;
 
     private final Map<UUID, Guild> guilds = new HashMap<>();
@@ -29,6 +31,7 @@ public class GuildsManager {
     public GuildsManager(GuildsPlugin plugin) {
         this.plugin = plugin;
         this.storage = new SqlStorage();
+        this.corePlugin = CoreBukkitPlugin.getInstance();
         load();
     }
 
@@ -67,7 +70,7 @@ public class GuildsManager {
     }
 
     public List<Guild> getOnlineGuilds() {
-        return guilds.values().stream().filter(guild -> guild.getOnlinePlayers().size() > 0)
+        return guilds.values().stream().filter(guild -> !guild.getOnlinePlayers().isEmpty())
                 .sorted(Comparator.comparingInt(Guild::getOnlinePlayerAmount).reversed()).toList();
     }
 
@@ -77,12 +80,12 @@ public class GuildsManager {
             return;
         }
 
-        if(name.contains(" ")) {
+        if (name.contains(" ")) {
             player.sendMessage("§cLe nom de la guilde ne doit pas contenir d'espace.");
             return;
         }
 
-        if(name.length() > 30) {
+        if (name.length() > 30) {
             player.sendMessage("§cLe nom de la guilde ne doit pas dépasser 30 caractères.");
             return;
         }
@@ -114,10 +117,25 @@ public class GuildsManager {
 
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC) {
             guildPlayer.setChatMode(ChatMode.GUILD);
+        } else if (guildPlayer.getChatMode() == ChatMode.GUILD) {
+            guildPlayer.setChatMode(ChatMode.ALLY);
         } else {
             guildPlayer.setChatMode(ChatMode.PUBLIC);
         }
 
+        player.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
+        saveGuildPlayerToDB(guildPlayer);
+    }
+
+    public void setChatMode(Player player, ChatMode chatMode) {
+        GuildPlayer guildPlayer = getGuildPlayer(player.getUniqueId());
+
+        if (guildPlayer == null) {
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        guildPlayer.setChatMode(chatMode);
         player.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
         saveGuildPlayerToDB(guildPlayer);
     }
@@ -267,7 +285,7 @@ public class GuildsManager {
             return;
         }
 
-        if(amount <= 0) {
+        if (amount <= 0) {
             player.sendMessage("§cVous ne pouvez pas déposer une valeur négative !");
             return;
         }
@@ -318,7 +336,7 @@ public class GuildsManager {
             return;
         }
 
-        if(amount <= 0) {
+        if (amount <= 0) {
             player.sendMessage("§cVous ne pouvez pas retirer une valeur négative !");
             return;
         }
@@ -357,7 +375,7 @@ public class GuildsManager {
         }
 
         boolean result = guildWithdraw(guild, amount);
-        if(result) {
+        if (result) {
             addLog(guild, economy.format(amount) + " ont été prélevés de la banque de votre guilde pour " + reason + ". " +
                     "Nouveau solde : " + economy.format(guild.getBalance()));
         }
@@ -575,7 +593,7 @@ public class GuildsManager {
             return;
         }
 
-        if(guildOwner != null) {
+        if (guildOwner != null) {
             guildOwner.setRank(Rank.ADMIN);
             saveGuildPlayerToDB(guildOwner);
         }
@@ -584,6 +602,108 @@ public class GuildsManager {
         saveGuildPlayerToDB(guildPlayer);
         guild.sendMessageToOnlineMembers("§7§l" + player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
         addLog(guild, player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
+    }
+
+    public void sendAllianceRequest(Player player, Guild targetGuild) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
+
+        if (!guildPlayer.isGranted(Rank.ADMIN)) {
+            player.sendMessage("§cVous devez être au moins administrateur pour inviter une guilde à vous rejoindre.");
+            return;
+        }
+
+        if (targetGuild.getId() == guild.getId()) {
+            player.sendMessage("§cVous ne pouvez pas vous allier avec votre propre guilde.");
+            return;
+        }
+
+        if (guild.getAlliances().contains(targetGuild)) {
+            player.sendMessage("§cVous êtes déjà allié avec cette guilde.");
+            return;
+        }
+
+        if (guild.getAllianceInvites().contains(targetGuild.getId())) {
+            player.sendMessage("§cVous avez déjà envoyé une invitation à cette guilde.");
+            return;
+        }
+
+        guild.getAllianceInvites().add(targetGuild.getId());
+        corePlugin.getMessagingManager().sendMessage(GuildsPlugin.GUILD_ALLIANCE_REQUEST, new GuildRequestMessage(guild.getId(), targetGuild.getId()));
+        targetGuild.sendMessageToOnlineMembers("[\"\",{\"text\":\"Votre guilde a reçu une invitation d'alliance à \",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild alliance accept " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild alliance accept " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" pour accepter.\",\"color\":\"green\"}]", Rank.ADMIN, true);
+        player.sendMessage("§aVous avez envoyé une invitation d'alliance à " + targetGuild.getName() + ".");
+    }
+
+    public void acceptAllianceRequest(Player player, Guild targetGuild) {
+        Guild guild = getGuildByPlayer(player);
+
+        if (guild == null) {
+            player.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
+
+        if (!guildPlayer.isGranted(Rank.ADMIN)) {
+            player.sendMessage("§cVous devez être au moins administrateur pour accepter une invitation à rejoindre une alliance.");
+            return;
+        }
+
+        if (!targetGuild.getAllianceInvites().contains(guild.getId())) {
+            player.sendMessage("§cVous n'avez pas reçu d'invitation de cette guilde.");
+            return;
+        }
+
+        if (guild.getAlliances().contains(targetGuild)) {
+            player.sendMessage("§cVous êtes déjà allié avec cette guilde.");
+            return;
+        }
+
+        guild.getAllianceInvites().remove(targetGuild.getId());
+        guild.getAlliances().add(targetGuild);
+        targetGuild.getAlliances().add(guild);
+        guild.sendMessageToOnlineMembers("§aVous êtes désormais allié avec la guilde " + targetGuild.getName() + ".");
+        targetGuild.sendMessageToOnlineMembers("§aVous êtes désormais allié avec la guilde " + guild.getName() + ".");
+        addLog(guild, "Alliance avec la guilde " + targetGuild.getName() + " acceptée.");
+        storage.addAlliance(guild, targetGuild);
+        saveGuildToDB(guild);
+        saveGuildToDB(targetGuild);
+    }
+
+    public void revokeAlliance(Player sender, Guild target) {
+        Guild guild = getGuildByPlayer(sender);
+
+        if (guild == null) {
+            sender.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
+            return;
+        }
+
+        GuildPlayer guildPlayer = guild.getMembers().get(sender.getUniqueId());
+
+        if (!guildPlayer.isGranted(Rank.ADMIN)) {
+            sender.sendMessage("§cVous devez être au moins administrateur pour révoquer une alliance.");
+            return;
+        }
+
+        if (!guild.getAlliances().contains(target)) {
+            sender.sendMessage("§cVous n'êtes pas allié avec cette guilde.");
+            return;
+        }
+
+        guild.getAlliances().remove(target);
+        target.getAlliances().remove(guild);
+        guild.sendMessageToOnlineMembers("§cVous n'êtes plus allié avec la guilde " + target.getName() + ".");
+        target.sendMessageToOnlineMembers("§cVous n'êtes plus allié avec la guilde " + guild.getName() + ".");
+        addLog(guild, "Alliance avec la guilde " + target.getName() + " révoquée.");
+        storage.removeAlliance(guild, target);
+        saveGuildToDB(guild);
+        saveGuildToDB(target);
     }
 
     /*
@@ -661,6 +781,13 @@ public class GuildsManager {
             for (GuildPlayer guildMember : storage.getGuildMembers(guildId)) {
                 newGuild.getMembers().put(guildMember.getUuid(), guildMember);
             }
+
+            for (UUID uuid : storage.getAlliances(newGuild)) {
+                Guild alliance = guilds.get(uuid);
+                if (alliance != null) {
+                    newGuild.getAlliances().add(alliance);
+                }
+            }
         }
     }
 
@@ -690,6 +817,16 @@ public class GuildsManager {
         for (Guild guild : storage.getGuilds()) {
             guilds.put(guild.getId(), guild);
         }
+
+        for (Guild guild : guilds.values()) {
+            for (UUID uuid : storage.getAlliances(guild)) {
+                Guild alliance = guilds.get(uuid);
+                if (alliance != null) {
+                    guild.getAlliances().add(alliance);
+                }
+            }
+        }
+
         plugin.getLogger().info(guilds.size() + " guildes chargées en " + (System.currentTimeMillis() - start) + "ms.");
     }
 
