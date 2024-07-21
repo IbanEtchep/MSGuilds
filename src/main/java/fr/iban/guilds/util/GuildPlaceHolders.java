@@ -43,7 +43,7 @@ public class GuildPlaceHolders extends PlaceholderExpansion {
 
         if (identifier.equals("name")) {
             Guild guild = plugin.getGuildsManager().getGuildByPlayer(player);
-            return guild == null ? "aucune" : guild.getName();
+            return guild == null ? "aucune" : guild.getName().replace("'", "’");
         }
 
         return null;

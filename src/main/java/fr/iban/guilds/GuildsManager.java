@@ -702,6 +702,7 @@ public class GuildsManager {
         target.sendMessageToOnlineMembers("§cVous n'êtes plus allié avec la guilde " + guild.getName() + ".");
         addLog(guild, "Alliance avec la guilde " + target.getName() + " révoquée.");
         storage.removeAlliance(guild, target);
+        storage.removeAlliance(target, guild);
         saveGuildToDB(guild);
         saveGuildToDB(target);
     }
