@@ -1,6 +1,6 @@
 messages:
   help:
-    header: "<dark_gray><bold>Menu d'aide des guildes"
+    header: "<dark_gray><bold>Commandes des guildes"
     no_guild: |
       <gold>/guild create <gray>→ Créer une guilde
       <gold>/guild join <nom> <gray>→ Accepter l'invitation d'une guilde
