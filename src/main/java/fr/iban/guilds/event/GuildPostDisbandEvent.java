@@ -1,7 +1,6 @@
 package fr.iban.guilds.event;
 
-import fr.iban.guilds.Guild;
-import org.bukkit.event.Cancellable;
+import fr.iban.guilds.model.Guild;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;

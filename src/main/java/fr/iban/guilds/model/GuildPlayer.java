@@ -1,9 +1,11 @@
-package fr.iban.guilds;
+package fr.iban.guilds.model;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.bukkitcore.manager.BukkitPlayerManager;
 import fr.iban.guilds.enums.ChatMode;
-import fr.iban.guilds.enums.Rank;
+import fr.iban.guilds.enums.DefaultRank;
+import fr.iban.guilds.enums.GuildPermission;
+import fr.iban.guilds.model.dto.GuildPlayerDTO;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -12,14 +14,14 @@ import java.util.UUID;
 public class GuildPlayer {
 
     private final UUID uuid;
-    private UUID guildId;
-    private Rank rank;
+    private Guild guild;
     private ChatMode chatMode;
     private String name;
+    private GuildRank rank;
 
-    public GuildPlayer(UUID uuid, UUID guildId, Rank rank, ChatMode chatMode) {
+    public GuildPlayer(UUID uuid, Guild guild, GuildRank rank, ChatMode chatMode) {
         this.uuid = uuid;
-        this.guildId = guildId;
+        this.guild = guild;
         this.rank = rank;
         this.chatMode = chatMode;
     }
@@ -28,19 +30,19 @@ public class GuildPlayer {
         return uuid;
     }
 
-    public UUID getGuildId() {
-        return guildId;
+    public Guild getGuild() {
+        return guild;
     }
 
-    public void setGuildId(UUID guildId) {
-        this.guildId = guildId;
+    public void setGuild(Guild guild) {
+        this.guild = guild;
     }
 
-    public Rank getRank() {
+    public GuildRank getRank() {
         return rank;
     }
 
-    public void setRank(Rank rank) {
+    public void setRank(GuildRank rank) {
         this.rank = rank;
     }
 
@@ -59,26 +61,17 @@ public class GuildPlayer {
         return name;
     }
 
-    public boolean isGranted(Rank comparedRank) {
+    public boolean isGranted(GuildPermission permission) {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null && player.hasPermission("guilds.bypass")) {
             return true;
         }
-        switch (rank) {
-            case OWNER -> {
-                return true;
-            }
-            case ADMIN -> {
-                return comparedRank == Rank.ADMIN || comparedRank == Rank.MODERATOR || comparedRank == Rank.MEMBER;
-            }
-            case MODERATOR -> {
-                return comparedRank == Rank.MODERATOR || comparedRank == Rank.MEMBER;
-            }
-            case MEMBER -> {
-                return comparedRank == Rank.MEMBER;
-            }
-        }
-        return false;
+
+        return rank.hasPermission(permission) || isOwner();
+    }
+
+    public boolean isOwner() {
+        return guild.getOwnerUUID().equals(uuid);
     }
 
     public void sendMessageIfOnline(String message, boolean raw) {

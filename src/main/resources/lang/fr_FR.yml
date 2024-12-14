@@ -1,0 +1,114 @@
+messages:
+  help:
+    header: "<dark_gray><bold>Menu d'aide des guildes"
+    no_guild: |
+      <gold>/guild create <gray>→ Créer une guilde
+      <gold>/guild join <nom> <gray>→ Accepter l'invitation d'une guilde
+      <gray>Plus de commandes seront affichées une fois membre d'une guilde
+    member: |
+      <gold>/guild info <gray>→ Informations sur la guilde
+      <gold>/guild chat <gray>→ Activer/désactiver le chat de guilde
+      <gold>/guild logs <gray>→ Voir le journal de la guilde
+
+      <gold>/guild bank <gray>→ Voir le solde de la guilde
+      <gold>/guild bank deposit <montant> <gray>→ Déposer de l'argent
+      <gold>/guild bank withdraw <montant> <gray>→ Retirer de l'argent
+
+      <gold>/guild lands <gray>→ Gérer les territoires de la guilde
+      <gold>/guild kick <gray>→ Exclure un membre de grade inférieur
+      <gold>/guild promote <gray>→ Promouvoir un membre
+      <gold>/guild demote <gray>→ Rétrograder un membre
+
+      <gold>/guild home <gray>→ Se téléporter à la résidence
+      <gold>/guild sethome <gray>→ Définir la résidence
+      <gold>/guild delhome <gray>→ Supprimer la résidence
+
+      <gold>/guild alliance invite <nom> <gray>→ Proposer une alliance
+      <gold>/guild alliance accept <nom> <gray>→ Accepter une alliance
+      <gold>/guild alliance remove <nom> <gray>→ Rompre une alliance
+
+      <gold>/guild leave <gray>→ Quitter sa guilde
+      <gold>/guild transfer <joueur> <gray>→ Transférer la propriété
+      <gold>/guild disband <gray>→ Dissoudre la guilde
+
+  reload: "<green>Plugin Guilds rechargé avec succès"
+
+  guild:
+    created: "<green>Guilde créée avec succès !"
+    deleted: "<red>La guilde a été supprimée !"
+    disbanded: "<red>La guilde a été dissoute !"
+    already_exists: "<red>Une guilde avec ce nom existe déjà !"
+    disband_confirm: "<red>Êtes-vous sûr de vouloir dissoudre la guilde ?"
+    name:
+      no_space: "<red>Le nom de la guilde ne doit pas contenir d'espace"
+      too_long: "<red>Le nom de la guilde ne doit pas dépasser 30 caractères"
+    player:
+      joined: "<green>%player% a rejoint la guilde."
+      left: "<red>%player% a quitté la guilde."
+
+  chat:
+    enabled: "<green>Chat de guilde activé"
+    disabled: "<green>Chat de guilde désactivé"
+    mode_changed: "<green>Mode de chat défini sur : <gold>%mode%"
+
+  members:
+    invite:
+      sent: "<green>Invitation envoyée à <gold>%player%"
+      revoked: "<yellow>Invitation révoquée pour <gold>%player%"
+    promote: "<green>Promotion de <gold>%player%</gold> au rang <yellow>%rank%"
+    demote: "<green>Rétrogradation de <gold>%player%</gold> au rang <yellow>%rank%"
+    transfer: "<green>Propriété de la guilde transférée à <gold>%player%"
+    kick: "<red>Exclusion de <gold>%player%</gold> de la guilde"
+    join: "<green>Vous avez rejoint la guilde <gold>%guild%"
+    leave: "<yellow>Vous avez quitté la guilde <gold>%guild%"
+
+  bank:
+    balance: "<green>Solde de la guilde : <white><bold>%amount%"
+    deposit: "<green>Dépôt de <gold>%amount%</gold> dans la banque"
+    withdraw: "<green>Retrait de <gold>%amount%</gold> de la banque"
+    insufficient_funds: "<red>Fonds insuffisants !"
+    economy_disabled: "<red>L'économie est actuellement désactivée !"
+
+  home:
+    teleport: "<green>Téléportation à la résidence de guilde"
+    set: "<green>Résidence de guilde définie"
+    delete: "<green>Résidence de guilde supprimée"
+    not_set: "<red>Aucune résidence de guilde définie"
+
+  info:
+    header: "<dark_gray><bold>Informations sur <gold><bold>%guild%"
+    created: "<dark_gray>Créée le %date%"
+    rank_format: "%rank% : <white>%players%"
+    alliances: "<gold><bold>Alliances : <white>%alliances%"
+
+  list:
+    header: "<gold><bold>Liste des guildes en ligne (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    format: "<white><bold>%guild% <yellow>- <white>%online%/%total% en ligne"
+    footer: "<gold><strikethrough>                                        "
+    invalid_page: "<red>Page invalide. Maximum : %maxpage%"
+
+  logs:
+    header: "<gold><bold>Journal de la guilde (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    entry: "<yellow>- <white>%log%"
+    footer: "<gold><strikethrough>                                        "
+    guild_created: "Création de la guilde par %player%"
+
+  alliance:
+    invite:
+      sent: "<green>Demande d'alliance envoyée à <gold>%guild%"
+      received: "<gold>%guild%</gold> souhaite former une alliance"
+    accept: "<green>Alliance formée avec <gold>%guild%"
+    remove: "<yellow>Alliance avec <gold>%guild%</gold> rompue"
+
+  errors:
+    no_permission: "<red>Vous n'avez pas la permission de faire cela !"
+    not_guild_member: "<red>Vous n'êtes pas membre d'une guilde !"
+    player_not_found: "<red>Joueur introuvable !"
+    already_in_guild: "<red>Ce joueur est déjà dans une guilde !"
+    not_invited: "<red>Vous n'avez pas été invité à rejoindre cette guilde !"
+    insufficient_rank: "<red>Votre rang ne vous permet pas de faire cela !"
+    specify_guild: "<red>Veuillez spécifier le nom d'une guilde"
+    player_not_in_guild: "<red>Ce joueur n'est pas membre de votre guilde !"
+    economy_disabled: "<red>L'économie est actuellement désactivée !"
+    already_guild_owner: "<red>Vous êtes déjà le propriétaire de la guilde !"
+    already_allied: "<red>Vous êtes déjà allié avec cette guilde !"

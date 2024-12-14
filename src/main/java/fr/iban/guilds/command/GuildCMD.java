@@ -1,20 +1,26 @@
 package fr.iban.guilds.command;
 
 import fr.iban.bukkitcore.commands.annotation.Online;
-import fr.iban.guilds.Guild;
-import fr.iban.guilds.GuildPlayer;
-import fr.iban.guilds.GuildsManager;
+import fr.iban.bukkitcore.menu.ConfirmMenu;
 import fr.iban.guilds.GuildsPlugin;
+import fr.iban.guilds.api.GuildManager;
+import fr.iban.guilds.api.service.GuildAllianceService;
+import fr.iban.guilds.api.service.GuildBankService;
+import fr.iban.guilds.api.service.GuildService;
 import fr.iban.guilds.enums.ChatMode;
-import fr.iban.guilds.enums.Rank;
-import fr.iban.guilds.util.Lang;
+import fr.iban.guilds.enums.GuildPermission;
+import fr.iban.guilds.lang.Lang;
+import fr.iban.guilds.model.Guild;
+import fr.iban.guilds.model.GuildPlayer;
+import fr.iban.guilds.model.GuildRank;
+import fr.iban.guilds.util.ChatUtils;
+import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
-import revxrsal.commands.command.CommandActor;
 
 import java.util.List;
 
@@ -22,118 +28,101 @@ import java.util.List;
 public class GuildCMD {
 
     private final GuildsPlugin plugin;
-    private final GuildsManager guildsManager;
+    private final GuildManager guildsManager;
+    private final GuildBankService guildBankService;
+    private final GuildAllianceService guildAllianceService;
+    private final GuildService guildService;
 
     public GuildCMD(GuildsPlugin plugin) {
         this.plugin = plugin;
-        this.guildsManager = plugin.getGuildsManager();
-    }
-
-    @Subcommand("help")
-    @DefaultFor({"guild", "g"})
-    public void help(CommandActor actor) {
-        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(actor.getUniqueId());
-        actor.reply("");
-        actor.reply("§7§lVoici l'aide pour utiliser les guildes :");
-        actor.reply("");
-        if (guildPlayer == null) {
-            actor.reply("§6/guild create §f→ créer une guilde.");
-            actor.reply("§6/guild join <nom de la guilde> §f→ accepter l'invitation d'une guilde.");
-            actor.reply("§7Davantage de commandes seront affichées quand vous serez membre d'une guilde et selon votre rang dans la guilde.");
-            return;
-        }
-        if (guildPlayer.isGranted(Rank.MEMBER)) {
-            actor.reply("§f§lCommandes §a§lmembre §f§f:");
-            actor.reply("§6/guild info §f→ informations sur la guilde.");
-            actor.reply("§6/guild chat §f→ activer/désactiver le chat de guilde.");
-            actor.reply("§6/guild logs §f→ voir le journal de sa guilde.");
-            actor.reply("§6/guild home §f→ rejoindre la résidence de la guilde.");
-            actor.reply("§6/guild bank §f→ voir le solde de la guilde");
-            actor.reply("§6/guild bank deposit <montant> §f→ déposer de l'argent dans la banque.");
-            actor.reply("§6/guild leave §f→ quitter sa guilde.");
-        }
-        if (guildPlayer.isGranted(Rank.MODERATOR)) {
-            actor.reply("§f§lCommandes §b§lmodérateur §f§l:");
-            actor.reply("§6/guild kick §f→ exclure un membre de grade inférieur.");
-        }
-        if (guildPlayer.isGranted(Rank.ADMIN)) {
-            actor.reply("§f§lCommandes §c§ladministrateur §f§l:");
-            actor.reply("§6/guild lands §f→ gérer les territoires de la guilde.");
-            actor.reply("§6/guild promote §f→ promouvoir un membre.");
-            actor.reply("§6/guild demote §f→ rétrograder un membre.");
-            actor.reply("§6/guild sethome §f→ définir la résidence de la guilde.");
-            actor.reply("§6/guild delhome §f→ supprimer la résidence de la guilde.");
-            actor.reply("§6/guild bank withdraw <montant> §f→ retirer de l'argent de la banque.");
-            actor.reply("§6/guild alliance invite <nom de la guilde> §f→ proposer une alliance à une guilde.");
-            actor.reply("§6/guild alliance accept <nom de la guilde> §f→ accepter une alliance.");
-            actor.reply("§6/guild alliance remove <nom de la guilde> §f→ rompre une alliance.");
-        }
-        if (guildPlayer.isGranted(Rank.OWNER)) {
-            actor.reply("§f§lCommandes §4§lfondateur §f§l:");
-            actor.reply("§6/guild disband §f→ dissoudre sa guilde.");
-        }
-        actor.reply("");
+        this.guildsManager = plugin.getGuildManager();
+        this.guildBankService = plugin.getGuildBankService();
+        this.guildAllianceService = plugin.getGuildAllianceService();
+        this.guildService = plugin.getGuildService();
     }
 
     @Subcommand("reload")
     @CommandPermission("guilds.reload")
     public void reload(BukkitCommandActor sender) {
-        guildsManager.load();
-        sender.reply("§cGuilds reloaded.");
+        plugin.getLangManager().load();
+        plugin.loadConfig();
+        sender.reply(Lang.RELOAD.component());
+    }
+
+    @Subcommand("help")
+    @DefaultFor({"guild", "g"})
+    public void help(BukkitCommandActor actor) {
+        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(actor.getUniqueId());
+
+        actor.reply(Component.empty());
+        actor.reply(Lang.HELP_HEADER.component());
+        actor.reply(Component.empty());
+
+        if (guildPlayer == null) {
+            actor.reply(Lang.HELP_NO_GUILD.component());
+        } else {
+            actor.reply(Lang.HELP_MEMBER.component());
+        }
     }
 
     @Subcommand("create")
     public void create(Player sender, @Named("nom de la guilde") String name) {
-        guildsManager.createGuild(sender, name);
+        guildService.createGuild(sender, name);
     }
 
     @Subcommand("disband")
     public void disband(Player sender) {
-        guildsManager.disbandGuild(sender);
+        new ConfirmMenu(sender,
+                Lang.GUILD_DISBAND_CONFIRM.toString(),
+                result -> {
+            if(result){
+                guildService.disbandGuild(sender);
+            }
+        }).open();
     }
 
     @Subcommand("chat")
     public void chat(Player sender, @Optional ChatMode chatMode) {
         if (chatMode == null) {
-            guildsManager.toggleChatMode(sender);
+            guildService.toggleChatMode(sender);
         } else {
-            guildsManager.setChatMode(sender, chatMode);
+            guildService.setChatMode(sender, chatMode);
         }
     }
 
     @Subcommand("invite")
     public void invite(Player sender, @Online OfflinePlayer player) {
-        guildsManager.invite(sender, player);
+        guildService.invite(sender, player);
     }
 
     @Subcommand("revoke")
     public void revoke(Player sender, OfflinePlayer player) {
-        guildsManager.revokeInvite(sender, player);
+        guildService.revokeInvite(sender, player);
     }
 
     @Subcommand("promote")
     public void promote(Player sender, OfflinePlayer player) {
-        guildsManager.promote(sender, player);
+        guildService.promote(sender, player);
     }
 
     @Subcommand("demote")
     public void demote(Player sender, OfflinePlayer player) {
-        guildsManager.demote(sender, player);
+        guildService.demote(sender, player);
     }
 
     @Subcommand("transfer")
     public void transfer(Player sender, OfflinePlayer player) {
-        guildsManager.transfer(sender, player);
+        guildService.transfer(sender, player);
     }
 
     @Subcommand("join")
     public void join(Player sender, Guild guild) {
-        guildsManager.joinGuild(sender, guild);
+        guildService.joinGuild(sender, guild);
     }
 
     @Subcommand("leave")
     public void leave(Player sender) {
-        guildsManager.quitGuild(sender);
+        guildService.quitGuild(sender);
     }
 
     @Subcommand("bank balance")
@@ -143,46 +132,46 @@ public class GuildCMD {
         Economy economy = plugin.getEconomy();
 
         if (economy == null) {
-            sender.sendMessage(Lang.ECONOMY_DISABLED.toString());
+            sender.sendMessage(Lang.BANK_ECONOMY_DISABLED.component());
             return;
         }
 
         if (guild == null) {
-            sender.sendMessage(Lang.NOT_GUILD_MEMBER.toString());
+            sender.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
             return;
         }
 
-        sender.sendMessage("§aVotre guilde possède : §f§l" + economy.format(guild.getBalance()));
+        sender.sendMessage(Lang.BANK_BALANCE.component("amount", economy.format(guild.getBalance())));
     }
 
     @Subcommand("bank deposit")
     public void bankDeposit(Player sender, @Named("le montant") double amount) {
-        guildsManager.guildDeposit(sender, amount);
+        guildBankService.deposit(sender, amount);
     }
 
     @Subcommand("bank withdraw")
     public void bankWithdraw(Player sender, @Named("le montant") double amount) {
-        guildsManager.guildWithdraw(sender, amount);
+        guildBankService.withdraw(sender, amount);
     }
 
     @Subcommand("home")
     public void home(Player sender) {
-        guildsManager.teleportHome(sender);
+        guildService.teleportHome(sender);
     }
 
     @Subcommand("delhome")
     public void delhome(Player sender) {
-        guildsManager.delHome(sender);
+        guildService.delHome(sender);
     }
 
     @Subcommand("sethome")
     public void sethome(Player sender) {
-        guildsManager.setHome(sender);
+        guildService.setHome(sender);
     }
 
     @Subcommand("kick")
     public void kick(Player sender, OfflinePlayer target) {
-        guildsManager.kick(sender, target);
+        guildService.kick(sender, target);
     }
 
     @Subcommand("lands")
@@ -197,65 +186,61 @@ public class GuildCMD {
             if (player != null) {
                 guild = guildsManager.getGuildByPlayer(player);
                 if (guild != null) {
-                    sender.reply(getInfo(guild));
+                    sendGuildInfo(sender, guild);
                     return;
                 }
             }
-            sender.reply("§cVeuillez spécifier le nom d'une guilde.");
+            sender.reply(Lang.ERROR_SPECIFY_GUILD.component());
         } else {
-            sender.reply(getInfo(guild));
+            sendGuildInfo(sender, guild);
         }
     }
 
-    private String getInfo(Guild guild) {
-        String info = "§7§lInformations sur §6§l" + guild.getName() + "\n";
-        info += "§8Créé le " + guild.getDate() + "\n";
-        List<String> admins = guild.getMembers().values().stream()
-                .filter(gp -> gp.getRank() == Rank.ADMIN)
-                .map(GuildPlayer::getName).toList();
-        List<String> mods = guild.getMembers().values().stream()
-                .filter(gp -> gp.getRank() == Rank.MODERATOR)
-                .map(GuildPlayer::getName).toList();
-        List<String> members = guild.getMembers().values().stream()
-                .filter(gp -> gp.getRank() == Rank.MEMBER)
-                .map(GuildPlayer::getName).toList();
-        List<String> alliances = guild.getAlliances().stream().map(Guild::getName).toList();
-        info += "§4§lFondateur : §f" + guild.getOwner().getName() + "\n";
-        if (!admins.isEmpty()) {
-            info += "§c§lAdministrateurs : §f" + String.join(", ", admins) + "\n";
-        }
-        if (!mods.isEmpty()) {
-            info += "§a§lModérateurs : §f" + String.join(", ", mods) + "\n";
-        }
-        if (!members.isEmpty()) {
-            info += "§b§lMembres : §f" + String.join(", ", members) + "\n";
-        }
-        if (!alliances.isEmpty()) {
-            info += "§6§lAlliances : §f" + String.join(", ", alliances) + "\n";
+    private void sendGuildInfo(BukkitCommandActor actor, Guild guild) {
+        actor.reply(Lang.INFO_HEADER.component("guild", guild.getName()));
+        actor.reply(Lang.INFO_CREATED.component("date", guild.getDate()));
+
+        for (GuildRank rank : guild.getRanks()) {
+            List<GuildPlayer> rankMembers = guild.getMembersByRank(rank);
+            if (!rankMembers.isEmpty()) {
+                actor.reply(Lang.INFO_RANK_FORMAT.component(
+                        "rank", ChatUtils.legacyToMiniMessage(rank.getName()),
+                        "players", String.join(", ", rankMembers.stream().map(GuildPlayer::getName).toList())
+                ));
+            }
         }
 
-        return info;
+        List<String> alliances = guild.getAlliances().stream().map(Guild::getName).toList();
+        if (!alliances.isEmpty()) {
+            actor.reply(Lang.INFO_ALLIANCES.component("alliances", String.join(", ", alliances)));
+        }
     }
 
     @Subcommand("list")
-    public void list(CommandActor actor, @Default("1") @Range(min = 1) @Named("page") int page) {
+    public void list(BukkitCommandActor actor, @Default("1") @Range(min = 1) @Named("page") int page) {
         List<Guild> onlineGuilds = guildsManager.getOnlineGuilds();
         int maxpages = (int) Math.ceil(onlineGuilds.size() / 10D);
 
         if (page > maxpages) {
-            actor.reply("§cLe liste va jusqu'à la page " + maxpages);
+            actor.reply(Lang.LIST_INVALID_PAGE.component("maxpage", String.valueOf(maxpages)));
             return;
         }
 
-        int startPos = (page - 1) * 10;
-        int endPos = startPos + 10;
+        actor.reply(Lang.LIST_HEADER.component(
+                "page", String.valueOf(page),
+                "maxpage", String.valueOf(maxpages)
+        ));
 
-        actor.reply(getCentered("§6§lListe des guildes en ligne (§f§l" + page + "§6§l/§f§l " + maxpages + "§6§l)", 54));
-        for (int i = startPos; i < endPos && i < onlineGuilds.size(); i++) {
-            Guild guild = onlineGuilds.get(i);
-            actor.reply("§f§l " + guild.getName() + " §e - §f" + guild.getOnlinePlayerAmount() + "/" + guild.getMembers().size() + " joueurs en ligne.");
-        }
-        actor.reply(getLine(40));
+        onlineGuilds.stream()
+                .skip((page - 1) * 10L)
+                .limit(10)
+                .forEach(guild -> actor.reply(Lang.LIST_FORMAT.component(
+                        "guild", ChatUtils.legacyToMiniMessage(guild.getName()),
+                        "online", String.valueOf(guild.getOnlinePlayerAmount()),
+                        "total", String.valueOf(guild.getMembers().size())
+                )));
+
+        actor.reply(Lang.LIST_FOOTER.component());
     }
 
     @Subcommand("logs")
@@ -265,11 +250,10 @@ public class GuildCMD {
             if (player != null) {
                 guild = guildsManager.getGuildByPlayer(player);
             }
-            sender.reply("§cVeuillez spécifier le nom d'une guilde.");
         }
 
         if (guild == null) {
-            sender.reply(Lang.NOT_GUILD_MEMBER.toString());
+            sender.reply(Lang.ERROR_SPECIFY_GUILD.component());
             return;
         }
 
@@ -277,60 +261,53 @@ public class GuildCMD {
             int maxpages = (int) Math.ceil(logs.size() / 10D);
 
             if (page > maxpages) {
-                sender.reply("§cLe liste va jusqu'à la page " + maxpages);
+                sender.reply(Lang.LIST_INVALID_PAGE.component("maxpage", String.valueOf(maxpages)));
                 return;
             }
 
-            int startPos = (page - 1) * 10;
-            int endPos = startPos + 10;
+            sender.reply(Lang.LOGS_HEADER.component(
+                    "page", String.valueOf(page),
+                    "maxpage", String.valueOf(maxpages)
+            ));
 
-            sender.reply(getCentered("§6§lJournal de la guilde (§f§l" + page + "§6§l/§f§l " + maxpages + "§6§l)", 54));
-            for (int i = startPos; i < endPos && i < logs.size(); i++) {
-                sender.reply("§e - §f" + logs.get(i));
-            }
-            sender.reply(getLine(40));
+            logs.stream()
+                    .skip((page - 1) * 10L)
+                    .limit(10)
+                    .forEach(log -> sender.reply(Lang.LOGS_ENTRY.component("log", log)));
+
+            sender.reply(Lang.LOGS_FOOTER.component());
         });
     }
 
     @Subcommand("alliance invite")
     public void allianceInvite(Player sender, Guild guild) {
-        guildsManager.sendAllianceRequest(sender, guild);
+        guildAllianceService.sendAllianceRequest(sender, guild);
     }
 
     @Subcommand("alliance accept")
     public void allianceAccept(Player sender, Guild guild) {
-        guildsManager.acceptAllianceRequest(sender, guild);
+        guildAllianceService.acceptAllianceRequest(sender, guild);
     }
 
     @Subcommand("alliance remove")
     public void allianceRevoke(Player sender, Guild guild) {
-        guildsManager.revokeAlliance(sender, guild);
+        guildAllianceService.revokeAlliance(sender, guild);
     }
 
-    private String getLine(int length) {
-        StringBuilder sb = new StringBuilder("§6§m");
-        for (int i = 0; i < length; i++) {
-            sb.append("-");
+    @Subcommand("ranks")
+    public void rankList(Player sender) {
+        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(sender.getUniqueId());
+
+        if (guildPlayer == null) {
+            sender.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
+            return;
         }
-        return sb.toString();
-    }
 
-    private String getCentered(String string, int lineLength) {
-        StringBuilder sb = new StringBuilder("§6§m");
-        int line = (lineLength - string.length()) / 2 + 2;
-        sb.append("-".repeat(Math.max(0, line)));
-        sb.append("§f ").append(string).append(" ");
-        sb.append("§6§m");
-        sb.append("-".repeat(Math.max(0, line)));
-        return sb.toString();
-    }
-
-    private Guild getActorGuild(BukkitCommandActor actor) {
-        Player player = actor.getAsPlayer();
-        if (player != null) {
-            return guildsManager.getGuildByPlayer(player);
+        if(!guildPlayer.isGranted(GuildPermission.MANAGE_RANKS)) {
+            sender.sendMessage(Lang.ERROR_NO_PERMISSION.component());
+            return;
         }
-        return null;
-    }
 
+        plugin.getMenuManager().openGuildRanksMenu(sender, guildPlayer.getGuild());
+    }
 }

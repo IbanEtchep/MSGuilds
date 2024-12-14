@@ -1,0 +1,112 @@
+messages:
+  help:
+    header: "<dark_gray><bold>Guild Help Menu"
+    no_guild: |
+      <gold>/guild create <gray>→ Create a guild
+      <gold>/guild join <name> <gray>→ Accept a guild invitation
+      <gray>More commands will be shown when you join a guild
+    member: |
+      <gold>/guild info <gray>→ Guild information
+      <gold>/guild chat <gray>→ Toggle guild chat
+      <gold>/guild logs <gray>→ View guild logs
+      
+      <gold>/guild bank <gray>→ Check guild balance
+      <gold>/guild bank deposit <amount> <gray>→ Deposit money
+      <gold>/guild bank withdraw <amount> <gray>→ Withdraw money
+      
+      <gold>/guild lands <gray>→ Manage guild territories
+      <gold>/guild kick <gray>→ Kick a lower rank member
+      <gold>/guild promote <gray>→ Promote a member
+      <gold>/guild demote <gray>→ Demote a member
+      
+      <gold>/guild home <gray>→ Teleport to guild home
+      <gold>/guild sethome <gray>→ Set guild home
+      <gold>/guild delhome <gray>→ Remove guild home
+      
+      <gold>/guild alliance invite <name> <gray>→ Propose an alliance
+      <gold>/guild alliance accept <name> <gray>→ Accept an alliance
+      <gold>/guild alliance remove <name> <gray>→ Break an alliance
+      
+      <gold>/guild leave <gray>→ Leave your guild
+      <gold>/guild transfer <player> <gray>→ Transfer guild ownership
+      <gold>/guild disband <gray>→ Dissolve your guild
+
+  reload: "<green>Guilds plugin reloaded successfully"
+
+  guild:
+    created: "<green>Guild successfully created!"
+    deleted: "<red>Guild has been deleted!"
+    disbanded: "<red>The guild has been disbanded!"
+    already_exists: "<red>A guild with this name already exists!"
+    name:
+      no_space: "<red>Guild name cannot contain spaces"
+      too_long: "<red>Guild name cannot exceed 30 characters"
+    player:
+        joined: "<green>%player% has joined the guild."
+        left: "<red>%player% has left the guild."
+
+  chat:
+    enabled: "<green>Guild chat enabled"
+    disabled: "<green>Guild chat disabled"
+    mode_changed: "<green>Chat mode set to: <gold>%mode%"
+
+  members:
+    invite:
+      sent: "<green>Invited <gold>%player%</gold> to the guild"
+      revoked: "<yellow>Revoked invitation for <gold>%player%"
+    promote: "<green>Promoted <gold>%player%</gold> to <yellow>%rank%"
+    demote: "<green>Demoted <gold>%player%</gold> to <yellow>%rank%"
+    transfer: "<green>Guild ownership transferred to <gold>%player%"
+    kick: "<red>Kicked <gold>%player%</gold> from the guild"
+    join: "<green>Joined guild <gold>%guild%"
+    leave: "<yellow>Left guild <gold>%guild%"
+
+  bank:
+    balance: "<green>Guild balance: <white><bold>%amount%"
+    deposit: "<green>Deposited <gold>%amount%</gold> to guild bank"
+    withdraw: "<green>Withdrew <gold>%amount%</gold> from guild bank"
+    insufficient_funds: "<red>Insufficient funds!"
+    economy_disabled: "<red>Economy is currently disabled!"
+
+  home:
+    teleport: "<green>Teleported to guild home"
+    set: "<green>Guild home set"
+    delete: "<green>Guild home removed"
+    not_set: "<red>Guild home is not set"
+
+  info:
+    header: "<dark_gray><bold>Information about <gold><bold>%guild%"
+    created: "<dark_gray>Created on %date%"
+    rank_format: "%rank%: <white>%players%"
+    alliances: "<gold><bold>Alliances: <white>%alliances%"
+
+  list:
+    header: "<gold><bold>Online Guilds List (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    format: "<white><bold>%guild% <yellow>- <white>%online%/%total% online"
+    footer: "<gold><strikethrough>                                        "
+    invalid_page: "<red>Invalid page. Maximum: %maxpage%"
+
+  logs:
+    header: "<gold><bold>Guild Logs (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    entry: "<yellow>- <white>%log%"
+    footer: "<gold><strikethrough>                                        "
+    guild_created: "Guild created by %player%"
+  alliance:
+    invite:
+      sent: "<green>Alliance request sent to <gold>%guild%"
+      received: "<gold>%guild%</gold> wants to form an alliance"
+    accept: "<green>Alliance formed with <gold>%guild%"
+    remove: "<yellow>Alliance with <gold>%guild%</gold> has been broken"
+
+  errors:
+    no_permission: "<red>You don't have permission to do this!"
+    not_guild_member: "<red>You are not a member of a guild!"
+    player_not_found: "<red>Player not found!"
+    already_in_guild: "<red>This player is already in a guild!"
+    not_invited: "<red>You haven't been invited to this guild!"
+    insufficient_rank: "<red>Your rank is too low to do this!"
+    specify_guild: "<red>Please specify a guild name"
+    player_not_in_guild: "<red>This player is not in your guild!"
+    economy_disabled: "<red>Economy is currently disabled!"
+    already_guild_owner: "<red>You are already the guild owner!"
+    already_allied: "<red>You are already allied with this guild!"

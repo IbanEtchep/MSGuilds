@@ -1,0 +1,41 @@
+name: "%msguilds_menu_rank%"
+size: 54
+
+items:
+  decoration:
+    isPermanent: true
+    item:
+      material: WHITE_STAINED_GLASS_PANE
+      name: "&e"
+    slots:
+      - 0-9
+      - 17-18
+      - 26-27
+      - 35-36
+      - 44-53
+  permissions:
+    isPermanent: true
+    type: GUILD_RANK_PERMISSION_PAGINATION
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+      - 37-43
+    item:
+      material: PLAYER_HEAD
+      name: "&e%name%"
+  back:
+    isPermanent: true
+    type: BACK
+    slot: 49
+    item:
+      material: RED_STAINED_GLASS_PANE
+      name: "&cRetour"
+
+  rename_rank:
+    isPermanent: true
+    type: GUILD_RANK_RENAME
+    slot: 53
+    item:
+      material: NAME_TAG
+      name: "&2&lRenommer le rang"
