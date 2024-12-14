@@ -53,6 +53,10 @@ messages:
         already_last: "<red>This rank is already the lowest"
         already_first: "<red>This rank is already the highest"
       change: "<gray>%player% has been %action% to %rank% by %by%"
+    promote:
+      success: "<gray>%player% has been promoted to %rank% by %by%"
+    demote:
+      success: "<gray>%player% has been demoted to %rank% by %by%"
 
   chat:
     enabled: "<green>Guild chat enabled"

@@ -54,6 +54,10 @@ messages:
         already_last: "<red>Ce rang est déjà le plus bas"
         already_first: "<red>Ce rang est déjà le plus haut"
       change: "<gray>%player% a été %action% %rank% par %by%"
+    promote:
+      success: "<gray>%player% a été promu %rank% par %by%"
+    demote:
+      success: "<gray>%player% a été rétrogradé %rank% par %by%"
 
   chat:
     enabled: "<green>Chat de guilde activé"

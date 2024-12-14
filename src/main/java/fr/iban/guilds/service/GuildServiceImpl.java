@@ -357,8 +357,16 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guildManager.savePlayer(targetPlayer);
-        guild.sendMessageToOnlineMembers("§7" + target.getName() + " a été rétrogradé " + targetPlayer.getRank().getName() + ".");
-        guildManager.addLog(guild, target.getName() + " a été rétrogradé " + targetPlayer.getRank().getName() + " par " + player.getName());
+        guild.sendMessageToOnlineMembers(Lang.DEMOTE_SUCCESS.toString(
+            "player", target.getName(),
+            "rank", targetPlayer.getRank().getName(),
+            "by", player.getName()
+        ));
+        guildManager.addLog(guild, Lang.DEMOTE_SUCCESS.toString(
+            "player", target.getName(),
+            "rank", targetPlayer.getRank().getName(),
+            "by", player.getName()
+        ));
     }
 
     @Override
@@ -389,8 +397,16 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guildManager.savePlayer(targetPlayer);
-        guild.sendMessageToOnlineMembers("§7" + target.getName() + " a été promu " + targetPlayer.getRank().getName() + " par " + player.getName() + ".");
-        guildManager.addLog(guild, target.getName() + " a été promu " + targetPlayer.getRank().getName() + " par " + player.getName());
+        guild.sendMessageToOnlineMembers(Lang.PROMOTE_SUCCESS.toString(
+            "player", target.getName(),
+            "rank", targetPlayer.getRank().getName(),
+            "by", player.getName()
+        ));
+        guildManager.addLog(guild, Lang.PROMOTE_SUCCESS.toString(
+            "player", target.getName(),
+            "rank", targetPlayer.getRank().getName(),
+            "by", player.getName()
+        ));
     }
 
     @Override

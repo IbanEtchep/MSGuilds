@@ -113,19 +113,23 @@ public enum Lang {
     ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
 
     // Messages de transfert
-    ERROR_TRANSFER_OWNER("messages.errors.transfer.error.owner"),
-    ERROR_TRANSFER_SELF("messages.errors.transfer.error.self"),
-    TRANSFER_SUCCESS("messages.errors.transfer.success"),
+    ERROR_TRANSFER_OWNER("messages.guild.transfer.error.owner"),
+    ERROR_TRANSFER_SELF("messages.guild.transfer.error.self"),
+    TRANSFER_SUCCESS("messages.guild.transfer.success"),
 
     // Messages de kick
-    ERROR_KICK_SELF("messages.errors.kick.error.self"),
-    ERROR_KICK_RANK("messages.errors.kick.error.rank"),
-    KICK_SUCCESS("messages.errors.kick.success"),
-    KICK_TARGET("messages.errors.kick.target"),
+    ERROR_KICK_SELF("messages.guild.kick.error.self"),
+    ERROR_KICK_RANK("messages.guild.kick.error.rank"),
+    KICK_SUCCESS("messages.guild.kick.success"),
+    KICK_TARGET("messages.guild.kick.target"),
 
     // Messages de leave
-    ERROR_LEAVE_OWNER("messages.errors.leave.error.owner"),
-    LEAVE_SUCCESS("messages.errors.leave.success"),
+    ERROR_LEAVE_OWNER("messages.guild.leave.error.owner"),
+    LEAVE_SUCCESS("messages.guild.leave.success"),
+
+    // Messages de promotion/rétrogradation
+    PROMOTE_SUCCESS("messages.guild.promote.success"),
+    DEMOTE_SUCCESS("messages.guild.demote.success"),
 
     // Messages de rang
     RANK_RENAMED("messages.guild.rank.renamed"),
