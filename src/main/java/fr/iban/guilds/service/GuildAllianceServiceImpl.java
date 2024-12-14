@@ -21,73 +21,73 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
     }
 
     @Override
-    public void sendAllianceRequest(Player player, Guild targetGuild) {
-        Guild guild = guildManager.getGuildByPlayer(player);
+    public void sendAllianceRequest(Player sender, Guild targetGuild) {
+        Guild guild = guildManager.getGuildByPlayer(sender);
 
         if (guild == null) {
-            player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
+            sender.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
             return;
         }
 
-        GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
+        GuildPlayer guildPlayer = guild.getMembers().get(sender.getUniqueId());
 
         if (!guildPlayer.isGranted(GuildPermission.MANAGE_ALLIANCES)) {
-            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
+            sender.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (targetGuild.getId() == guild.getId()) {
-            player.sendMessage(Lang.ERROR_CANNOT_SELF_ALLY.component());
+            sender.sendMessage(Lang.ERROR_CANNOT_SELF_ALLY.component());
             return;
         }
 
         if (guild.getAlliances().contains(targetGuild)) {
-            player.sendMessage(Lang.ERROR_ALREADY_ALLIED.component());
+            sender.sendMessage(Lang.ERROR_ALREADY_ALLIED.component());
             return;
         }
 
         if (guild.getAllianceInvites().contains(targetGuild.getId())) {
-            player.sendMessage(Lang.ERROR_ALLIANCE_INVITE_ALREADY_SENT.component());
+            sender.sendMessage(Lang.ERROR_ALLIANCE_INVITE_ALREADY_SENT.component());
             return;
         }
 
         guild.getAllianceInvites().add(targetGuild.getId());
         plugin.getMessagingManager().sendMessage(GuildsPlugin.GUILD_ALLIANCE_REQUEST, new GuildRequestMessage(guild.getId(), targetGuild.getId()));
         targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_REQUEST_RECEIVED.toString("guild", guild.getName()));
-        player.sendMessage("§aVous avez envoyé une invitation d'alliance à " + targetGuild.getName() + ".");
+        sender.sendMessage(Lang.ALLIANCE_REQUEST_SENT.component("guild", targetGuild.getName()));
     }
 
     @Override
-    public void acceptAllianceRequest(Player player, Guild targetGuild) {
-        Guild guild = guildManager.getGuildByPlayer(player);
+    public void acceptAllianceRequest(Player sender, Guild targetGuild) {
+        Guild guild = guildManager.getGuildByPlayer(sender);
 
         if (guild == null) {
-            player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
+            sender.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
             return;
         }
 
-        GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
+        GuildPlayer guildPlayer = guild.getMembers().get(sender.getUniqueId());
 
         if (!guildPlayer.isGranted(GuildPermission.MANAGE_ALLIANCES)) {
-            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
+            sender.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (!targetGuild.getAllianceInvites().contains(guild.getId())) {
-            player.sendMessage(Lang.ERROR_NOT_INVITED.component());
+            sender.sendMessage(Lang.ERROR_NOT_INVITED.component());
             return;
         }
 
         if (guild.getAlliances().contains(targetGuild)) {
-            player.sendMessage(Lang.ERROR_ALREADY_ALLIED.component());
+            sender.sendMessage(Lang.ERROR_ALREADY_ALLIED.component());
             return;
         }
 
         guild.getAllianceInvites().remove(targetGuild.getId());
         guild.getAlliances().add(targetGuild);
         targetGuild.getAlliances().add(guild);
-        guild.sendMessageToOnlineMembers("§aVous êtes désormais allié avec la guilde " + targetGuild.getName() + ".");
-        targetGuild.sendMessageToOnlineMembers("§aVous êtes désormais allié avec la guilde " + guild.getName() + ".");
+        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.toString("guild", targetGuild.getName()));
+        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.toString("guild", guild.getName()));
         guildManager.addLog(guild, "Alliance avec la guilde " + targetGuild.getName() + " acceptée.");
         guildManager.saveGuild(guild);
         guildManager.saveGuild(targetGuild);

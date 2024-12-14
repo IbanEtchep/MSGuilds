@@ -37,13 +37,12 @@ messages:
     created: "<green>Guild successfully created!"
     deleted: "<red>Guild has been deleted!"
     disbanded: "<red>The guild has been disbanded!"
+    disband:
+      confirm: "<red>Are you sure you want to disband the guild?"
     already_exists: "<red>A guild with this name already exists!"
     name:
       no_space: "<red>Guild name cannot contain spaces"
       too_long: "<red>Guild name cannot exceed 30 characters"
-    player:
-        joined: "<green>%player% has joined the guild."
-        left: "<red>%player% has left the guild."
     rank:
       renamed: "<green>Rank <gold>%oldName%</gold> has been renamed to <gold>%newName%"
       deleted: "<green>Rank <gold>%rank%</gold> has been deleted"
@@ -57,6 +56,21 @@ messages:
       success: "<gray>%player% has been promoted to %rank% by %by%"
     demote:
       success: "<gray>%player% has been demoted to %rank% by %by%"
+    transfer:
+      error:
+        owner: "<red>You must be the guild owner to transfer ownership"
+        self: "<red>You cannot transfer ownership to yourself"
+      success: "<gray><bold>%player% has transferred guild ownership to %target%"
+    kick:
+      error:
+        self: "<red>You cannot kick yourself!"
+        rank: "<red>You must be higher ranked than the person you want to kick"
+      success: "<red>%player% has been kicked from the guild"
+      target: "<red>You have been kicked from the guild"
+    leave:
+      error:
+        owner: "<red>You cannot leave the guild as owner. Please promote someone else to owner or disband the guild"
+      success: "<red>You have left your guild"
 
   chat:
     enabled: "<green>Guild chat enabled"
@@ -67,10 +81,6 @@ messages:
     invite:
       sent: "<green>Invited <gold>%player%</gold> to the guild"
       revoked: "<yellow>Revoked invitation for <gold>%player%"
-    promote: "<green>Promoted <gold>%player%</gold> to <yellow>%rank%"
-    demote: "<green>Demoted <gold>%player%</gold> to <yellow>%rank%"
-    transfer: "<green>Guild ownership transferred to <gold>%player%"
-    kick: "<red>Kicked <gold>%player%</gold> from the guild"
     join: "<green>Joined guild <gold>%guild%"
     leave: "<yellow>Left guild <gold>%guild%"
 
@@ -115,12 +125,16 @@ messages:
     home:
       set: "%player% has set the guild home location"
       delete: "%player% has deleted the guild home"
+
   alliance:
     invite:
       sent: "<green>Alliance request sent to <gold>%guild%"
       received: "<gold>%guild%</gold> wants to form an alliance"
     accept: "<green>Alliance formed with <gold>%guild%"
     remove: "<yellow>Alliance with <gold>%guild%</gold> has been broken"
+    request:
+      sent: "<green>Alliance request sent to <gold>%guild%"
+    formed: "<green>You are now allied with guild <gold>%guild%"
     request_received: "<gold>%guild%</gold> wants to form an alliance"
     ended: "<yellow>Alliance with <gold>%guild%</gold> has ended"
 
@@ -136,29 +150,17 @@ messages:
     economy_disabled: "<red>Economy is currently disabled!"
     already_guild_owner: "<red>You are already the guild owner!"
     already_allied: "<red>You are already allied with this guild!"
+    rank:
+      name_length: "<red>Rank name must be between 2 and 24 characters"
+    rank_already_exists: "<red>A rank with this name already exists"
+    rank_not_empty: "<red>Cannot delete a rank that has members"
     rank_too_high: "<red>Your rank is too low to manage this rank"
     target_rank_too_high: "<red>Your rank is too low to manage this player's rank"
-    rank_already_exists: "<red>A rank with this name already exists"
-    rank.name_length: "<red>Rank name must be between 2 and 24 characters"
-    rank_not_empty: "<red>Cannot delete a rank that has members"
     need_positive_amount: "<red>Amount must be positive"
     cannot_self_ally: "<red>You cannot ally with your own guild"
     alliance_invite_already_sent: "<red>An alliance request has already been sent to this guild"
     not_guild_owner: "<red>You must be the guild owner to do this"
     not_allied: "<red>You are not allied with this guild"
     player_not_invited: "<red>This player has not been invited"
-    transfer:
-      error:
-        owner: "<red>You must be the guild owner to transfer ownership"
-        self: "<red>You cannot transfer ownership to yourself"
-      success: "<gray><bold>%player% has transferred guild ownership to %target%"
-    kick:
-      error:
-        self: "<red>You cannot kick yourself!"
-        rank: "<red>You must be higher ranked than the person you want to kick"
-      success: "<red>%player% has been kicked from the guild"
-      target: "<red>You have been kicked from the guild"
-    leave:
-      error:
-        owner: "<red>You cannot leave the guild as owner. Please promote someone else to owner or disband the guild"
-      success: "<red>You have left your guild"
+    already_lowest_rank: "<red>Player is already the lowest rank"
+    already_highest_rank: "<red>Player is already the highest rank"

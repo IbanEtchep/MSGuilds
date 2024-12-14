@@ -21,7 +21,7 @@ items:
       - 28-34
       - 37-43
     item:
-      material: PLAYER_HEAD
+      material: PAINTING
       name: "%name%"
       lore:
         - "&b[Click droit] &fpour gérer les permissions"

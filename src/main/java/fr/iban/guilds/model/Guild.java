@@ -191,6 +191,18 @@ public class Guild {
         next.setOrder(index);
     }
 
+    public GuildRank getNextRank(GuildRank rank) {
+        int index = ranks.indexOf(rank);
+        if(index == ranks.size() - 1) return null;
+        return ranks.get(index + 1);
+    }
+
+    public GuildRank getPreviousRank(GuildRank rank) {
+        int index = ranks.indexOf(rank);
+        if(index == 0) return null;
+        return ranks.get(index - 1);
+    }
+
     public void removeRank(GuildRank rank) {
         this.ranks.remove(rank);
     }

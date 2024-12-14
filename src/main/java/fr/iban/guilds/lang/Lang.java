@@ -26,17 +26,11 @@ public enum Lang {
     GUILD_RANK_CHANGE("messages.guild.rank.change"),
 
     // Messages de chat
-    CHAT_ENABLED("messages.chat.enabled"),
-    CHAT_DISABLED("messages.chat.disabled"),
     CHAT_MODE_CHANGED("messages.chat.mode_changed"),
 
     // Messages de membres
     MEMBER_INVITED("messages.members.invite.sent"),
     MEMBER_INVITE_REVOKED("messages.members.invite.revoked"),
-    MEMBER_PROMOTED("messages.members.promote"),
-    MEMBER_DEMOTED("messages.members.demote"),
-    MEMBER_TRANSFERRED("messages.members.transfer"),
-    MEMBER_KICKED("messages.members.kick"),
     MEMBER_JOINED("messages.members.join"),
     MEMBER_LEFT("messages.members.leave"),
 
@@ -85,6 +79,8 @@ public enum Lang {
     ALLIANCE_REMOVED("messages.alliance.remove"),
     ALLIANCE_REQUEST_RECEIVED("messages.alliance.request_received"),
     ALLIANCE_ENDED("messages.alliance.ended"),
+    ALLIANCE_REQUEST_SENT("messages.alliance.request.sent"),
+    ALLIANCE_FORMED("messages.alliance.formed"),
 
     // Messages de transfert
     ERROR_TRANSFER_OWNER("messages.guild.transfer.error.owner"),
@@ -135,7 +131,10 @@ public enum Lang {
     ERROR_ALLIANCE_INVITE_ALREADY_SENT("messages.errors.alliance_invite_already_sent"),
     ERROR_NOT_GUILD_OWNER("messages.errors.not_guild_owner"),
     ERROR_NOT_ALLIED("messages.errors.not_allied"),
-    ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited");
+    ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
+    ERROR_ALREADY_LOWEST_RANK("messages.errors.already_lowest_rank"),
+    ERROR_ALREADY_HIGHEST_RANK("messages.errors.already_highest_rank");
+
 
     private final String key;
     private static YamlDocument messages;

@@ -356,6 +356,14 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
+        GuildRank previousRank = guild.getPreviousRank(targetPlayer.getRank());
+        if(previousRank == null) {
+            player.sendMessage(Lang.ERROR_ALREADY_LOWEST_RANK.component());
+            return;
+        }
+
+        targetPlayer.setRank(previousRank);
+
         guildManager.savePlayer(targetPlayer);
         guild.sendMessageToOnlineMembers(Lang.DEMOTE_SUCCESS.toString(
             "player", target.getName(),
@@ -395,6 +403,14 @@ public class GuildServiceImpl implements GuildService {
             player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
+
+        GuildRank nextRank = guild.getNextRank(targetPlayer.getRank());
+        if(nextRank == null) {
+            player.sendMessage(Lang.ERROR_ALREADY_HIGHEST_RANK.component());
+            return;
+        }
+
+        targetPlayer.setRank(nextRank);
 
         guildManager.savePlayer(targetPlayer);
         guild.sendMessageToOnlineMembers(Lang.PROMOTE_SUCCESS.toString(
