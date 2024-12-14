@@ -45,6 +45,7 @@ public enum Lang {
     BANK_DEPOSIT("messages.bank.deposit"),
     BANK_WITHDRAW("messages.bank.withdraw"),
     BANK_INSUFFICIENT_FUNDS("messages.bank.insufficient_funds"),
+    PLAYER_INSUFFICIENT_FUNDS("messages.bank.player_insufficient_funds"),
     BANK_ECONOMY_DISABLED("messages.bank.economy_disabled"),
 
     // Messages de home
@@ -99,7 +100,21 @@ public enum Lang {
     RANK_RENAMED("messages.guild.rank.renamed"),
     RANK_DELETED("messages.guild.rank.deleted"),
     RANK_MOVED_DOWN("messages.guild.rank.moved_down"),
-    ;
+    RANK_MOVED_UP("messages.guild.rank.moved_up"),
+    ERROR_RANK_TOO_HIGH("messages.errors.rank_too_high"),
+    ERROR_NEED_POSITIVE_AMOUNT("messages.errors.need_positive_amount"),
+    BANK_DEPOSIT_SUCCESS("messages.bank.deposit.success"),
+    LOG_BANK_DEPOSIT("messages.logs.bank_deposit"),
+    BANK_WITHDRAW_SUCCESS("messages.bank.withdraw.success"),
+    LOG_BANK_WITHDRAW("messages.logs.bank_withdraw"),
+    ERROR_CANNOT_SELF_ALLY("messages.errors.cannot_self_ally"),
+    ERROR_ALLIANCE_INVITE_ALREADY_SENT("messages.errors.alliance_invite_already_sent"),
+    ERROR_NOT_GUILD_OWNER("messages.errors.not_guild_owner"),
+    LOG_GUILD_DISBANDED("messages.logs.guild_disbanded"),
+    ERROR_NOT_ALLIED("messages.errors.not_allied"),
+    ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
+    ALLIANCE_ENDED("messages.alliance.ended"),
+    ERROR_TARGET_RANK_TOO_HIGH("messages.errors.target_rank_too_high"),;
 
     private final String key;
     private static YamlDocument messages;

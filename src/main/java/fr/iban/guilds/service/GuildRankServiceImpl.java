@@ -40,7 +40,7 @@ public class GuildRankServiceImpl implements GuildRankService {
 
         guild.moveRankUp(rank);
         guildManager.saveGuild(guild);
-        player.sendMessage("§aLe grade " + rank.getName() + " a été déplacé vers le haut.");
+        player.sendMessage(Lang.RANK_MOVED_UP.component("rank", rank.getName()));
     }
 
     @Override

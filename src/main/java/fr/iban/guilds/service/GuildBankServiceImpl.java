@@ -30,27 +30,35 @@ public class GuildBankServiceImpl implements GuildBankService {
         }
 
         if (economy == null) {
-            player.sendMessage("§cLa banque n'est pas accessible.");
+            player.sendMessage(Lang.ERROR_ECONOMY_DISABLED.component());
             return;
         }
 
         if (amount <= 0) {
-            player.sendMessage("§cVous ne pouvez pas déposer une valeur négative !");
+            player.sendMessage(Lang.ERROR_NEED_POSITIVE_AMOUNT.component());
             return;
         }
 
         double playerBalance = economy.getBalance(player);
         if (playerBalance < amount) {
-            player.sendMessage("§cVous n'avez pas " + economy.format(amount) + "§c.");
+            player.sendMessage(Lang.PLAYER_INSUFFICIENT_FUNDS.component(
+                    "amount", economy.format(amount),
+                    "balance", economy.format(playerBalance)
+            ));
             return;
         }
 
         economy.withdrawPlayer(player, amount);
         guild.setBalance(guild.getBalance() + amount);
-        player.sendMessage("§aVous avez déposé " + economy.format(amount) + " §adans la banque de votre guilde. " +
-                "Nouveau solde : " + economy.format(guild.getBalance()));
-        guildManager.addLog(guild, player.getName() + " a déposé " + economy.format(amount) + " dans la banque de votre guilde. " +
-                "Nouveau solde : " + economy.format(guild.getBalance()));
+        player.sendMessage(Lang.BANK_DEPOSIT_SUCCESS.component(
+                "amount", economy.format(amount),
+                "balance", economy.format(guild.getBalance())
+        ));
+        guildManager.addLog(guild, Lang.LOG_BANK_DEPOSIT.plainText(
+                "player", player.getName(),
+                "amount", economy.format(amount),
+                "balance", economy.format(guild.getBalance())
+        ));
         guildManager.saveGuild(guild);
     }
 
@@ -75,7 +83,7 @@ public class GuildBankServiceImpl implements GuildBankService {
         }
 
         if (amount <= 0) {
-            player.sendMessage("§cVous ne pouvez pas retirer une valeur négative !");
+            player.sendMessage(Lang.ERROR_NEED_POSITIVE_AMOUNT.component());
             return;
         }
 
@@ -87,11 +95,16 @@ public class GuildBankServiceImpl implements GuildBankService {
 
         economy.depositPlayer(player, amount);
         guild.setBalance(currentBalance - amount);
-        player.sendMessage("§aVous avez retiré " + economy.format(amount) + " §ade la banque de votre guilde. " +
-                "Nouveau solde : " + economy.format(guild.getBalance()));
+        player.sendMessage(Lang.BANK_WITHDRAW_SUCCESS.component(
+                "amount", economy.format(amount),
+                "balance", economy.format(guild.getBalance())
+        ));
         guildManager.saveGuild(guild);
-        guildManager.addLog(guild, player.getName() + " a retiré " + economy.format(amount) + " de la banque de votre guilde. " +
-                "Nouveau solde : " + economy.format(guild.getBalance()));
+        guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.plainText(
+                "player", player.getName(),
+                "amount", economy.format(amount),
+                "balance", economy.format(guild.getBalance())
+        ));
     }
 
     @Override
@@ -129,8 +142,11 @@ public class GuildBankServiceImpl implements GuildBankService {
 
         boolean result = withdraw(guild, amount);
         if (result) {
-            guildManager.addLog(guild, economy.format(amount) + " ont été prélevés de la banque de votre guilde pour " + reason + ". " +
-                    "Nouveau solde : " + economy.format(guild.getBalance()));
+            guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.plainText(
+                    "reason", reason,
+                    "amount", economy.format(amount),
+                    "balance", economy.format(guild.getBalance())
+            ));
         }
         return result;
     }

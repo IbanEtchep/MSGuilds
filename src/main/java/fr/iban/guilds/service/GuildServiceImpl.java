@@ -93,7 +93,7 @@ public class GuildServiceImpl implements GuildService {
             guildPlayer.setChatMode(ChatMode.PUBLIC);
         }
 
-        player.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
+        player.sendMessage(Lang.CHAT_MODE_CHANGED.component("mode", guildPlayer.getChatMode().toString()));
         guildManager.savePlayer(guildPlayer);
     }
 
@@ -107,7 +107,7 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guildPlayer.setChatMode(chatMode);
-        player.sendMessage("§fVotre chat est désormais en : §b" + guildPlayer.getChatMode().toString());
+        player.sendMessage(Lang.CHAT_MODE_CHANGED.component("mode", chatMode.toString()));
         guildManager.savePlayer(guildPlayer);
     }
 
@@ -121,7 +121,7 @@ public class GuildServiceImpl implements GuildService {
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
         if (!guildPlayer.isOwner() && !player.hasPermission("guilds.admin")) {
-            player.sendMessage("§cVous devez être fondateur de la guilde pour la dissoudre.");
+            player.sendMessage(Lang.ERROR_NOT_GUILD_OWNER.component());
             return;
         }
 
@@ -131,11 +131,11 @@ public class GuildServiceImpl implements GuildService {
         if (disbandEvent.isCancelled()) return;
 
         guild.getMembers().forEach((uuid, gp) -> {
-            gp.sendMessageIfOnline("§cVotre guilde a été dissoute.");
+            gp.sendMessageIfOnline(Lang.GUILD_DISBANDED.toString());
             guildManager.deletePlayer(gp);
         });
 
-        guildManager.addLog(guild, "Dissolution de la guilde " + guild.getName() + " par " + player.getName());
+        guildManager.addLog(guild, Lang.LOG_GUILD_DISBANDED.toString("player", player.getName()));
         guildManager.deleteGuild(guild);
         new GuildPostDisbandEvent(guild).callEvent();
     }
@@ -195,17 +195,17 @@ public class GuildServiceImpl implements GuildService {
         }
 
         if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.INVITE_MEMBER)) {
-            player.sendMessage("§cVous n'avez pas la permission d'inviter des gens dans la guilde.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (guild.getInvites().contains(target.getUniqueId())) {
-            player.sendMessage("§cVous avez déjà envoyé une invitation à ce joueur.");
+            player.sendMessage(Lang.MEMBER_INVITED.component());
             return;
         }
 
         if (guild.getMember(target.getUniqueId()) != null) {
-            player.sendMessage("§cCe joueur est déjà dans votre guilde.");
+            player.sendMessage(Lang.ERROR_ALREADY_IN_GUILD.component());
             return;
         }
 
@@ -230,12 +230,12 @@ public class GuildServiceImpl implements GuildService {
         }
 
         if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.INVITE_MEMBER)) {
-            player.sendMessage("§cVous n'avez pas la permission de révoquer une invitation.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (!guild.getInvites().contains(target.getUniqueId())) {
-            player.sendMessage("§cCe joueur n'a pas d'invitation.");
+            player.sendMessage(Lang.ERROR_PLAYER_NOT_INVITED.component());
             return;
         }
 
@@ -307,7 +307,7 @@ public class GuildServiceImpl implements GuildService {
         }
 
         if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.KICK_MEMBER)) {
-            player.sendMessage("§cVous n'avez pas la permission d'exclure des membres de la guilde.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
@@ -339,11 +339,6 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
-        if (player.getUniqueId().equals(target.getUniqueId())) {
-            player.sendMessage("§cVous ne pouvez pas vous rétrograder vous même !");
-            return;
-        }
-
         GuildPlayer targetPlayer = guild.getMember(target.getUniqueId());
         if (targetPlayer == null) {
             player.sendMessage(Lang.ERROR_PLAYER_NOT_IN_GUILD.component());
@@ -353,12 +348,12 @@ public class GuildServiceImpl implements GuildService {
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
         if((guildPlayer.getRank().getOrder() <= targetPlayer.getRank().getOrder() && !guildPlayer.isOwner())) {
-            player.sendMessage("§cVous devez être plus gradé que la personne que vous voulez rétrograder.");
+            player.sendMessage(Lang.ERROR_RANK_TOO_HIGH.component());
             return;
         }
 
         if(!guildPlayer.isGranted(GuildPermission.DEMOTE_MEMBER)) {
-            player.sendMessage("§cVous n'avez pas la permission de rétrograder des membres.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
@@ -376,11 +371,6 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
-        if (player.getUniqueId().equals(target.getUniqueId())) {
-            player.sendMessage("§cVous ne pouvez pas vous promouvoir vous même !");
-            return;
-        }
-
         GuildPlayer targetPlayer = guild.getMember(target.getUniqueId());
         if (targetPlayer == null) {
             player.sendMessage(Lang.ERROR_PLAYER_NOT_IN_GUILD.component());
@@ -390,12 +380,12 @@ public class GuildServiceImpl implements GuildService {
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
         if((guildPlayer.getRank().getOrder() <= targetPlayer.getRank().getOrder() && !guildPlayer.isOwner())) {
-            player.sendMessage("§cVous devez être plus gradé que la personne que vous voulez promouvoir.");
+            player.sendMessage(Lang.ERROR_TARGET_RANK_TOO_HIGH.component());
             return;
         }
 
         if(!guildPlayer.isGranted(GuildPermission.PROMOTE_MEMBER)) {
-            player.sendMessage("§cVous n'avez pas la permission de promouvoir des membres.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 

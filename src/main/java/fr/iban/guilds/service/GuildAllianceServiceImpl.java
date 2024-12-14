@@ -32,22 +32,22 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
         GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
 
         if (!guildPlayer.isGranted(GuildPermission.MANAGE_ALLIANCES)) {
-            player.sendMessage("§cVous devez être au moins administrateur pour inviter une guilde à vous rejoindre.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (targetGuild.getId() == guild.getId()) {
-            player.sendMessage("§cVous ne pouvez pas vous allier avec votre propre guilde.");
+            player.sendMessage(Lang.ERROR_CANNOT_SELF_ALLY.component());
             return;
         }
 
         if (guild.getAlliances().contains(targetGuild)) {
-            player.sendMessage("§cVous êtes déjà allié avec cette guilde.");
+            player.sendMessage(Lang.ERROR_ALREADY_ALLIED.component());
             return;
         }
 
         if (guild.getAllianceInvites().contains(targetGuild.getId())) {
-            player.sendMessage("§cVous avez déjà envoyé une invitation à cette guilde.");
+            player.sendMessage(Lang.ERROR_ALLIANCE_INVITE_ALREADY_SENT.component());
             return;
         }
 
@@ -69,12 +69,12 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
         GuildPlayer guildPlayer = guild.getMembers().get(player.getUniqueId());
 
         if (!guildPlayer.isGranted(GuildPermission.MANAGE_ALLIANCES)) {
-            player.sendMessage("§cVous devez être au moins administrateur pour accepter une invitation à rejoindre une alliance.");
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (!targetGuild.getAllianceInvites().contains(guild.getId())) {
-            player.sendMessage("§cVous n'avez pas reçu d'invitation de cette guilde.");
+            player.sendMessage(Lang.ERROR_NOT_INVITED.component());
             return;
         }
 
@@ -105,20 +105,20 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
         GuildPlayer guildPlayer = guild.getMembers().get(sender.getUniqueId());
 
         if (!guildPlayer.isGranted(GuildPermission.MANAGE_ALLIANCES)) {
-            sender.sendMessage("§cVous devez être au moins administrateur pour révoquer une alliance.");
+            sender.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 
         if (!guild.getAlliances().contains(target)) {
-            sender.sendMessage("§cVous n'êtes pas allié avec cette guilde.");
+            sender.sendMessage(Lang.ERROR_NOT_ALLIED.component());
             return;
         }
 
         guild.getAlliances().remove(target);
         target.getAlliances().remove(guild);
-        guild.sendMessageToOnlineMembers("§cVous n'êtes plus allié avec la guilde " + target.getName() + ".");
-        target.sendMessageToOnlineMembers("§cVous n'êtes plus allié avec la guilde " + guild.getName() + ".");
-        guildManager.addLog(guild, "Alliance avec la guilde " + target.getName() + " révoquée.");
+        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.toString("guild", target.getName()));
+        target.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.toString("guild", guild.getName()));
+        guildManager.addLog(guild, Lang.ALLIANCE_ENDED.plainText("guild", target.getName()));
         guildManager.saveGuild(guild);
         guildManager.saveGuild(target);
     }
