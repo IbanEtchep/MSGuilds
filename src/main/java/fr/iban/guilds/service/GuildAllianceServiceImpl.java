@@ -53,7 +53,7 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
 
         guild.getAllianceInvites().add(targetGuild.getId());
         plugin.getMessagingManager().sendMessage(GuildsPlugin.GUILD_ALLIANCE_REQUEST, new GuildRequestMessage(guild.getId(), targetGuild.getId()));
-        targetGuild.sendMessageToOnlineMembers("[\"\",{\"text\":\"Votre guilde a reçu une invitation d'alliance à \",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild alliance accept " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild alliance accept " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" pour accepter.\",\"color\":\"green\"}]", true);
+        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_REQUEST_RECEIVED.toString("guild", guild.getName()));
         player.sendMessage("§aVous avez envoyé une invitation d'alliance à " + targetGuild.getName() + ".");
     }
 

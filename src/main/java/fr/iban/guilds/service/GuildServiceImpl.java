@@ -1,4 +1,3 @@
-
 package fr.iban.guilds.service;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
@@ -154,9 +153,9 @@ public class GuildServiceImpl implements GuildService {
         }
 
         GuildPlayer guildPlayer = new GuildPlayer(uuid, guild, guild.getDefautRank(), ChatMode.PUBLIC);
-        guild.sendMessageToOnlineMembers(Lang.PLAYER_JOINED_GUILD.toString("player", player.getName()));
-        guildManager.addLog(guild, Lang.PLAYER_JOINED_GUILD.toString("player", player.getName()));
-        player.sendMessage("§aVous avez rejoint la guilde " + guild.getName() + ".");
+        guild.sendMessageToOnlineMembers(Lang.MEMBER_JOINED.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.MEMBER_JOINED.toString("player", player.getName()));
+        player.sendMessage(Lang.MEMBER_JOINED.component("guild", guild.getName()));
         guild.getInvites().remove(uuid);
         guild.getMembers().put(uuid, guildPlayer);
         guildManager.savePlayer(guildPlayer);
@@ -180,9 +179,9 @@ public class GuildServiceImpl implements GuildService {
 
         guild.getMembers().remove(guildPlayer.getUuid());
         guildManager.deletePlayer(guildPlayer);
-        player.sendMessage("§cVous avez quitté votre guilde.");
-        guildManager.addLog(guild, Lang.PLAYER_LEFT_GUILD.toString().replace("name", player.getName()));
-        guild.sendMessageToOnlineMembers(Lang.PLAYER_LEFT_GUILD.toString("name", player.getName()));
+        player.sendMessage(Lang.LEAVE_SUCCESS.component());
+        guildManager.addLog(guild, Lang.MEMBER_LEFT.toString("player", player.getName()));
+        guild.sendMessageToOnlineMembers(Lang.MEMBER_LEFT.toString("player", player.getName()));
     }
 
     @Override
@@ -216,8 +215,8 @@ public class GuildServiceImpl implements GuildService {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,
                 new GuildRequestMessage(guild.getId(), target.getUniqueId()));
-        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), "[\"\",{\"text\":\"Vous avez reçu une invitation à rejoindre la guilde\",\"color\":\"green\"},{\"text\":\" " + guild.getName() + "\",\"color\":\"dark_green\"},{\"text\":\". Tapez \",\"color\":\"green\"},{\"text\":\"/guild join " + guild.getName() + "\",\"bold\":true,\"color\":\"white\",\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/guild join " + guild.getName() + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"Clic pour accepter\"}},{\"text\":\" ou cliquez\",\"color\":\"green\"},{\"text\":\" pour accepter.\",\"color\":\"green\"}]");
-        player.sendMessage("§aVous avez invité " + target.getName() + " à rejoindre votre guilde.");
+        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), Lang.ALLIANCE_REQUEST_RECEIVED.toString("guild", guild.getName()));
+        player.sendMessage(Lang.MEMBER_INVITED.component("player", target.getName()));
     }
 
     @Override
@@ -240,9 +239,9 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guild.getInvites().remove(target.getUniqueId());
-        player.sendMessage("§cVous avez révoqué l'invitation envoyée à " + target.getName() + ".");
-        CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(target.getUniqueId(),
-                "§cL'invitation que vous avez reçu de §2§l" + guild.getName() + "§c a expiré.");
+        player.sendMessage(Lang.MEMBER_INVITE_REVOKED.component("player", target.getName()));
+        CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(target.getUniqueId(), 
+            Lang.ERROR_NOT_INVITED.toString("guild", guild.getName()));
     }
 
     @Override
@@ -255,7 +254,7 @@ public class GuildServiceImpl implements GuildService {
         }
 
         if (guild.getHome() == null) {
-            player.sendMessage("§cVotre guilde n'a pas de résidence.");
+            player.sendMessage(Lang.HOME_NOT_SET.component());
             return;
         }
 
@@ -272,9 +271,9 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guild.setHome(SLocationUtils.getSLocation(player.getLocation()));
-        guildManager.addLog(guild, player.getName() + " a redéfini la position de la résidence de la guilde.");
+        guildManager.addLog(guild, Lang.LOG_HOME_SET.toString("player", player.getName()));
         guildManager.saveGuild(guild);
-        player.sendMessage("§aVous avez redéfini la position de la résidence de votre guilde.");
+        player.sendMessage(Lang.HOME_SET.component());
     }
 
     @Override
@@ -288,8 +287,8 @@ public class GuildServiceImpl implements GuildService {
 
         guild.setHome(null);
         guildManager.saveGuild(guild);
-        guildManager.addLog(guild, player.getName() + " a supprimé la résidence de la guilde.");
-        player.sendMessage("§aVous supprimé la résidence de votre guilde.");
+        guildManager.addLog(guild, Lang.LOG_HOME_DELETE.toString("player", player.getName()));
+        player.sendMessage(Lang.HOME_DELETE.component());
     }
 
     @Override
@@ -297,7 +296,7 @@ public class GuildServiceImpl implements GuildService {
         Guild guild = guildManager.getGuildByPlayer(player);
 
         if (player.getUniqueId().equals(target.getUniqueId())) {
-            player.sendMessage("§cVous ne pouvez pas vous exclure vous même !");
+            player.sendMessage(Lang.ERROR_KICK_SELF.component());
             return;
         }
 
@@ -319,14 +318,14 @@ public class GuildServiceImpl implements GuildService {
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
         if (guildPlayer.getRank().getOrder() > targetGuildPlayer.getRank().getOrder()) {
-            player.sendMessage("§cVous devez être plus gradé que la personne que vous voulez exclure.");
+            player.sendMessage(Lang.ERROR_KICK_RANK.component());
             return;
         }
 
         guild.getMembers().remove(targetGuildPlayer.getUuid());
-        guild.sendMessageToOnlineMembers("§c" + target.getName() + " a été exclu de la guilde.");
-        targetGuildPlayer.sendMessageIfOnline("§cVous avez été exclu de la guilde.");
-        guildManager.addLog(guild, target.getName() + " a été exclu de la guilde.");
+        guild.sendMessageToOnlineMembers(Lang.KICK_SUCCESS.toString("player", target.getName()));
+        targetGuildPlayer.sendMessageIfOnline(Lang.KICK_TARGET.toString());
+        guildManager.addLog(guild, Lang.KICK_SUCCESS.toString("player", target.getName()));
         guildManager.deletePlayer(targetGuildPlayer);
     }
 
@@ -405,12 +404,12 @@ public class GuildServiceImpl implements GuildService {
 
         GuildPlayer guildOwner = guild.getOwner();
         if ((guildOwner != null && !guildOwner.getUuid().equals(player.getUniqueId())) && !player.hasPermission("guilds.admin")) {
-            player.sendMessage("§cIl faut être le fondateur pour transférer la proprieté de la guilde.");
+            player.sendMessage(Lang.ERROR_TRANSFER_OWNER.component());
             return;
         }
 
         if (player.getUniqueId().equals(target.getUniqueId())) {
-            player.sendMessage(Lang.ERROR_ALREADY_GUILD_OWNER.component());
+            player.sendMessage(Lang.ERROR_TRANSFER_SELF.component());
             return;
         }
 
@@ -423,7 +422,10 @@ public class GuildServiceImpl implements GuildService {
         guild.setOwnerUUID(target.getUniqueId());
 
         guildManager.saveGuild(guild);
-        guild.sendMessageToOnlineMembers("§7§l" + player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
+        guild.sendMessageToOnlineMembers(Lang.TRANSFER_SUCCESS.toString(
+            "player", player.getName(),
+            "target", guildPlayer.getName()
+        ));
         guildManager.addLog(guild, player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
     }
 

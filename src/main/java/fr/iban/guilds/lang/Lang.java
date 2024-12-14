@@ -23,7 +23,7 @@ public enum Lang {
     GUILD_ALREADY_EXISTS("messages.guild.already_exists"),
     GUILD_NAME_NO_SPACE("messages.guild.name.no_space"),
     GUILD_NAME_TOO_LONG("messages.guild.name.too_long"),
-    LOG_GUILD_CREATED("messages.logs.guild_created"),
+    GUILD_RANK_CHANGE("messages.guild.rank.change"),
 
     // Messages de chat
     CHAT_ENABLED("messages.chat.enabled"),
@@ -42,11 +42,11 @@ public enum Lang {
 
     // Messages de banque
     BANK_BALANCE("messages.bank.balance"),
-    BANK_DEPOSIT("messages.bank.deposit"),
-    BANK_WITHDRAW("messages.bank.withdraw"),
+    BANK_DEPOSIT_SUCCESS("messages.bank.deposit.success"),
+    BANK_WITHDRAW_SUCCESS("messages.bank.withdraw.success"),
     BANK_INSUFFICIENT_FUNDS("messages.bank.insufficient_funds"),
-    PLAYER_INSUFFICIENT_FUNDS("messages.bank.player_insufficient_funds"),
     BANK_ECONOMY_DISABLED("messages.bank.economy_disabled"),
+    PLAYER_INSUFFICIENT_FUNDS("messages.bank.player_insufficient_funds"),
 
     // Messages de home
     HOME_TELEPORT("messages.home.teleport"),
@@ -70,12 +70,21 @@ public enum Lang {
     LOGS_HEADER("messages.logs.header"),
     LOGS_ENTRY("messages.logs.entry"),
     LOGS_FOOTER("messages.logs.footer"),
+    LOG_GUILD_CREATED("messages.logs.guild_created"),
+    LOG_GUILD_DISBANDED("messages.logs.guild_disbanded"),
+    LOG_BANK_DEPOSIT("messages.logs.bank_deposit"),
+    LOG_BANK_WITHDRAW("messages.logs.bank_withdraw"),
+    LOG_RANK_CHANGE("messages.logs.rank.change"),
+    LOG_HOME_SET("messages.logs.home.set"),
+    LOG_HOME_DELETE("messages.logs.home.delete"),
 
     // Messages d'alliance
     ALLIANCE_INVITE_SENT("messages.alliance.invite.sent"),
     ALLIANCE_INVITE_RECEIVED("messages.alliance.invite.received"),
     ALLIANCE_ACCEPTED("messages.alliance.accept"),
     ALLIANCE_REMOVED("messages.alliance.remove"),
+    ALLIANCE_REQUEST_RECEIVED("messages.alliance.request_received"),
+    ALLIANCE_ENDED("messages.alliance.ended"),
 
     // Messages d'erreur
     ERROR_NO_PERMISSION("messages.errors.no_permission"),
@@ -94,27 +103,35 @@ public enum Lang {
     ERROR_RANK_NOT_EMPTY("messages.errors.rank_not_empty"),
     ERROR_RANK_ALREADY_LAST("messages.guild.rank.error.already_last"),
     ERROR_RANK_ALREADY_FIRST("messages.guild.rank.error.already_first"),
-
-    PLAYER_JOINED_GUILD("messages.guild.player.joined"),
-    PLAYER_LEFT_GUILD("messages.guild.player.left"),
-    RANK_RENAMED("messages.guild.rank.renamed"),
-    RANK_DELETED("messages.guild.rank.deleted"),
-    RANK_MOVED_DOWN("messages.guild.rank.moved_down"),
-    RANK_MOVED_UP("messages.guild.rank.moved_up"),
     ERROR_RANK_TOO_HIGH("messages.errors.rank_too_high"),
+    ERROR_TARGET_RANK_TOO_HIGH("messages.errors.target_rank_too_high"),
     ERROR_NEED_POSITIVE_AMOUNT("messages.errors.need_positive_amount"),
-    BANK_DEPOSIT_SUCCESS("messages.bank.deposit.success"),
-    LOG_BANK_DEPOSIT("messages.logs.bank_deposit"),
-    BANK_WITHDRAW_SUCCESS("messages.bank.withdraw.success"),
-    LOG_BANK_WITHDRAW("messages.logs.bank_withdraw"),
     ERROR_CANNOT_SELF_ALLY("messages.errors.cannot_self_ally"),
     ERROR_ALLIANCE_INVITE_ALREADY_SENT("messages.errors.alliance_invite_already_sent"),
     ERROR_NOT_GUILD_OWNER("messages.errors.not_guild_owner"),
-    LOG_GUILD_DISBANDED("messages.logs.guild_disbanded"),
     ERROR_NOT_ALLIED("messages.errors.not_allied"),
     ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
-    ALLIANCE_ENDED("messages.alliance.ended"),
-    ERROR_TARGET_RANK_TOO_HIGH("messages.errors.target_rank_too_high"),;
+
+    // Messages de transfert
+    ERROR_TRANSFER_OWNER("messages.errors.transfer.error.owner"),
+    ERROR_TRANSFER_SELF("messages.errors.transfer.error.self"),
+    TRANSFER_SUCCESS("messages.errors.transfer.success"),
+
+    // Messages de kick
+    ERROR_KICK_SELF("messages.errors.kick.error.self"),
+    ERROR_KICK_RANK("messages.errors.kick.error.rank"),
+    KICK_SUCCESS("messages.errors.kick.success"),
+    KICK_TARGET("messages.errors.kick.target"),
+
+    // Messages de leave
+    ERROR_LEAVE_OWNER("messages.errors.leave.error.owner"),
+    LEAVE_SUCCESS("messages.errors.leave.success"),
+
+    // Messages de rang
+    RANK_RENAMED("messages.guild.rank.renamed"),
+    RANK_DELETED("messages.guild.rank.deleted"),
+    RANK_MOVED_UP("messages.guild.rank.moved_up"),
+    RANK_MOVED_DOWN("messages.guild.rank.moved_down");
 
     private final String key;
     private static YamlDocument messages;

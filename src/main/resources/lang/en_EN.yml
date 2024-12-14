@@ -44,6 +44,15 @@ messages:
     player:
         joined: "<green>%player% has joined the guild."
         left: "<red>%player% has left the guild."
+    rank:
+      renamed: "<green>Rank <gold>%oldName%</gold> has been renamed to <gold>%newName%"
+      deleted: "<green>Rank <gold>%rank%</gold> has been deleted"
+      moved_up: "<green>Rank <gold>%rank%</gold> has been moved up"
+      moved_down: "<green>Rank <gold>%rank%</gold> has been moved down"
+      error:
+        already_last: "<red>This rank is already the lowest"
+        already_first: "<red>This rank is already the highest"
+      change: "<gray>%player% has been %action% to %rank% by %by%"
 
   chat:
     enabled: "<green>Guild chat enabled"
@@ -63,10 +72,13 @@ messages:
 
   bank:
     balance: "<green>Guild balance: <white><bold>%amount%"
-    deposit: "<green>Deposited <gold>%amount%</gold> to guild bank"
-    withdraw: "<green>Withdrew <gold>%amount%</gold> from guild bank"
+    deposit:
+      success: "<green>Successfully deposited <gold>%amount%</gold>. New balance: <gold>%balance%"
+    withdraw:
+      success: "<green>Successfully withdrew <gold>%amount%</gold>. New balance: <gold>%balance%"
     insufficient_funds: "<red>Insufficient funds!"
     economy_disabled: "<red>Economy is currently disabled!"
+    player_insufficient_funds: "<red>You don't have enough money! Required: <gold>%amount%</gold>, Balance: <gold>%balance%"
 
   home:
     teleport: "<green>Teleported to guild home"
@@ -91,12 +103,22 @@ messages:
     entry: "<yellow>- <white>%log%"
     footer: "<gold><strikethrough>                                        "
     guild_created: "Guild created by %player%"
+    bank_deposit: "%player% deposited %amount%. New balance: %balance%"
+    bank_withdraw: "%player% withdrew %amount%. New balance: %balance%"
+    guild_disbanded: "Guild disbanded by %player%"
+    rank:
+      change: "%player% has been %action% to %rank% by %by%"
+    home:
+      set: "%player% has set the guild home location"
+      delete: "%player% has deleted the guild home"
   alliance:
     invite:
       sent: "<green>Alliance request sent to <gold>%guild%"
       received: "<gold>%guild%</gold> wants to form an alliance"
     accept: "<green>Alliance formed with <gold>%guild%"
     remove: "<yellow>Alliance with <gold>%guild%</gold> has been broken"
+    request_received: "<gold>%guild%</gold> wants to form an alliance"
+    ended: "<yellow>Alliance with <gold>%guild%</gold> has ended"
 
   errors:
     no_permission: "<red>You don't have permission to do this!"
@@ -110,3 +132,29 @@ messages:
     economy_disabled: "<red>Economy is currently disabled!"
     already_guild_owner: "<red>You are already the guild owner!"
     already_allied: "<red>You are already allied with this guild!"
+    rank_too_high: "<red>Your rank is too low to manage this rank"
+    target_rank_too_high: "<red>Your rank is too low to manage this player's rank"
+    rank_already_exists: "<red>A rank with this name already exists"
+    rank.name_length: "<red>Rank name must be between 2 and 24 characters"
+    rank_not_empty: "<red>Cannot delete a rank that has members"
+    need_positive_amount: "<red>Amount must be positive"
+    cannot_self_ally: "<red>You cannot ally with your own guild"
+    alliance_invite_already_sent: "<red>An alliance request has already been sent to this guild"
+    not_guild_owner: "<red>You must be the guild owner to do this"
+    not_allied: "<red>You are not allied with this guild"
+    player_not_invited: "<red>This player has not been invited"
+    transfer:
+      error:
+        owner: "<red>You must be the guild owner to transfer ownership"
+        self: "<red>You cannot transfer ownership to yourself"
+      success: "<gray><bold>%player% has transferred guild ownership to %target%"
+    kick:
+      error:
+        self: "<red>You cannot kick yourself!"
+        rank: "<red>You must be higher ranked than the person you want to kick"
+      success: "<red>%player% has been kicked from the guild"
+      target: "<red>You have been kicked from the guild"
+    leave:
+      error:
+        owner: "<red>You cannot leave the guild as owner. Please promote someone else to owner or disband the guild"
+      success: "<red>You have left your guild"

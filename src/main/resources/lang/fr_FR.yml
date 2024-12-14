@@ -45,6 +45,15 @@ messages:
     player:
       joined: "<green>%player% a rejoint la guilde."
       left: "<red>%player% a quitté la guilde."
+    rank:
+      renamed: "<green>Le rang <gold>%oldName%</gold> a été renommé en <gold>%newName%"
+      deleted: "<green>Le rang <gold>%rank%</gold> a été supprimé"
+      moved_up: "<green>Le rang <gold>%rank%</gold> a été déplacé vers le haut"
+      moved_down: "<green>Le rang <gold>%rank%</gold> a été déplacé vers le bas"
+      error:
+        already_last: "<red>Ce rang est déjà le plus bas"
+        already_first: "<red>Ce rang est déjà le plus haut"
+      change: "<gray>%player% a été %action% %rank% par %by%"
 
   chat:
     enabled: "<green>Chat de guilde activé"
@@ -68,6 +77,11 @@ messages:
     withdraw: "<green>Retrait de <gold>%amount%</gold> de la banque"
     insufficient_funds: "<red>Fonds insuffisants !"
     economy_disabled: "<red>L'économie est actuellement désactivée !"
+    deposit:
+      success: "<green>Dépôt de <gold>%amount%</gold> effectué. Nouveau solde : <gold>%balance%"
+    withdraw:
+      success: "<green>Retrait de <gold>%amount%</gold> effectué. Nouveau solde : <gold>%balance%"
+    player_insufficient_funds: "<red>Vous n'avez pas assez d'argent ! Requis : <gold>%amount%</gold>, Solde : <gold>%balance%"
 
   home:
     teleport: "<green>Téléportation à la résidence de guilde"
@@ -92,6 +106,11 @@ messages:
     entry: "<yellow>- <white>%log%"
     footer: "<gold><strikethrough>                                        "
     guild_created: "Création de la guilde par %player%"
+    bank_deposit: "%player% a déposé %amount%. Nouveau solde : %balance%"
+    bank_withdraw: "%player% a retiré %amount%. Nouveau solde : %balance%"
+    guild_disbanded: "Guilde dissoute par %player%"
+    rank:
+      change: "%player% a été %action% %rank% par %by%"
 
   alliance:
     invite:
@@ -99,6 +118,8 @@ messages:
       received: "<gold>%guild%</gold> souhaite former une alliance"
     accept: "<green>Alliance formée avec <gold>%guild%"
     remove: "<yellow>Alliance avec <gold>%guild%</gold> rompue"
+    request_received: "<gold>%guild%</gold> souhaite former une alliance"
+    ended: "<yellow>L'alliance avec <gold>%guild%</gold> est terminée"
 
   errors:
     no_permission: "<red>Vous n'avez pas la permission de faire cela !"
@@ -112,3 +133,32 @@ messages:
     economy_disabled: "<red>L'économie est actuellement désactivée !"
     already_guild_owner: "<red>Vous êtes déjà le propriétaire de la guilde !"
     already_allied: "<red>Vous êtes déjà allié avec cette guilde !"
+    rank_too_high: "<red>Votre rang est trop bas pour gérer ce rang"
+    target_rank_too_high: "<red>Votre rang est trop bas pour gérer le rang de ce joueur"
+    rank_already_exists: "<red>Un rang avec ce nom existe déjà"
+    rank.name_length: "<red>Le nom du rang doit faire entre 2 et 24 caractères"
+    rank_not_empty: "<red>Impossible de supprimer un rang qui a des membres"
+    need_positive_amount: "<red>Le montant doit être positif"
+    cannot_self_ally: "<red>Vous ne pouvez pas vous allier avec votre propre guilde"
+    alliance_invite_already_sent: "<red>Une demande d'alliance a déjà été envoyée à cette guilde"
+    not_guild_owner: "<red>Vous devez être le propriétaire de la guilde pour faire cela"
+    not_allied: "<red>Vous n'êtes pas allié avec cette guilde"
+    player_not_invited: "<red>Ce joueur n'a pas été invité"
+    transfer:
+      error:
+        owner: "<red>Il faut être le fondateur pour transférer la proprieté de la guilde"
+        self: "<red>Vous ne pouvez pas vous transférer la propriété"
+      success: "<gray><bold>%player% a transféré la proprieté de la guilde à %target%"
+    kick:
+      error:
+        self: "<red>Vous ne pouvez pas vous exclure vous même !"
+        rank: "<red>Vous devez être plus gradé que la personne que vous voulez exclure"
+      success: "<red>%player% a été exclu de la guilde"
+      target: "<red>Vous avez été exclu de la guilde"
+    leave:
+      error:
+        owner: "<red>Vous ne pouvez pas quitter la guilde en étant fondateur. Veuillez promouvoir quelqu'un fondateur ou dissoudre la guilde"
+      success: "<red>Vous avez quitté votre guilde"
+    home:
+      set: "%player% a redéfini la position de la résidence de la guilde"
+      delete: "%player% a supprimé la résidence de la guilde"
