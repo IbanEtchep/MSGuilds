@@ -173,7 +173,7 @@ public class GuildServiceImpl implements GuildService {
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
         if (guild.getOwnerUUID() == player.getUniqueId()) {
-            player.sendMessage("§cVous ne pouvez pas quitter la guilde en étant fondateur. Veuillez promouvoir quelqu'un fondateur ou dissoudre la guilde.");
+            player.sendMessage(Lang.ERROR_LEAVE_OWNER.component());
             return;
         }
 
@@ -442,7 +442,10 @@ public class GuildServiceImpl implements GuildService {
             "player", player.getName(),
             "target", guildPlayer.getName()
         ));
-        guildManager.addLog(guild, player.getName() + " a transféré la proprieté de la guilde à " + guildPlayer.getName() + ".");
+        guildManager.addLog(guild, Lang.TRANSFER_SUCCESS.toString(
+            "player", player.getName(),
+            "target", guildPlayer.getName()
+        ));
     }
 
 

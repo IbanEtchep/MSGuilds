@@ -86,32 +86,6 @@ public enum Lang {
     ALLIANCE_REQUEST_RECEIVED("messages.alliance.request_received"),
     ALLIANCE_ENDED("messages.alliance.ended"),
 
-    // Messages d'erreur
-    ERROR_NO_PERMISSION("messages.errors.no_permission"),
-    ERROR_NOT_GUILD_MEMBER("messages.errors.not_guild_member"),
-    ERROR_PLAYER_NOT_FOUND("messages.errors.player_not_found"),
-    ERROR_ALREADY_IN_GUILD("messages.errors.already_in_guild"),
-    ERROR_NOT_INVITED("messages.errors.not_invited"),
-    ERROR_INSUFFICIENT_RANK("messages.errors.insufficient_rank"),
-    ERROR_SPECIFY_GUILD("messages.errors.specify_guild"),
-    ERROR_PLAYER_NOT_IN_GUILD("messages.errors.player_not_in_guild"),
-    ERROR_ECONOMY_DISABLED("messages.errors.economy_disabled"),
-    ERROR_ALREADY_GUILD_OWNER("messages.errors.already_guild_owner"),
-    ERROR_ALREADY_ALLIED("messages.errors.already_allied"),
-    ERROR_RANK_ALREADY_EXISTS("messages.errors.rank_already_exists"),
-    ERROR_RANK_NAME_LENGTH("messages.errors.rank.name_length"),
-    ERROR_RANK_NOT_EMPTY("messages.errors.rank_not_empty"),
-    ERROR_RANK_ALREADY_LAST("messages.guild.rank.error.already_last"),
-    ERROR_RANK_ALREADY_FIRST("messages.guild.rank.error.already_first"),
-    ERROR_RANK_TOO_HIGH("messages.errors.rank_too_high"),
-    ERROR_TARGET_RANK_TOO_HIGH("messages.errors.target_rank_too_high"),
-    ERROR_NEED_POSITIVE_AMOUNT("messages.errors.need_positive_amount"),
-    ERROR_CANNOT_SELF_ALLY("messages.errors.cannot_self_ally"),
-    ERROR_ALLIANCE_INVITE_ALREADY_SENT("messages.errors.alliance_invite_already_sent"),
-    ERROR_NOT_GUILD_OWNER("messages.errors.not_guild_owner"),
-    ERROR_NOT_ALLIED("messages.errors.not_allied"),
-    ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
-
     // Messages de transfert
     ERROR_TRANSFER_OWNER("messages.guild.transfer.error.owner"),
     ERROR_TRANSFER_SELF("messages.guild.transfer.error.self"),
@@ -135,7 +109,33 @@ public enum Lang {
     RANK_RENAMED("messages.guild.rank.renamed"),
     RANK_DELETED("messages.guild.rank.deleted"),
     RANK_MOVED_UP("messages.guild.rank.moved_up"),
-    RANK_MOVED_DOWN("messages.guild.rank.moved_down");
+    RANK_MOVED_DOWN("messages.guild.rank.moved_down"),
+
+    // Messages d'erreur (à garder)
+    ERROR_NO_PERMISSION("messages.errors.no_permission"),
+    ERROR_NOT_GUILD_MEMBER("messages.errors.not_guild_member"),
+    ERROR_PLAYER_NOT_FOUND("messages.errors.player_not_found"),
+    ERROR_ALREADY_IN_GUILD("messages.errors.already_in_guild"),
+    ERROR_NOT_INVITED("messages.errors.not_invited"),
+    ERROR_INSUFFICIENT_RANK("messages.errors.insufficient_rank"),
+    ERROR_SPECIFY_GUILD("messages.errors.specify_guild"),
+    ERROR_PLAYER_NOT_IN_GUILD("messages.errors.player_not_in_guild"),
+    ERROR_ECONOMY_DISABLED("messages.errors.economy_disabled"),
+    ERROR_ALREADY_GUILD_OWNER("messages.errors.already_guild_owner"),
+    ERROR_ALREADY_ALLIED("messages.errors.already_allied"),
+    ERROR_RANK_ALREADY_EXISTS("messages.errors.rank_already_exists"),
+    ERROR_RANK_NAME_LENGTH("messages.errors.rank.name_length"),
+    ERROR_RANK_NOT_EMPTY("messages.errors.rank_not_empty"),
+    ERROR_RANK_ALREADY_LAST("messages.guild.rank.error.already_last"),
+    ERROR_RANK_ALREADY_FIRST("messages.guild.rank.error.already_first"),
+    ERROR_RANK_TOO_HIGH("messages.errors.rank_too_high"),
+    ERROR_TARGET_RANK_TOO_HIGH("messages.errors.target_rank_too_high"),
+    ERROR_NEED_POSITIVE_AMOUNT("messages.errors.need_positive_amount"),
+    ERROR_CANNOT_SELF_ALLY("messages.errors.cannot_self_ally"),
+    ERROR_ALLIANCE_INVITE_ALREADY_SENT("messages.errors.alliance_invite_already_sent"),
+    ERROR_NOT_GUILD_OWNER("messages.errors.not_guild_owner"),
+    ERROR_NOT_ALLIED("messages.errors.not_allied"),
+    ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited");
 
     private final String key;
     private static YamlDocument messages;
