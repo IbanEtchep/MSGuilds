@@ -3,6 +3,7 @@ package fr.iban.guilds.model;
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.common.teleport.SLocation;
 import fr.iban.guilds.enums.DefaultRank;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
@@ -63,10 +64,6 @@ public class Guild {
         return members.values().stream().filter(member -> member.getRank().equals(rank)).toList();
     }
 
-    public GuildPlayer getOwner() {
-        return members.get(owner);
-    }
-
     public GuildPlayer getMember(UUID uuid) {
         return members.get(uuid);
     }
@@ -95,15 +92,11 @@ public class Guild {
         this.home = home;
     }
 
-    public void sendMessageToOnlineMembers(String message, boolean raw) {
-        getMembers().values().forEach(member -> member.sendMessageIfOnline(message, raw));
+    public void sendMessageToOnlineMembers(Component message) {
+        getMembers().values().forEach(member -> member.sendMessageIfOnline(message));
     }
 
-    public void sendMessageToOnlineMembers(String message) {
-        sendMessageToOnlineMembers(message, false);
-    }
-
-    public void sendMessageToAllies(String message) {
+    public void sendMessageToAllies(Component message) {
         getAlliances().forEach(guild -> guild.sendMessageToOnlineMembers(message));
         sendMessageToOnlineMembers(message);
     }

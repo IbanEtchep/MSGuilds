@@ -344,6 +344,10 @@ public class SqlStorage {
                         UUID guildAId = UUID.fromString(rs.getString("guild_a_id"));
                         UUID guildBId = UUID.fromString(rs.getString("guild_b_id"));
 
+                        if(alliances.contains(guildAId) || alliances.contains(guildBId)) {
+                            continue;
+                        }
+
                         if (guildAId.equals(guild.getId())) {
                             alliances.add(guildBId);
                         } else {

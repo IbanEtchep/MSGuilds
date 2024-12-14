@@ -30,6 +30,7 @@ public enum Lang {
 
     // Messages de membres
     MEMBER_INVITED("messages.members.invite.sent"),
+    MEMBER_INVITE_RECEIVED("messages.members.invite.received"),
     MEMBER_INVITE_REVOKED("messages.members.invite.revoked"),
     MEMBER_JOINED("messages.members.join"),
     MEMBER_LEFT("messages.members.leave"),
@@ -72,9 +73,6 @@ public enum Lang {
     LOG_HOME_SET("messages.logs.home.set"),
     LOG_HOME_DELETE("messages.logs.home.delete"),
 
-    // Messages d'alliance
-    ALLIANCE_INVITE_SENT("messages.alliance.invite.sent"),
-    ALLIANCE_INVITE_RECEIVED("messages.alliance.invite.received"),
     ALLIANCE_ACCEPTED("messages.alliance.accept"),
     ALLIANCE_REMOVED("messages.alliance.remove"),
     ALLIANCE_REQUEST_RECEIVED("messages.alliance.request_received"),
@@ -96,6 +94,7 @@ public enum Lang {
     // Messages de leave
     ERROR_LEAVE_OWNER("messages.guild.leave.error.owner"),
     LEAVE_SUCCESS("messages.guild.leave.success"),
+    JOIN_SUCCESS("messages.guild.join.success"),
 
     // Messages de promotion/rétrogradation
     PROMOTE_SUCCESS("messages.guild.promote.success"),

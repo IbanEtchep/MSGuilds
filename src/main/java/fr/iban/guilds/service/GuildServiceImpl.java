@@ -129,10 +129,8 @@ public class GuildServiceImpl implements GuildService {
 
         if (disbandEvent.isCancelled()) return;
 
-        guild.getMembers().forEach((uuid, gp) -> {
-            gp.sendMessageIfOnline(Lang.GUILD_DISBANDED.toString());
-            guildManager.deletePlayer(gp);
-        });
+        guild.sendMessageToOnlineMembers(Lang.GUILD_DISBANDED.component());
+        guild.getMembers().forEach((uuid, gp) -> guildManager.deletePlayer(gp));
 
         guildManager.addLog(guild, Lang.LOG_GUILD_DISBANDED.toString("player", player.getName()));
         guildManager.deleteGuild(guild);
@@ -142,20 +140,17 @@ public class GuildServiceImpl implements GuildService {
     @Override
     public void joinGuild(Player player, Guild guild) {
         UUID uuid = player.getUniqueId();
-        if (guildManager.getGuildByPlayerId(uuid) != null) {
-            player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
-            return;
-        }
 
         if (!guild.getInvites().contains(uuid) && !player.hasPermission("guilds.bypass")) {
             player.sendMessage(Lang.ERROR_NOT_INVITED.component());
             return;
         }
 
+
         GuildPlayer guildPlayer = new GuildPlayer(uuid, guild, guild.getDefautRank(), ChatMode.PUBLIC);
-        guild.sendMessageToOnlineMembers(Lang.MEMBER_JOINED.toString("player", player.getName()));
+        player.sendMessage(Lang.JOIN_SUCCESS.component("guild", guild.getName()));
+        guild.sendMessageToOnlineMembers(Lang.MEMBER_JOINED.component("player", player.getName()));
         guildManager.addLog(guild, Lang.MEMBER_JOINED.toString("player", player.getName()));
-        player.sendMessage(Lang.MEMBER_JOINED.component("guild", guild.getName()));
         guild.getInvites().remove(uuid);
         guild.getMembers().put(uuid, guildPlayer);
         guildManager.savePlayer(guildPlayer);
@@ -172,7 +167,7 @@ public class GuildServiceImpl implements GuildService {
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
 
-        if (guild.getOwnerUUID() == player.getUniqueId()) {
+        if (guild.getOwnerUUID().equals(player.getUniqueId())) {
             player.sendMessage(Lang.ERROR_LEAVE_OWNER.component());
             return;
         }
@@ -181,7 +176,7 @@ public class GuildServiceImpl implements GuildService {
         guildManager.deletePlayer(guildPlayer);
         player.sendMessage(Lang.LEAVE_SUCCESS.component());
         guildManager.addLog(guild, Lang.MEMBER_LEFT.toString("player", player.getName()));
-        guild.sendMessageToOnlineMembers(Lang.MEMBER_LEFT.toString("player", player.getName()));
+        guild.sendMessageToOnlineMembers(Lang.MEMBER_LEFT.component("player", player.getName()));
     }
 
     @Override
@@ -215,7 +210,8 @@ public class GuildServiceImpl implements GuildService {
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,
                 new GuildRequestMessage(guild.getId(), target.getUniqueId()));
-        core.getPlayerManager().sendMessageRawIfOnline(target.getUniqueId(), Lang.ALLIANCE_REQUEST_RECEIVED.toString("guild", guild.getName()));
+        core.getPlayerManager().sendMessageIfOnline(target.getUniqueId(),
+            Lang.MEMBER_INVITE_RECEIVED.component("guild", guild.getName()));
         player.sendMessage(Lang.MEMBER_INVITED.component("player", target.getName()));
     }
 
@@ -323,8 +319,8 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guild.getMembers().remove(targetGuildPlayer.getUuid());
-        guild.sendMessageToOnlineMembers(Lang.KICK_SUCCESS.toString("player", target.getName()));
-        targetGuildPlayer.sendMessageIfOnline(Lang.KICK_TARGET.toString());
+        guild.sendMessageToOnlineMembers(Lang.KICK_SUCCESS.component("player", target.getName()));
+        targetGuildPlayer.sendMessageIfOnline(Lang.KICK_TARGET.component());
         guildManager.addLog(guild, Lang.KICK_SUCCESS.toString("player", target.getName()));
         guildManager.deletePlayer(targetGuildPlayer);
     }
@@ -365,7 +361,7 @@ public class GuildServiceImpl implements GuildService {
         targetPlayer.setRank(previousRank);
 
         guildManager.savePlayer(targetPlayer);
-        guild.sendMessageToOnlineMembers(Lang.DEMOTE_SUCCESS.toString(
+        guild.sendMessageToOnlineMembers(Lang.DEMOTE_SUCCESS.component(
             "player", target.getName(),
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
@@ -413,7 +409,7 @@ public class GuildServiceImpl implements GuildService {
         targetPlayer.setRank(nextRank);
 
         guildManager.savePlayer(targetPlayer);
-        guild.sendMessageToOnlineMembers(Lang.PROMOTE_SUCCESS.toString(
+        guild.sendMessageToOnlineMembers(Lang.PROMOTE_SUCCESS.component(
             "player", target.getName(),
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
@@ -434,8 +430,7 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
-        GuildPlayer guildOwner = guild.getOwner();
-        if ((guildOwner != null && !guildOwner.getUuid().equals(player.getUniqueId())) && !player.hasPermission("guilds.admin")) {
+        if ((!guild.getOwnerUUID().equals(player.getUniqueId())) && !player.hasPermission("guilds.admin")) {
             player.sendMessage(Lang.ERROR_TRANSFER_OWNER.component());
             return;
         }
@@ -454,7 +449,7 @@ public class GuildServiceImpl implements GuildService {
         guild.setOwnerUUID(target.getUniqueId());
 
         guildManager.saveGuild(guild);
-        guild.sendMessageToOnlineMembers(Lang.TRANSFER_SUCCESS.toString(
+        guild.sendMessageToOnlineMembers(Lang.TRANSFER_SUCCESS.component(
             "player", player.getName(),
             "target", guildPlayer.getName()
         ));

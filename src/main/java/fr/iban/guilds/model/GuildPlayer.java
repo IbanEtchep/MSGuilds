@@ -6,6 +6,7 @@ import fr.iban.guilds.enums.ChatMode;
 import fr.iban.guilds.enums.DefaultRank;
 import fr.iban.guilds.enums.GuildPermission;
 import fr.iban.guilds.model.dto.GuildPlayerDTO;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -74,22 +75,7 @@ public class GuildPlayer {
         return guild.getOwnerUUID().equals(uuid);
     }
 
-    public void sendMessageIfOnline(String message, boolean raw) {
-        Player player = Bukkit.getPlayer(uuid);
-        BukkitPlayerManager playerManager = CoreBukkitPlugin.getInstance().getPlayerManager();
-
-        if (!raw) {
-            if (player != null) {
-                player.sendMessage(message);
-            } else {
-                playerManager.sendMessageIfOnline(uuid, message);
-            }
-        } else {
-            playerManager.sendMessageRawIfOnline(uuid, message);
-        }
-    }
-
-    public void sendMessageIfOnline(String message) {
-        sendMessageIfOnline(message, false);
+    public void sendMessageIfOnline(Component message) {
+        CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(uuid, message);
     }
 }

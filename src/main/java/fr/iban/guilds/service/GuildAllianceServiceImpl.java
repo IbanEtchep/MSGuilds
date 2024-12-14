@@ -53,7 +53,7 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
 
         guild.getAllianceInvites().add(targetGuild.getId());
         plugin.getMessagingManager().sendMessage(GuildsPlugin.GUILD_ALLIANCE_REQUEST, new GuildRequestMessage(guild.getId(), targetGuild.getId()));
-        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_REQUEST_RECEIVED.toString("guild", guild.getName()));
+        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_REQUEST_RECEIVED.component("guild", guild.getName()));
         sender.sendMessage(Lang.ALLIANCE_REQUEST_SENT.component("guild", targetGuild.getName()));
     }
 
@@ -86,8 +86,8 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
         guild.getAllianceInvites().remove(targetGuild.getId());
         guild.getAlliances().add(targetGuild);
         targetGuild.getAlliances().add(guild);
-        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.toString("guild", targetGuild.getName()));
-        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.toString("guild", guild.getName()));
+        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.component("guild", targetGuild.getName()));
+        targetGuild.sendMessageToOnlineMembers(Lang.ALLIANCE_FORMED.component("guild", guild.getName()));
         guildManager.addLog(guild, "Alliance avec la guilde " + targetGuild.getName() + " acceptée.");
         guildManager.saveGuild(guild);
         guildManager.saveGuild(targetGuild);
@@ -116,8 +116,8 @@ public class GuildAllianceServiceImpl implements GuildAllianceService {
 
         guild.getAlliances().remove(target);
         target.getAlliances().remove(guild);
-        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.toString("guild", target.getName()));
-        target.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.toString("guild", guild.getName()));
+        guild.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.component("guild", target.getName()));
+        target.sendMessageToOnlineMembers(Lang.ALLIANCE_ENDED.component("guild", guild.getName()));
         guildManager.addLog(guild, Lang.ALLIANCE_ENDED.plainText("guild", target.getName()));
         guildManager.saveGuild(guild);
         guildManager.saveGuild(target);

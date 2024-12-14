@@ -78,6 +78,8 @@ public class GuildCMD {
             if(result){
                 guildService.disbandGuild(sender);
             }
+
+            sender.closeInventory();
         }).open();
     }
 

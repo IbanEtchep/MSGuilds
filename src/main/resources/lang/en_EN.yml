@@ -71,6 +71,8 @@ messages:
       error:
         owner: "<red>You cannot leave the guild as owner. Please promote someone else to owner or disband the guild"
       success: "<red>You have left your guild"
+    join:
+      success: "<green>Vous avez rejoint la guilde <dark_green>%guild%"
 
   chat:
     enabled: "<green>Guild chat enabled"
@@ -81,8 +83,9 @@ messages:
     invite:
       sent: "<green>Invited <gold>%player%</gold> to the guild"
       revoked: "<yellow>Revoked invitation for <gold>%player%"
-    join: "<green>Joined guild <gold>%guild%"
-    leave: "<yellow>Left guild <gold>%guild%"
+      received: "<green>You have been invited to join guild <dark_green>%guild%<green>. Type <white><bold><click:run_command:'/guild join %guild%'>/guild join %guild%</click></bold><hover:show_text:'<green>Click to accept'></hover><green> or click to accept."
+    join: "<green>%player% has joined the guild"
+    leave: "<yellow>%player% has left the guild"
 
   bank:
     balance: "<green>Guild balance: <white><bold>%amount%"
@@ -127,15 +130,12 @@ messages:
       delete: "%player% has deleted the guild home"
 
   alliance:
-    invite:
-      sent: "<green>Alliance request sent to <gold>%guild%"
-      received: "<gold>%guild%</gold> wants to form an alliance"
     accept: "<green>Alliance formed with <gold>%guild%"
     remove: "<yellow>Alliance with <gold>%guild%</gold> has been broken"
     request:
       sent: "<green>Alliance request sent to <gold>%guild%"
     formed: "<green>You are now allied with guild <gold>%guild%"
-    request_received: "<gold>%guild%</gold> wants to form an alliance"
+    request_received: "<green>Guild <dark_green>%guild%<green> wants to form an alliance. Type <white><bold><click:run_command:'/guild alliance accept %guild%'>/guild alliance accept %guild%</click></bold><hover:show_text:'<green>Click to accept'></hover><green> or click to accept."
     ended: "<yellow>Alliance with <gold>%guild%</gold> has ended"
 
   errors:

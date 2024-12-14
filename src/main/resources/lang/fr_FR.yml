@@ -71,6 +71,8 @@ messages:
       error:
         owner: "<red>Vous ne pouvez pas quitter la guilde en étant fondateur. Veuillez promouvoir quelqu'un fondateur ou dissoudre la guilde"
       success: "<red>Vous avez quitté votre guilde"
+    join:
+      success: "<green>Vous avez rejoint la guilde <dark_green>%guild%"
 
   chat:
     enabled: "<green>Chat de guilde activé"
@@ -81,8 +83,9 @@ messages:
     invite:
       sent: "<green>Invitation envoyée à <gold>%player%"
       revoked: "<yellow>Invitation révoquée pour <gold>%player%"
-    join: "<green>Vous avez rejoint la guilde <gold>%guild%"
-    leave: "<yellow>Vous avez quitté la guilde <gold>%guild%"
+      received: "<green>Vous avez reçu une invitation à rejoindre la guilde <dark_green>%guild%<green>. Tapez <white><bold><click:run_command:'/guild join %guild%'>/guild join %guild%</click></bold><hover:show_text:'<green>Clic pour accepter'></hover><green> ou cliquez pour accepter."
+    join: "<green>%player% a rejoint la guilde"
+    leave: "<yellow>%player% a quitté la guilde"
 
   bank:
     balance: "<green>Solde de la guilde : <white><bold>%amount%"
@@ -127,15 +130,12 @@ messages:
       delete: "%player% a supprimé la résidence de la guilde"
 
   alliance:
-    invite:
-      sent: "<green>Demande d'alliance envoyée à <gold>%guild%"
-      received: "<gold>%guild%</gold> souhaite former une alliance"
     accept: "<green>Alliance formée avec <gold>%guild%"
     remove: "<yellow>Alliance avec <gold>%guild%</gold> rompue"
     request:
       sent: "<green>Demande d'alliance envoyée à <gold>%guild%"
     formed: "<green>Vous êtes désormais allié avec la guilde <gold>%guild%"
-    request_received: "<gold>%guild%</gold> souhaite former une alliance"
+    request_received: "<green>La guilde <dark_green>%guild%<green> souhaite former une alliance. Tapez <white><bold><click:run_command:'/guild alliance accept %guild%'>/guild alliance accept %guild%</click></bold><hover:show_text:'<green>Clic pour accepter'></hover><green> ou cliquez pour accepter."
     ended: "<yellow>L'alliance avec <gold>%guild%</gold> est terminée"
 
   errors:
