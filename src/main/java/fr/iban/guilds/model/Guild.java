@@ -2,9 +2,7 @@ package fr.iban.guilds.model;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.common.teleport.SLocation;
-import fr.iban.guilds.enums.DefaultRank;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -20,12 +18,10 @@ public class Guild {
     private long exp;
     private SLocation home;
     private final Date createdAt;
-    private @Nullable List<String> cachedLogs;
+
     private final List<UUID> invites = new ArrayList<>();
     private final List<UUID> allianceInvites = new ArrayList<>();
-
     private final List<Guild> alliances = new ArrayList<>();
-
     private List<GuildRank> ranks = new ArrayList<>();
 
     public Guild(UUID id, String name, double balance, long exp, Date createdAt) {
@@ -118,18 +114,6 @@ public class Guild {
         return getOnlinePlayers().size();
     }
 
-    public @Nullable List<String> getCachedLogs() {
-        return cachedLogs;
-    }
-
-    public void setCachedLogs(@Nullable List<String> cachedLogs) {
-        this.cachedLogs = cachedLogs;
-    }
-
-    public void invalidateLogs() {
-        this.cachedLogs = null;
-    }
-
     public List<UUID> getAllianceInvites() {
         return allianceInvites;
     }
@@ -144,6 +128,10 @@ public class Guild {
 
     public void setOwnerUUID(UUID owner) {
         this.owner = owner;
+    }
+
+    public GuildPlayer getOwner() {
+        return getMember(owner);
     }
 
     public List<GuildRank> getRanks() {
@@ -205,6 +193,18 @@ public class Guild {
     }
 
     public GuildRank getDefautRank() {
-        return ranks.get(0);
+        return ranks.getFirst();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Guild guild = (Guild) o;
+        return Objects.equals(id, guild.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

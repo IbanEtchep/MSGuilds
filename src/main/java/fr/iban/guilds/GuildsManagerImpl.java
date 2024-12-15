@@ -110,18 +110,12 @@ public class GuildsManagerImpl implements GuildManager {
 
     @Override
     public void addLog(Guild guild, String log) {
-        guild.invalidateLogs();
         plugin.runAsyncQueued(() -> storage.addLog(guild, log));
     }
 
     @Override
     public CompletableFuture<List<String>> getLogsAsync(Guild guild) {
-        return CompletableFuture.supplyAsync(() -> {
-            if (guild.getCachedLogs() == null) {
-                guild.setCachedLogs(storage.getLogs(guild.getId()));
-            }
-            return guild.getCachedLogs();
-        });
+        return CompletableFuture.supplyAsync(() -> storage.getLogs(guild.getId()));
     }
 
     /*

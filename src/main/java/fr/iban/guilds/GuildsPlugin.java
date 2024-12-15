@@ -30,6 +30,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
+import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.exception.CommandErrorException;
@@ -77,7 +78,12 @@ public final class GuildsPlugin extends JavaPlugin {
         this.guildAllianceService = new GuildAllianceServiceImpl(this);
         this.guildRankService = new GuildRankServiceImpl(this);
 
-        getServer().getServicesManager().register(GuildManager.class, guildsManager, this, ServicePriority.Normal);
+        ServicesManager servicesManager = getServer().getServicesManager();
+        servicesManager.register(GuildManager.class, guildsManager, this, ServicePriority.Normal);
+        servicesManager.register(GuildService.class, guildService, this, ServicePriority.Normal);
+        servicesManager.register(GuildBankService.class, guildBankService, this, ServicePriority.Normal);
+        servicesManager.register(GuildAllianceService.class, guildAllianceService, this, ServicePriority.Normal);
+        servicesManager.register(GuildRankService.class, guildRankService, this, ServicePriority.Normal);
 
         registerCommands();
         setupEconomy();
