@@ -42,7 +42,7 @@ messages:
     already_exists: "<red>Une guilde avec ce nom existe déjà !"
     name:
       no_space: "<red>Le nom de la guilde ne doit pas contenir d'espace"
-      too_long: "<red>Le nom de la guilde ne doit pas dépasser 30 caractères"
+      invalid_length: "<red>Le nom de la guilde doit être entre 2 et 30 caractères"
     rank:
       renamed: "<green>Le rang <gold>%oldName%</gold> a été renommé en <gold>%newName%"
       deleted: "<green>Le rang <gold>%rank%</gold> a été supprimé"
@@ -142,6 +142,7 @@ messages:
     no_permission: "<red>Vous n'avez pas la permission de faire cela !"
     not_guild_member: "<red>Vous n'êtes pas membre d'une guilde !"
     player_not_found: "<red>Joueur introuvable !"
+    self_already_in_guild: "<red>Vous êtes déjà dans une guilde !"
     already_in_guild: "<red>Ce joueur est déjà dans une guilde !"
     not_invited: "<red>Vous n'avez pas été invité à rejoindre cette guilde !"
     insufficient_rank: "<red>Votre rang ne vous permet pas de faire cela !"
@@ -150,8 +151,7 @@ messages:
     economy_disabled: "<red>L'économie est actuellement désactivée !"
     already_guild_owner: "<red>Vous êtes déjà le propriétaire de la guilde !"
     already_allied: "<red>Vous êtes déjà allié avec cette guilde !"
-    rank:
-      name_length: "<red>Le nom du rang doit faire entre 2 et 24 caractères"
+    rank_name_length: "<red>Le nom du rang doit faire entre 2 et 24 caractères"
     rank_already_exists: "<red>Un rang avec ce nom existe déjà"
     rank_not_empty: "<red>Impossible de supprimer un rang qui a des membres"
     rank_too_high: "<red>Votre rang est trop bas pour gérer ce rang"

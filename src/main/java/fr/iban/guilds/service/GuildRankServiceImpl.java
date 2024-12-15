@@ -7,6 +7,8 @@ import fr.iban.guilds.enums.GuildPermission;
 import fr.iban.guilds.lang.Lang;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildRank;
+import fr.iban.guilds.util.ChatUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
 public class GuildRankServiceImpl implements GuildRankService {
@@ -93,8 +95,10 @@ public class GuildRankServiceImpl implements GuildRankService {
     }
 
     @Override
-    public void renameRank(Player player, GuildRank rank, String newName) {
+    public void renameRank(Player player, GuildRank rank, Component newName) {
         Guild guild = guildManager.getGuildByPlayer(player);
+        String plainTextName = ChatUtils.toPlainText(newName);
+        String miniMessageName = ChatUtils.toMiniMessage(newName);
 
         if (guild == null) {
             player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
@@ -106,12 +110,12 @@ public class GuildRankServiceImpl implements GuildRankService {
             return;
         }
 
-        if(guild.getRank(newName) != null) {
+        if(guild.getRank(plainTextName) != null) {
             player.sendMessage(Lang.ERROR_RANK_ALREADY_EXISTS.component());
             return;
         }
 
-        if(newName.length() > 24 || newName.length() < 2) {
+        if(plainTextName.length() > 24 || plainTextName.length() < 2) {
             player.sendMessage(Lang.ERROR_RANK_NAME_LENGTH.component());
             return;
         }
@@ -119,10 +123,10 @@ public class GuildRankServiceImpl implements GuildRankService {
 
         player.sendMessage(Lang.RANK_RENAMED.component(
                 "oldName", rank.getName(),
-                "newName", newName
+                "newName", miniMessageName
         ));
 
-        rank.setName(newName);
+        rank.setName(miniMessageName);
         guildManager.saveGuild(guild);
     }
 

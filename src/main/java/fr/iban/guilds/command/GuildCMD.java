@@ -306,7 +306,7 @@ public class GuildCMD {
         }
 
         if(!guildPlayer.isGranted(GuildPermission.MANAGE_RANKS)) {
-            sender.sendMessage(Lang.ERROR_NO_PERMISSION.component());
+            sender.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
             return;
         }
 

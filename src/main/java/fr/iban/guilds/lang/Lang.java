@@ -22,7 +22,7 @@ public enum Lang {
     GUILD_DISBAND_CONFIRM("messages.guild.disband.confirm"),
     GUILD_ALREADY_EXISTS("messages.guild.already_exists"),
     GUILD_NAME_NO_SPACE("messages.guild.name.no_space"),
-    GUILD_NAME_TOO_LONG("messages.guild.name.too_long"),
+    GUILD_NAME_INVALID_LENGTH("messages.guild.name.invalid_length"),
     GUILD_RANK_CHANGE("messages.guild.rank.change"),
 
     // Messages de chat
@@ -111,6 +111,7 @@ public enum Lang {
     ERROR_NOT_GUILD_MEMBER("messages.errors.not_guild_member"),
     ERROR_PLAYER_NOT_FOUND("messages.errors.player_not_found"),
     ERROR_ALREADY_IN_GUILD("messages.errors.already_in_guild"),
+    ERROR_SELF_ALREADY_IN_GUILD("messages.errors.self_already_in_guild"),
     ERROR_NOT_INVITED("messages.errors.not_invited"),
     ERROR_INSUFFICIENT_RANK("messages.errors.insufficient_rank"),
     ERROR_SPECIFY_GUILD("messages.errors.specify_guild"),
@@ -119,7 +120,7 @@ public enum Lang {
     ERROR_ALREADY_GUILD_OWNER("messages.errors.already_guild_owner"),
     ERROR_ALREADY_ALLIED("messages.errors.already_allied"),
     ERROR_RANK_ALREADY_EXISTS("messages.errors.rank_already_exists"),
-    ERROR_RANK_NAME_LENGTH("messages.errors.rank.name_length"),
+    ERROR_RANK_NAME_LENGTH("messages.errors.rank_name_length"),
     ERROR_RANK_NOT_EMPTY("messages.errors.rank_not_empty"),
     ERROR_RANK_ALREADY_LAST("messages.guild.rank.error.already_last"),
     ERROR_RANK_ALREADY_FIRST("messages.guild.rank.error.already_first"),

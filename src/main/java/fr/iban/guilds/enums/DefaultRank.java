@@ -5,11 +5,11 @@ import java.util.Set;
 
 public enum DefaultRank {
 
-    MEMBER("&aMembre", Set.of()),
-    MODERATOR("&9&lModérateur", Set.of(
+    MEMBER("<color:#27ae60>Membre", Set.of()),
+    MODERATOR("<color:#2980b9>Modérateur", Set.of(
             GuildPermission.KICK_MEMBER)
     ),
-    ADMIN("&c&lAdministrateur", Set.of(
+    ADMIN("<color:#e74c3c>Administrateur", Set.of(
             GuildPermission.KICK_MEMBER,
             GuildPermission.MANAGE_LANDS,
             GuildPermission.PROMOTE_MEMBER,
@@ -18,7 +18,7 @@ public enum DefaultRank {
             GuildPermission.BANK_WITHDRAW,
             GuildPermission.MANAGE_ALLIANCES
     )),
-    OWNER("&4&lFondateur", Set.of(
+    OWNER("<color:#c0392b>Fondateur", Set.of(
             GuildPermission.KICK_MEMBER,
             GuildPermission.MANAGE_LANDS,
             GuildPermission.PROMOTE_MEMBER,

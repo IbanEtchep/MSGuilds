@@ -1,6 +1,8 @@
 package fr.iban.guilds.model;
 
 import fr.iban.guilds.enums.GuildPermission;
+import fr.iban.guilds.util.ChatUtils;
+import net.kyori.adventure.text.Component;
 
 import java.util.Set;
 import java.util.UUID;
@@ -22,6 +24,10 @@ public class GuildRank {
 
     public String getName() {
         return name;
+    }
+
+    public Component getDisplayName() {
+        return ChatUtils.parseAll(name);
     }
 
     public void setName(String name) {

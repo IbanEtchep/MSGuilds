@@ -24,6 +24,7 @@ public class GuildRankRenameButton extends AbstractGuildMenuButton {
 
         player.closeInventory();
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
+        player.sendMessage("§aEntrez le nouveau nom du rang, ou tapez \"annuler\".");
         core.getTextInputs().put(player.getUniqueId(), text -> {
             plugin.getGuildRankService().renameRank(player, guildMenuData.getCurrentRank(), text);
             plugin.getMenuManager().openInventory(player, inventory.getMenuInventory());

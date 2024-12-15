@@ -179,7 +179,7 @@ public class SqlStorage {
 
     public List<GuildPlayerDTO> getGuildPlayerDTOs(UUID guildId) {
         String sql = "SELECT player_uuid, gm.guild_id, chat_mode, gr.label  FROM guilds_members gm " +
-                "JOIN guilds_ranks gr ON gr.id = gm.rank_id;";
+                "JOIN guilds_ranks gr ON gr.id = gm.rank_id WHERE gm.guild_id=?;";
         List<GuildPlayerDTO> guildPlayers = new ArrayList<>();
 
         try (Connection connection = ds.getConnection()) {
@@ -201,7 +201,7 @@ public class SqlStorage {
 
     public GuildPlayerDTO getGuildPlayerDto(UUID uuid) {
         String sql = "SELECT player_uuid, gm.guild_id, chat_mode, gr.label  FROM guilds_members gm " +
-                "JOIN guilds_ranks gr ON gr.id = gm.rank_id";
+                "JOIN guilds_ranks gr ON gr.id = gm.rank_id WHERE player_uuid=?;";
 
         try (Connection connection = ds.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(sql)) {

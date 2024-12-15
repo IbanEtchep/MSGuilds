@@ -16,7 +16,6 @@ import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.util.GuildRequestMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -44,13 +43,13 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
-        if (name.length() > 30) {
-            player.sendMessage(Lang.GUILD_NAME_TOO_LONG.component());
+        if (name.length() > 30 || name.length() < 3) {
+            player.sendMessage(Lang.GUILD_NAME_INVALID_LENGTH.component());
             return;
         }
 
         if (guildManager.getGuildPlayer(player.getUniqueId()) != null) {
-            player.sendMessage(Lang.ERROR_ALREADY_IN_GUILD.component());
+            player.sendMessage(Lang.ERROR_SELF_ALREADY_IN_GUILD.component());
             return;
         }
 
@@ -237,7 +236,7 @@ public class GuildServiceImpl implements GuildService {
         guild.getInvites().remove(target.getUniqueId());
         player.sendMessage(Lang.MEMBER_INVITE_REVOKED.component("player", target.getName()));
         CoreBukkitPlugin.getInstance().getPlayerManager().sendMessageIfOnline(target.getUniqueId(), 
-            Lang.ERROR_NOT_INVITED.toString("guild", guild.getName()));
+            Lang.ERROR_NOT_INVITED.component("guild", guild.getName()));
     }
 
     @Override
@@ -313,7 +312,7 @@ public class GuildServiceImpl implements GuildService {
         }
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
-        if (guildPlayer.getRank().getOrder() > targetGuildPlayer.getRank().getOrder()) {
+        if (guildPlayer.getRank().getOrder() <= targetGuildPlayer.getRank().getOrder()) {
             player.sendMessage(Lang.ERROR_KICK_RANK.component());
             return;
         }

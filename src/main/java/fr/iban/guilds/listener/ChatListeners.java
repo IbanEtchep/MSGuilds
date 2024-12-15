@@ -33,7 +33,8 @@ public class ChatListeners implements Listener {
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !message.startsWith("!")) {
             Component guildMessage = Component.text("[Guilde] ", NamedTextColor.GRAY)
-                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(guildPlayer.getRank().getDisplayName())
+                    .append(Component.text(" "))
                     .append(Component.text(player.getName()))
                     .append(Component.text(" ➤ ", NamedTextColor.WHITE))
                     .append(e.message());
@@ -46,7 +47,8 @@ public class ChatListeners implements Listener {
         if (guildPlayer.getChatMode() == ChatMode.PUBLIC && message.startsWith("!")) {
             String msg = message.substring(1);
             Component guildMessage = Component.text("[Guilde] ", NamedTextColor.GRAY)
-                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(guildPlayer.getRank().getDisplayName())
+                    .append(Component.text(" "))
                     .append(Component.text(player.getName()))
                     .append(Component.text(" ➤ ", NamedTextColor.WHITE))
                     .append(Component.text(msg));
@@ -58,7 +60,8 @@ public class ChatListeners implements Listener {
 
         if (guildPlayer.getChatMode() == ChatMode.ALLY && !message.startsWith("!")) {
             Component allyMessage = Component.text("[Alliance] ", NamedTextColor.GRAY)
-                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(guildPlayer.getRank().getDisplayName())
+                    .append(Component.text(" "))
                     .append(Component.text(player.getName()))
                     .append(Component.text(" ➤ ", NamedTextColor.WHITE))
                     .append(e.message());

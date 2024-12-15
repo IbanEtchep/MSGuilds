@@ -42,7 +42,7 @@ messages:
     already_exists: "<red>A guild with this name already exists!"
     name:
       no_space: "<red>Guild name cannot contain spaces"
-      too_long: "<red>Guild name cannot exceed 30 characters"
+      invalid_length: "<red>Guild name must be between 2 and 30 characters"
     rank:
       renamed: "<green>Rank <gold>%oldName%</gold> has been renamed to <gold>%newName%"
       deleted: "<green>Rank <gold>%rank%</gold> has been deleted"
@@ -142,6 +142,7 @@ messages:
     no_permission: "<red>You don't have permission to do this!"
     not_guild_member: "<red>You are not a member of a guild!"
     player_not_found: "<red>Player not found!"
+    self_already_in_guild: "<red>You are already in a guild!"
     already_in_guild: "<red>This player is already in a guild!"
     not_invited: "<red>You haven't been invited to this guild!"
     insufficient_rank: "<red>Your rank is too low to do this!"
@@ -150,8 +151,7 @@ messages:
     economy_disabled: "<red>Economy is currently disabled!"
     already_guild_owner: "<red>You are already the guild owner!"
     already_allied: "<red>You are already allied with this guild!"
-    rank:
-      name_length: "<red>Rank name must be between 2 and 24 characters"
+    rank_name_length: "<red>Rank name must be between 2 and 24 characters"
     rank_already_exists: "<red>A rank with this name already exists"
     rank_not_empty: "<red>Cannot delete a rank that has members"
     rank_too_high: "<red>Your rank is too low to manage this rank"
