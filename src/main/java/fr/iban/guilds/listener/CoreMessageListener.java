@@ -39,32 +39,32 @@ public class CoreMessageListener implements Listener {
 
     private void consumeAddInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.getSenderID());
+        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.senderID());
         if (guild != null) {
-            if (!guild.getInvites().contains(requestMessage.getTargetID())) {
-                guild.getInvites().add(requestMessage.getTargetID());
+            if (!guild.getInvites().contains(requestMessage.targetID())) {
+                guild.getInvites().add(requestMessage.targetID());
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> guild.getInvites().remove(requestMessage.getTargetID()), 2400L);
+                        () -> guild.getInvites().remove(requestMessage.targetID()), 2400L);
             }
         }
     }
 
     private void consumeRevokeInviteMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.getSenderID());
+        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.senderID());
         if (guild != null) {
-            guild.getInvites().remove(requestMessage.getTargetID());
+            guild.getInvites().remove(requestMessage.targetID());
         }
     }
 
     private void consumeAllianceRequestMessage(Message message) {
         GuildRequestMessage requestMessage = gson.fromJson(message.getMessage(), GuildRequestMessage.class);
-        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.getSenderID());
+        Guild guild = plugin.getGuildManager().getGuildById(requestMessage.senderID());
         if (guild != null) {
-            if (!guild.getAllianceInvites().contains(requestMessage.getTargetID())) {
-                guild.getAllianceInvites().add(requestMessage.getTargetID());
+            if (!guild.getAllianceInvites().contains(requestMessage.targetID())) {
+                guild.getAllianceInvites().add(requestMessage.targetID());
                 Bukkit.getScheduler().runTaskLater(plugin,
-                        () -> guild.getAllianceInvites().remove(requestMessage.getTargetID()), 2400L);
+                        () -> guild.getAllianceInvites().remove(requestMessage.targetID()), 2400L);
             }
         }
     }
