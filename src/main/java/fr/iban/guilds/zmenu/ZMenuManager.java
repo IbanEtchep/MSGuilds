@@ -3,9 +3,7 @@ package fr.iban.guilds.zmenu;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildRank;
-import fr.iban.guilds.zmenu.button.GuildPermissionPaginatedButton;
-import fr.iban.guilds.zmenu.button.GuildRankPaginatedButton;
-import fr.iban.guilds.zmenu.button.GuildRankRenameButton;
+import fr.iban.guilds.zmenu.button.*;
 import fr.iban.guilds.zmenu.data.GuildMenuData;
 import fr.iban.guilds.zmenu.loader.ToggleableButtonLoader;
 import fr.maxlego08.menu.api.ButtonManager;
@@ -70,8 +68,10 @@ public class ZMenuManager implements Listener {
 
     private void registerButtons() {
         buttonManager.register(new NoneLoader(plugin, GuildRankPaginatedButton.class, "guild_rank_pagination"));
+        buttonManager.register(new NoneLoader(plugin, GuildMemberPaginatedButton.class, "guild_member_pagination"));
         buttonManager.register(new ToggleableButtonLoader(plugin, GuildPermissionPaginatedButton.class, "guild_rank_permission_pagination"));
         buttonManager.register(new NoneLoader(plugin, GuildRankRenameButton.class, "guild_rank_rename"));
+        buttonManager.register(new NoneLoader(plugin, GuildRankAddButton.class, "guild_rank_add"));
     }
 
     private void loadInventories() {

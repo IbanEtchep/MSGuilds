@@ -21,7 +21,7 @@ import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.ServiceListeners;
 import fr.iban.guilds.manager.GuildsManagerImpl;
 import fr.iban.guilds.model.Guild;
-import fr.iban.guilds.placeholderapi.GuildsPlaceholdersExpansion;
+import fr.iban.guilds.placeholderapi.GuildsPlaceholderExpansion;
 import fr.iban.guilds.service.GuildAllianceServiceImpl;
 import fr.iban.guilds.service.GuildBankServiceImpl;
 import fr.iban.guilds.service.GuildRankServiceImpl;
@@ -61,7 +61,7 @@ public final class GuildsPlugin extends JavaPlugin {
     private FoliaLib foliaLib;
 
     private ZMenuManager zMenuManager;
-    private GuildsPlaceholdersExpansion placeholdersExpansion;
+    private GuildsPlaceholderExpansion placeholdersExpansion;
     private LangManager langManager;
     private YamlDocument config;
     private GuildService guildService;
@@ -105,7 +105,7 @@ public final class GuildsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(zMenuManager, this);
 
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
-            placeholdersExpansion = new GuildsPlaceholdersExpansion(this);
+            placeholdersExpansion = new GuildsPlaceholderExpansion(this);
             placeholdersExpansion.register();
         }
     }

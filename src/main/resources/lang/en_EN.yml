@@ -46,6 +46,7 @@ messages:
     rank:
       renamed: "<green>Rank <gold>%oldName%</gold> has been renamed to <gold>%newName%"
       deleted: "<green>Rank <gold>%rank%</gold> has been deleted"
+      created: "<green>Rank <gold>%rank%</gold> has been created"
       moved_up: "<green>Rank <gold>%rank%</gold> has been moved up"
       moved_down: "<green>Rank <gold>%rank%</gold> has been moved down"
       error:

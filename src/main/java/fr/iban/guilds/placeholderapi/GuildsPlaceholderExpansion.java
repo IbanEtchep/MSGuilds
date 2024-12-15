@@ -8,11 +8,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class GuildsPlaceholdersExpansion extends PlaceholderExpansion {
+public class GuildsPlaceholderExpansion extends PlaceholderExpansion {
 
     private final GuildsPlugin plugin;
 
-    public GuildsPlaceholdersExpansion(GuildsPlugin plugin) {
+    public GuildsPlaceholderExpansion(GuildsPlugin plugin) {
         this.plugin = plugin;
     }
 

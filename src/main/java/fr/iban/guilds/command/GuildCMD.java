@@ -206,7 +206,7 @@ public class GuildCMD {
             List<GuildPlayer> rankMembers = guild.getMembersByRank(rank);
             if (!rankMembers.isEmpty()) {
                 actor.reply(Lang.INFO_RANK_FORMAT.component(
-                        "rank", ChatUtils.legacyToMiniMessage(rank.getName()),
+                        "rank", rank.getName(),
                         "players", String.join(", ", rankMembers.stream().map(GuildPlayer::getName).toList())
                 ));
             }

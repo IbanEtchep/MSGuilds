@@ -27,7 +27,7 @@ public class GuildRank {
     }
 
     public Component getDisplayName() {
-        return ChatUtils.parseAll(name);
+        return ChatUtils.parseMiniMessage(name);
     }
 
     public void setName(String name) {

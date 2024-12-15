@@ -16,7 +16,9 @@ public enum DefaultRank {
             GuildPermission.DEMOTE_MEMBER,
             GuildPermission.MANAGE_HOME,
             GuildPermission.BANK_WITHDRAW,
-            GuildPermission.MANAGE_ALLIANCES
+            GuildPermission.MANAGE_ALLIANCES,
+            GuildPermission.MANAGE_RANKS,
+            GuildPermission.INVITE_MEMBER
     )),
     OWNER("<color:#c0392b>Fondateur", Set.of(
             GuildPermission.KICK_MEMBER,
@@ -25,7 +27,9 @@ public enum DefaultRank {
             GuildPermission.DEMOTE_MEMBER,
             GuildPermission.MANAGE_HOME,
             GuildPermission.BANK_WITHDRAW,
-            GuildPermission.MANAGE_ALLIANCES
+            GuildPermission.MANAGE_ALLIANCES,
+            GuildPermission.MANAGE_RANKS,
+            GuildPermission.INVITE_MEMBER
     ));
 
     private final String name;

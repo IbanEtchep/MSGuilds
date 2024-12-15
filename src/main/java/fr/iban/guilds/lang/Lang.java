@@ -133,7 +133,9 @@ public enum Lang {
     ERROR_NOT_ALLIED("messages.errors.not_allied"),
     ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
     ERROR_ALREADY_LOWEST_RANK("messages.errors.already_lowest_rank"),
-    ERROR_ALREADY_HIGHEST_RANK("messages.errors.already_highest_rank");
+    ERROR_ALREADY_HIGHEST_RANK("messages.errors.already_highest_rank"),
+    RANK_CREATED("messages.guild.rank.created"),
+    ;
 
 
     private final String key;

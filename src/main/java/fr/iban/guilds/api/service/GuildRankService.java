@@ -9,4 +9,5 @@ public interface GuildRankService {
     void rankMoveDown(Player player, GuildRank rank);
     void deleteRank(Player player, GuildRank rank);
     void renameRank(Player player, GuildRank rank, Component newName);
+    void createRank(Player player, Component  name);
 }

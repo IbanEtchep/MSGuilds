@@ -11,6 +11,10 @@ import fr.iban.guilds.util.ChatUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public class GuildRankServiceImpl implements GuildRankService {
 
     private final GuildsPlugin plugin;
@@ -35,7 +39,7 @@ public class GuildRankServiceImpl implements GuildRankService {
             return;
         }
 
-        if(rank.getOrder() == 0) {
+        if(rank.getOrder() == guild.getRanks().size() - 1) {
             player.sendMessage(Lang.ERROR_RANK_ALREADY_FIRST.component());
             return;
         }
@@ -59,7 +63,7 @@ public class GuildRankServiceImpl implements GuildRankService {
             return;
         }
 
-        if(rank.getOrder() == guild.getRanks().size() - 1) {
+        if(rank.getOrder() == 0) {
             player.sendMessage(Lang.ERROR_RANK_ALREADY_LAST.component());
             return;
         }
@@ -128,6 +132,38 @@ public class GuildRankServiceImpl implements GuildRankService {
 
         rank.setName(miniMessageName);
         guildManager.saveGuild(guild);
+    }
+
+    @Override
+    public void createRank(Player player, Component name) {
+        Guild guild = guildManager.getGuildByPlayer(player);
+        String plainTextName = ChatUtils.toPlainText(name);
+        String miniMessageName = ChatUtils.toMiniMessage(name);
+
+        if (guild == null) {
+            player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
+            return;
+        }
+
+        if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.MANAGE_RANKS)) {
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
+            return;
+        }
+
+        if(guild.getRank(plainTextName) != null) {
+            player.sendMessage(Lang.ERROR_RANK_ALREADY_EXISTS.component());
+            return;
+        }
+
+        if(plainTextName.length() > 24 || plainTextName.length() < 2) {
+            player.sendMessage(Lang.ERROR_RANK_NAME_LENGTH.component());
+            return;
+        }
+
+        GuildRank rank = new GuildRank(UUID.randomUUID(), miniMessageName, guild.getRanks().size(), new HashSet<>());
+        guild.addRank(rank);
+        guildManager.saveGuild(guild);
+        player.sendMessage(Lang.RANK_CREATED.component("rank", rank.getName()));
     }
 
 }

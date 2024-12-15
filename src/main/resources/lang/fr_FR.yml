@@ -46,6 +46,7 @@ messages:
     rank:
       renamed: "<green>Le rang <gold>%oldName%</gold> a été renommé en <gold>%newName%"
       deleted: "<green>Le rang <gold>%rank%</gold> a été supprimé"
+      created: "<green>Le rang <gold>%rank%</gold> a été créé"
       moved_up: "<green>Le rang <gold>%rank%</gold> a été déplacé vers le haut"
       moved_down: "<green>Le rang <gold>%rank%</gold> a été déplacé vers le bas"
       error:

@@ -24,8 +24,16 @@ items:
       material: PAINTING
       name: "%name%"
       lore:
-        - "&b[Click droit] &fpour gérer les permissions"
-        - "&b[Click gauche] &fpour supprimer le grade"
+        - "&b[Click gauche] &fpour gérer les permissions"
+        - "&b[Click droit] &fpour supprimer le grade"
         - ""
         - "&b[Shift + Click gauche] &fpour déplacer vers le bas"
         - "&b[Shift + Click droit] &fpour déplacer vers le haut"
+  add_rank:
+    isPermanent: true
+    type: GUILD_RANK_ADD
+    slot: 53
+    item:
+      material: PLAYER_HEAD
+      url: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2VkZDIwYmU5MzUyMDk0OWU2Y2U3ODlkYzRmNDNlZmFlYjI4YzcxN2VlNmJmY2JiZTAyNzgwMTQyZjcxNiJ9fX0="
+      name: "&2&lAjouter un rang"
