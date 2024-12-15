@@ -1,5 +1,5 @@
 name: MSGuilds
-version: '${project.version}'
+version: ${project_version}
 main: fr.iban.guilds.GuildsPlugin
 api-version: 1.21
 authors: [ Iban ]
