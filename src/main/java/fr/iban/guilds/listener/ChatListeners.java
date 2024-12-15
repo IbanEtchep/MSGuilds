@@ -1,13 +1,16 @@
 package fr.iban.guilds.listener;
 
-import fr.iban.guilds.Guild;
-import fr.iban.guilds.GuildPlayer;
+import fr.iban.guilds.model.Guild;
+import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.enums.ChatMode;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class ChatListeners implements Listener {
 
@@ -18,39 +21,56 @@ public class ChatListeners implements Listener {
     }
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent e) {
+    public void onChat(AsyncChatEvent e) {
         Player player = e.getPlayer();
-        Guild guild = plugin.getGuildsManager().getGuildByPlayer(player);
+        Guild guild = plugin.getGuildManager().getGuildByPlayer(player);
         if (guild == null) {
             return;
         }
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
+        String message = PlainTextComponentSerializer.plainText().serialize(e.message());
 
-        if (guildPlayer.getChatMode() == ChatMode.GUILD && !e.getMessage().startsWith("!")) {
-            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + e.getMessage());
-            plugin.getLogger().info("Chat (" + player.getName() + ") : " + e.getMessage());
+        if (guildPlayer.getChatMode() == ChatMode.GUILD && !message.startsWith("!")) {
+            Component guildMessage = Component.text("[Guilde] ", NamedTextColor.GRAY)
+                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(Component.text(player.getName()))
+                    .append(Component.text(" ➤ ", NamedTextColor.WHITE))
+                    .append(e.message());
+
+            guild.sendMessageToOnlineMembers(guildMessage);
+            plugin.getLogger().info("Chat (" + player.getName() + ") : " + message);
             e.setCancelled(true);
         }
 
-        if (guildPlayer.getChatMode() == ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
-            String msg = e.getMessage().replaceFirst("!", "");
-            guild.sendMessageToOnlineMembers("§7[Guilde] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + msg);
-            plugin.getLogger().info("§7[Guilde] Chat (" + player.getName() + ") : " + msg);
+        if (guildPlayer.getChatMode() == ChatMode.PUBLIC && message.startsWith("!")) {
+            String msg = message.substring(1);
+            Component guildMessage = Component.text("[Guilde] ", NamedTextColor.GRAY)
+                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(Component.text(player.getName()))
+                    .append(Component.text(" ➤ ", NamedTextColor.WHITE))
+                    .append(Component.text(msg));
+
+            guild.sendMessageToOnlineMembers(guildMessage);
+            plugin.getLogger().info("[Guilde] Chat (" + player.getName() + ") : " + msg);
             e.setCancelled(true);
         }
 
-        if (guildPlayer.getChatMode() == ChatMode.ALLY && !e.getMessage().startsWith("!")) {
-            String msg = e.getMessage();
-            guild.sendMessageToAllies("§7[Alliance] " + guildPlayer.getRank().getColor() + player.getName() + " §f➤ " + msg);
-            plugin.getLogger().info("[Alliance] Chat (" + player.getName() + ") : " + msg);
+        if (guildPlayer.getChatMode() == ChatMode.ALLY && !message.startsWith("!")) {
+            Component allyMessage = Component.text("[Alliance] ", NamedTextColor.GRAY)
+                    .append(Component.text(guildPlayer.getRank().getName()))
+                    .append(Component.text(player.getName()))
+                    .append(Component.text(" ➤ ", NamedTextColor.WHITE))
+                    .append(e.message());
+
+            guild.sendMessageToAllies(allyMessage);
+            plugin.getLogger().info("[Alliance] Chat (" + player.getName() + ") : " + message);
             e.setCancelled(true);
         }
 
-        if (guildPlayer.getChatMode() != ChatMode.PUBLIC && e.getMessage().startsWith("!")) {
-            String msg = e.getMessage().replaceFirst("!", "");
-            e.setMessage(msg);
+        if (guildPlayer.getChatMode() != ChatMode.PUBLIC && message.startsWith("!")) {
+            String msg = message.substring(1);
+            e.message(Component.text(msg));
         }
     }
-
 }

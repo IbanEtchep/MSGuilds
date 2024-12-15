@@ -1,0 +1,31 @@
+name: "&5Grades de guilde"
+size: 54
+items:
+  decoration:
+    isPermanent: true
+    item:
+      material: WHITE_STAINED_GLASS_PANE
+      name: "&e"
+    slots:
+      - 0-9
+      - 17-18
+      - 26-27
+      - 35-36
+      - 44-53
+  ranks:
+    isPermanent: true
+    type: GUILD_RANK_PAGINATION
+    slots:
+      - 10-16
+      - 19-25
+      - 28-34
+      - 37-43
+    item:
+      material: PAINTING
+      name: "%name%"
+      lore:
+        - "&b[Click droit] &fpour gérer les permissions"
+        - "&b[Click gauche] &fpour supprimer le grade"
+        - ""
+        - "&b[Shift + Click gauche] &fpour déplacer vers le bas"
+        - "&b[Shift + Click droit] &fpour déplacer vers le haut"

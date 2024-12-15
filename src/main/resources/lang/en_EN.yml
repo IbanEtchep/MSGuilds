@@ -1,0 +1,166 @@
+messages:
+  help:
+    header: "<dark_gray><bold>Guild Help Menu"
+    no_guild: |
+      <gold>/guild create <gray>→ Create a guild
+      <gold>/guild join <name> <gray>→ Accept a guild invitation
+      <gray>More commands will be shown when you join a guild
+    member: |
+      <gold>/guild info <gray>→ Guild information
+      <gold>/guild chat <gray>→ Toggle guild chat
+      <gold>/guild logs <gray>→ View guild logs
+      
+      <gold>/guild bank <gray>→ Check guild balance
+      <gold>/guild bank deposit <amount> <gray>→ Deposit money
+      <gold>/guild bank withdraw <amount> <gray>→ Withdraw money
+      
+      <gold>/guild lands <gray>→ Manage guild territories
+      <gold>/guild kick <gray>→ Kick a lower rank member
+      <gold>/guild promote <gray>→ Promote a member
+      <gold>/guild demote <gray>→ Demote a member
+      
+      <gold>/guild home <gray>→ Teleport to guild home
+      <gold>/guild sethome <gray>→ Set guild home
+      <gold>/guild delhome <gray>→ Remove guild home
+      
+      <gold>/guild alliance invite <name> <gray>→ Propose an alliance
+      <gold>/guild alliance accept <name> <gray>→ Accept an alliance
+      <gold>/guild alliance remove <name> <gray>→ Break an alliance
+      
+      <gold>/guild leave <gray>→ Leave your guild
+      <gold>/guild transfer <player> <gray>→ Transfer guild ownership
+      <gold>/guild disband <gray>→ Dissolve your guild
+
+  reload: "<green>Guilds plugin reloaded successfully"
+
+  guild:
+    created: "<green>Guild successfully created!"
+    deleted: "<red>Guild has been deleted!"
+    disbanded: "<red>The guild has been disbanded!"
+    disband:
+      confirm: "<red>Are you sure you want to disband the guild?"
+    already_exists: "<red>A guild with this name already exists!"
+    name:
+      no_space: "<red>Guild name cannot contain spaces"
+      too_long: "<red>Guild name cannot exceed 30 characters"
+    rank:
+      renamed: "<green>Rank <gold>%oldName%</gold> has been renamed to <gold>%newName%"
+      deleted: "<green>Rank <gold>%rank%</gold> has been deleted"
+      moved_up: "<green>Rank <gold>%rank%</gold> has been moved up"
+      moved_down: "<green>Rank <gold>%rank%</gold> has been moved down"
+      error:
+        already_last: "<red>This rank is already the lowest"
+        already_first: "<red>This rank is already the highest"
+      change: "<gray>%player% has been %action% to %rank% by %by%"
+    promote:
+      success: "<gray>%player% has been promoted to %rank% by %by%"
+    demote:
+      success: "<gray>%player% has been demoted to %rank% by %by%"
+    transfer:
+      error:
+        owner: "<red>You must be the guild owner to transfer ownership"
+        self: "<red>You cannot transfer ownership to yourself"
+      success: "<gray><bold>%player% has transferred guild ownership to %target%"
+    kick:
+      error:
+        self: "<red>You cannot kick yourself!"
+        rank: "<red>You must be higher ranked than the person you want to kick"
+      success: "<red>%player% has been kicked from the guild"
+      target: "<red>You have been kicked from the guild"
+    leave:
+      error:
+        owner: "<red>You cannot leave the guild as owner. Please promote someone else to owner or disband the guild"
+      success: "<red>You have left your guild"
+    join:
+      success: "<green>Vous avez rejoint la guilde <dark_green>%guild%"
+
+  chat:
+    enabled: "<green>Guild chat enabled"
+    disabled: "<green>Guild chat disabled"
+    mode_changed: "<green>Chat mode set to: <gold>%mode%"
+
+  members:
+    invite:
+      sent: "<green>Invited <gold>%player%</gold> to the guild"
+      revoked: "<yellow>Revoked invitation for <gold>%player%"
+      received: "<green>You have been invited to join guild <dark_green>%guild%<green>. Type <white><bold><click:run_command:'/guild join %guild%'>/guild join %guild%</click></bold><hover:show_text:'<green>Click to accept'></hover><green> or click to accept."
+    join: "<green>%player% has joined the guild"
+    leave: "<yellow>%player% has left the guild"
+
+  bank:
+    balance: "<green>Guild balance: <white><bold>%amount%"
+    deposit:
+      success: "<green>Successfully deposited <gold>%amount%</gold>. New balance: <gold>%balance%"
+    withdraw:
+      success: "<green>Successfully withdrew <gold>%amount%</gold>. New balance: <gold>%balance%"
+    insufficient_funds: "<red>Insufficient funds!"
+    economy_disabled: "<red>Economy is currently disabled!"
+    player_insufficient_funds: "<red>You don't have enough money! Required: <gold>%amount%</gold>, Balance: <gold>%balance%"
+
+  home:
+    teleport: "<green>Teleported to guild home"
+    set: "<green>Guild home set"
+    delete: "<green>Guild home removed"
+    not_set: "<red>Guild home is not set"
+
+  info:
+    header: "<dark_gray><bold>Information about <gold><bold>%guild%"
+    created: "<dark_gray>Created on %date%"
+    rank_format: "%rank%: <white>%players%"
+    alliances: "<gold><bold>Alliances: <white>%alliances%"
+
+  list:
+    header: "<gold><bold>Online Guilds List (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    format: "<white><bold>%guild% <yellow>- <white>%online%/%total% online"
+    footer: "<gold><strikethrough>                                        "
+    invalid_page: "<red>Invalid page. Maximum: %maxpage%"
+
+  logs:
+    header: "<gold><bold>Guild Logs (<white>%page%<gold>/<white>%maxpage%<gold>)"
+    entry: "<yellow>- <white>%log%"
+    footer: "<gold><strikethrough>                                        "
+    guild_created: "Guild created by %player%"
+    bank_deposit: "%player% deposited %amount%. New balance: %balance%"
+    bank_withdraw: "%player% withdrew %amount%. New balance: %balance%"
+    guild_disbanded: "Guild disbanded by %player%"
+    rank:
+      change: "%player% has been %action% to %rank% by %by%"
+    home:
+      set: "%player% has set the guild home location"
+      delete: "%player% has deleted the guild home"
+
+  alliance:
+    accept: "<green>Alliance formed with <gold>%guild%"
+    remove: "<yellow>Alliance with <gold>%guild%</gold> has been broken"
+    request:
+      sent: "<green>Alliance request sent to <gold>%guild%"
+    formed: "<green>You are now allied with guild <gold>%guild%"
+    request_received: "<green>Guild <dark_green>%guild%<green> wants to form an alliance. Type <white><bold><click:run_command:'/guild alliance accept %guild%'>/guild alliance accept %guild%</click></bold><hover:show_text:'<green>Click to accept'></hover><green> or click to accept."
+    ended: "<yellow>Alliance with <gold>%guild%</gold> has ended"
+
+  errors:
+    no_permission: "<red>You don't have permission to do this!"
+    not_guild_member: "<red>You are not a member of a guild!"
+    player_not_found: "<red>Player not found!"
+    already_in_guild: "<red>This player is already in a guild!"
+    not_invited: "<red>You haven't been invited to this guild!"
+    insufficient_rank: "<red>Your rank is too low to do this!"
+    specify_guild: "<red>Please specify a guild name"
+    player_not_in_guild: "<red>This player is not in your guild!"
+    economy_disabled: "<red>Economy is currently disabled!"
+    already_guild_owner: "<red>You are already the guild owner!"
+    already_allied: "<red>You are already allied with this guild!"
+    rank:
+      name_length: "<red>Rank name must be between 2 and 24 characters"
+    rank_already_exists: "<red>A rank with this name already exists"
+    rank_not_empty: "<red>Cannot delete a rank that has members"
+    rank_too_high: "<red>Your rank is too low to manage this rank"
+    target_rank_too_high: "<red>Your rank is too low to manage this player's rank"
+    need_positive_amount: "<red>Amount must be positive"
+    cannot_self_ally: "<red>You cannot ally with your own guild"
+    alliance_invite_already_sent: "<red>An alliance request has already been sent to this guild"
+    not_guild_owner: "<red>You must be the guild owner to do this"
+    not_allied: "<red>You are not allied with this guild"
+    player_not_invited: "<red>This player has not been invited"
+    already_lowest_rank: "<red>Player is already the lowest rank"
+    already_highest_rank: "<red>Player is already the highest rank"
