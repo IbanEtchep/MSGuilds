@@ -40,12 +40,14 @@ dependencies {
     compileOnly(libs.com.github.maxlego08.zmenu.api)
 
     implementation(libs.dev.dejvokep.boosted.yaml)
+    implementation(libs.folialib)
 }
 
 tasks.shadowJar {
     archiveClassifier.set("")
 
     relocate("dev.dejvokep.boostedyaml", "fr.iban.guilds.libs.boostedyaml")
+    relocate("com.tcoded.folialib", "fr.iban.guilds.libs.folialib")
 }
 
 publishing {

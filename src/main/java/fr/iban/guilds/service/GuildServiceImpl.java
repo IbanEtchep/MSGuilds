@@ -204,8 +204,8 @@ public class GuildServiceImpl implements GuildService {
         }
 
         guild.getInvites().add(target.getUniqueId());
-        Bukkit.getScheduler().runTaskLater(plugin,
-                () -> guild.getInvites().remove(target.getUniqueId()), 2400L);
+
+        plugin.getScheduler().runLater(() -> guild.getInvites().remove(target.getUniqueId()), 2400L);
 
         CoreBukkitPlugin core = CoreBukkitPlugin.getInstance();
         core.getMessagingManager().sendMessage(GuildsPlugin.GUILD_INVITE_ADD,

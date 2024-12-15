@@ -1,5 +1,7 @@
 package fr.iban.guilds;
 
+import com.tcoded.folialib.FoliaLib;
+import com.tcoded.folialib.impl.PlatformScheduler;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
@@ -45,6 +47,7 @@ public final class GuildsPlugin extends JavaPlugin {
 
     private static GuildsPlugin instance;
     private GuildManager guildsManager;
+
     public static final String GUILD_SYNC_CHANNEL = "GuildSyncChannel";
     public static final String GUILD_PLAYER_SYNC_CHANNEL = "GuildPlayerSyncChannel";
     public static final String GUILD_INVITE_ADD = "AddGuildInviteChannel";
@@ -52,7 +55,9 @@ public final class GuildsPlugin extends JavaPlugin {
     public static final String GUILD_ALLIANCE_REQUEST = "GuildAllianceRequestChannel";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
     private Economy econ = null;
+    private FoliaLib foliaLib;
 
     private ZMenuManager zMenuManager;
     private GuildsPlaceholdersExpansion placeholdersExpansion;
@@ -66,6 +71,7 @@ public final class GuildsPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        foliaLib = new FoliaLib(this);
 
         loadConfig();
 
@@ -214,5 +220,9 @@ public final class GuildsPlugin extends JavaPlugin {
 
     public MessagingManager getMessagingManager() {
         return CoreBukkitPlugin.getInstance().getMessagingManager();
+    }
+
+    public PlatformScheduler getScheduler() {
+        return foliaLib.getScheduler();
     }
 }

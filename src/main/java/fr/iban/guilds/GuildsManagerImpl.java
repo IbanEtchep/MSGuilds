@@ -131,42 +131,46 @@ public class GuildsManagerImpl implements GuildManager {
 
     @Override
     public void reloadGuildFromDB(UUID guildId) {
-        Guild oldGuild = guilds.get(guildId);
-        Guild newGuild = storage.getGuild(guildId);
+        plugin.runAsyncQueued(() -> {
+            Guild oldGuild = guilds.get(guildId);
+            Guild newGuild = storage.getGuild(guildId);
 
-        if (oldGuild != null && newGuild == null) {
-            //Suppression d'une guilde
-            guilds.remove(guildId);
-        } else {
-            //Ajout ou maj à jour de la guilde
-            guilds.put(guildId, newGuild);
-            for (GuildPlayerDTO guildPlayerDTO : storage.getGuildPlayerDTOs(guildId)) {
-                loadGuildPlayerFromDTO(guildPlayerDTO);
-            }
+            if (oldGuild != null && newGuild == null) {
+                //Suppression d'une guilde
+                guilds.remove(guildId);
+            } else {
+                //Ajout ou maj à jour de la guilde
+                guilds.put(guildId, newGuild);
+                for (GuildPlayerDTO guildPlayerDTO : storage.getGuildPlayerDTOs(guildId)) {
+                    loadGuildPlayerFromDTO(guildPlayerDTO);
+                }
 
-            for (UUID uuid : storage.getAlliances(newGuild)) {
-                Guild alliance = guilds.get(uuid);
-                if (alliance != null) {
-                    newGuild.getAlliances().add(alliance);
+                for (UUID uuid : storage.getAlliances(newGuild)) {
+                    Guild alliance = guilds.get(uuid);
+                    if (alliance != null) {
+                        newGuild.getAlliances().add(alliance);
+                    }
                 }
             }
-        }
+        });
     }
 
     @Override
     public void reloadGuildPlayerFromDB(UUID uuid) {
-        GuildPlayer oldGuildPlayer = getGuildPlayer(uuid);
+        plugin.runAsyncQueued(() -> {
+            GuildPlayer oldGuildPlayer = getGuildPlayer(uuid);
 
-        GuildPlayerDTO updatedGuildPlayerDTO = storage.getGuildPlayerDto(uuid);
-        if (oldGuildPlayer != null && updatedGuildPlayerDTO == null) {
-            //Le joueur a quitté la guilde
-            Guild guild = getGuildById(oldGuildPlayer.getGuild().getId());
-            if (guild != null) {
-                guild.getMembers().remove(uuid);
+            GuildPlayerDTO updatedGuildPlayerDTO = storage.getGuildPlayerDto(uuid);
+            if (oldGuildPlayer != null && updatedGuildPlayerDTO == null) {
+                //Le joueur a quitté la guilde
+                Guild guild = getGuildById(oldGuildPlayer.getGuild().getId());
+                if (guild != null) {
+                    guild.getMembers().remove(uuid);
+                }
+            } else {
+                loadGuildPlayerFromDTO(updatedGuildPlayerDTO);
             }
-        } else {
-            loadGuildPlayerFromDTO(updatedGuildPlayerDTO);
-        }
+        });
     }
 
     /*

@@ -27,10 +27,8 @@ public class CoreMessageListener implements Listener {
         String channel = message.getChannel();
 
         switch (channel) {
-            case GuildsPlugin.GUILD_SYNC_CHANNEL -> Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                    plugin.getGuildManager().reloadGuildFromDB(UUID.fromString(message.getMessage())));
-            case GuildsPlugin.GUILD_PLAYER_SYNC_CHANNEL -> Bukkit.getScheduler().runTaskAsynchronously(plugin, () ->
-                    plugin.getGuildManager().reloadGuildPlayerFromDB(UUID.fromString(message.getMessage())));
+            case GuildsPlugin.GUILD_SYNC_CHANNEL -> plugin.getGuildManager().reloadGuildFromDB(UUID.fromString(message.getMessage()));
+            case GuildsPlugin.GUILD_PLAYER_SYNC_CHANNEL -> plugin.getGuildManager().reloadGuildPlayerFromDB(UUID.fromString(message.getMessage()));
             case GuildsPlugin.GUILD_INVITE_ADD -> consumeAddInviteMessage(message);
             case GuildsPlugin.GUILD_INVITE_REVOKE -> consumeRevokeInviteMessage(message);
             case GuildsPlugin.GUILD_ALLIANCE_REQUEST -> consumeAllianceRequestMessage(message);
@@ -43,7 +41,7 @@ public class CoreMessageListener implements Listener {
         if (guild != null) {
             if (!guild.getInvites().contains(requestMessage.targetID())) {
                 guild.getInvites().add(requestMessage.targetID());
-                Bukkit.getScheduler().runTaskLater(plugin,
+                plugin.getScheduler().runLater(
                         () -> guild.getInvites().remove(requestMessage.targetID()), 2400L);
             }
         }
@@ -63,7 +61,7 @@ public class CoreMessageListener implements Listener {
         if (guild != null) {
             if (!guild.getAllianceInvites().contains(requestMessage.targetID())) {
                 guild.getAllianceInvites().add(requestMessage.targetID());
-                Bukkit.getScheduler().runTaskLater(plugin,
+                plugin.getScheduler().runLater(
                         () -> guild.getAllianceInvites().remove(requestMessage.targetID()), 2400L);
             }
         }
