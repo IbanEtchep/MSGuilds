@@ -1,5 +1,5 @@
 group = "fr.iban.guilds"
-version = "1.0.0"
+version = "1.0.1"
 description = "MSGuilds"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
