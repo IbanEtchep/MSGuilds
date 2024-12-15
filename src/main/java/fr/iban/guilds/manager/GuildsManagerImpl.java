@@ -1,6 +1,7 @@
-package fr.iban.guilds;
+package fr.iban.guilds.manager;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
+import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.api.GuildManager;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildPlayer;

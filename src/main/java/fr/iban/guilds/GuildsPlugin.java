@@ -19,6 +19,7 @@ import fr.iban.guilds.lang.LangManager;
 import fr.iban.guilds.listener.ChatListeners;
 import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.ServiceListeners;
+import fr.iban.guilds.manager.GuildsManagerImpl;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.placeholderapi.GuildsPlaceholdersExpansion;
 import fr.iban.guilds.service.GuildAllianceServiceImpl;

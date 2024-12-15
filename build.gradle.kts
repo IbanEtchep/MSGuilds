@@ -1,5 +1,5 @@
 group = "fr.iban.guilds"
-version = "1.0.1"
+version = "1.0.2"
 description = "MSGuilds"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.io.papermc.paper.paper.api)
-    compileOnly(libs.com.github.ibanetchep.servercore.core.paper)
+    compileOnly(libs.corePaper)
     compileOnly(libs.com.github.milkbowl.vaultapi)
     compileOnly(libs.me.clip.placeholderapi)
     compileOnly(libs.com.github.maxlego08.zmenu.api)
