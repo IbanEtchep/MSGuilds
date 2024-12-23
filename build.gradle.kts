@@ -1,4 +1,4 @@
-group = "fr.iban.guilds"
+group = "com.github.IbanEtchep"
 version = "1.1.0"
 description = "MSGuilds"
 java.sourceCompatibility = JavaVersion.VERSION_21
