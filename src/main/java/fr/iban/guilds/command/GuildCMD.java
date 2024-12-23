@@ -41,6 +41,11 @@ public class GuildCMD {
         this.guildService = plugin.getGuildService();
     }
 
+    @CommandPlaceholder
+    public void guild(Player player) {
+        help(player);
+    }
+
     @Subcommand("reload")
     @CommandPermission("guilds.reload")
     public void reload(BukkitCommandActor sender) {
@@ -50,7 +55,6 @@ public class GuildCMD {
     }
 
     @Subcommand("help")
-    @CommandPlaceholder
     public void help(Player player) {
         GuildPlayer guildPlayer = guildsManager.getGuildPlayer(player.getUniqueId());
 
