@@ -109,6 +109,7 @@ public enum Lang {
     // Messages d'erreur (à garder)
     ERROR_NO_PERMISSION("messages.errors.no_permission"),
     ERROR_NOT_GUILD_MEMBER("messages.errors.not_guild_member"),
+    ERROR_GUILD_NOT_FOUND("messages.errors.guild_not_found"),
     ERROR_PLAYER_NOT_FOUND("messages.errors.player_not_found"),
     ERROR_ALREADY_IN_GUILD("messages.errors.already_in_guild"),
     ERROR_SELF_ALREADY_IN_GUILD("messages.errors.self_already_in_guild"),

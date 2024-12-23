@@ -58,7 +58,7 @@ public class GuildMemberPaginatedButton extends AbstractToggleButton implements 
 
         ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta sm = (SkullMeta) head.getItemMeta();
-        PlayerProfile profile = Bukkit.createProfile(guildPlayer.getUuid());
+        PlayerProfile profile = Bukkit.createProfile(guildPlayer.getUniqueId());
         profile.complete(true);
         sm.setPlayerProfile(profile);
         head.setItemMeta(sm);

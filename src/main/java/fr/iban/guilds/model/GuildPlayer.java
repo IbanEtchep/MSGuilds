@@ -1,11 +1,8 @@
 package fr.iban.guilds.model;
 
 import fr.iban.bukkitcore.CoreBukkitPlugin;
-import fr.iban.bukkitcore.manager.BukkitPlayerManager;
 import fr.iban.guilds.enums.ChatMode;
-import fr.iban.guilds.enums.DefaultRank;
 import fr.iban.guilds.enums.GuildPermission;
-import fr.iban.guilds.model.dto.GuildPlayerDTO;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -27,7 +24,7 @@ public class GuildPlayer {
         this.chatMode = chatMode;
     }
 
-    public UUID getUuid() {
+    public UUID getUniqueId() {
         return uuid;
     }
 
@@ -57,7 +54,7 @@ public class GuildPlayer {
 
     public String getName() {
         if (name == null) {
-            name = CoreBukkitPlugin.getInstance().getPlayerManager().getName(uuid);
+            name = CoreBukkitPlugin.getInstance().getPlayerManager().getOfflinePlayer(uuid).getName();
         }
         return name;
     }

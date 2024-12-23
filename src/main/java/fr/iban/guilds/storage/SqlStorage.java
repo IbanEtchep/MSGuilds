@@ -261,7 +261,7 @@ public class SqlStorage {
         try (Connection connection = ds.getConnection()) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(updateStatement)) {
                 preparedStatement.setString(1, guildPlayer.getGuild().getId().toString());
-                preparedStatement.setString(2, guildPlayer.getUuid().toString());
+                preparedStatement.setString(2, guildPlayer.getUniqueId().toString());
                 preparedStatement.setString(3, guildPlayer.getRank().getId().toString());
                 preparedStatement.setString(4, guildPlayer.getChatMode().toString());
                 preparedStatement.executeUpdate();

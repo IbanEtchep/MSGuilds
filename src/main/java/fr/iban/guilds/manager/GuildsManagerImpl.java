@@ -83,7 +83,7 @@ public class GuildsManagerImpl implements GuildManager {
     public void savePlayer(GuildPlayer guildPlayer) {
         plugin.runAsyncQueued(() -> {
             storage.saveGuildPlayer(guildPlayer);
-            syncGuildPlayer(guildPlayer.getUuid());
+            syncGuildPlayer(guildPlayer.getUniqueId());
         });
     }
 
@@ -101,7 +101,7 @@ public class GuildsManagerImpl implements GuildManager {
 
     @Override
     public void deletePlayer(GuildPlayer guildPlayer) {
-        UUID uuid = guildPlayer.getUuid();
+        UUID uuid = guildPlayer.getUniqueId();
 
         plugin.runAsyncQueued(() -> {
             storage.deleteGuildPlayer(uuid);

@@ -1,7 +1,8 @@
 package fr.iban.guilds.command;
 
-import fr.iban.bukkitcore.commands.annotation.Online;
 import fr.iban.bukkitcore.menu.ConfirmMenu;
+import fr.iban.common.model.MSPlayer;
+import fr.iban.common.model.MSPlayerProfile;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.api.GuildManager;
 import fr.iban.guilds.api.service.GuildAllianceService;
@@ -16,10 +17,9 @@ import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.util.ChatUtils;
 import net.kyori.adventure.text.Component;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.*;
-import revxrsal.commands.bukkit.BukkitCommandActor;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 
 import java.util.List;
@@ -50,18 +50,18 @@ public class GuildCMD {
     }
 
     @Subcommand("help")
-    @DefaultFor({"guild", "g"})
-    public void help(BukkitCommandActor actor) {
-        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(actor.getUniqueId());
+    @CommandPlaceholder
+    public void help(Player player) {
+        GuildPlayer guildPlayer = guildsManager.getGuildPlayer(player.getUniqueId());
 
-        actor.reply(Component.empty());
-        actor.reply(Lang.HELP_HEADER.component());
-        actor.reply(Component.empty());
+        player.sendMessage(Component.empty());
+        player.sendMessage(Lang.HELP_HEADER.component());
+        player.sendMessage(Component.empty());
 
         if (guildPlayer == null) {
-            actor.reply(Lang.HELP_NO_GUILD.component());
+            player.sendMessage(Lang.HELP_NO_GUILD.component());
         } else {
-            actor.reply(Lang.HELP_MEMBER.component());
+            player.sendMessage(Lang.HELP_MEMBER.component());
         }
     }
 
@@ -93,27 +93,27 @@ public class GuildCMD {
     }
 
     @Subcommand("invite")
-    public void invite(Player sender, @Online OfflinePlayer player) {
-        guildService.invite(sender, player);
+    public void invite(Player sender, MSPlayerProfile target) {
+        guildService.invite(sender, target);
     }
 
     @Subcommand("revoke")
-    public void revoke(Player sender, OfflinePlayer player) {
+    public void revoke(Player sender, MSPlayer player) {
         guildService.revokeInvite(sender, player);
     }
 
     @Subcommand("promote")
-    public void promote(Player sender, OfflinePlayer player) {
+    public void promote(Player sender, GuildPlayer player) {
         guildService.promote(sender, player);
     }
 
     @Subcommand("demote")
-    public void demote(Player sender, OfflinePlayer player) {
+    public void demote(Player sender, GuildPlayer player) {
         guildService.demote(sender, player);
     }
 
     @Subcommand("transfer")
-    public void transfer(Player sender, OfflinePlayer player) {
+    public void transfer(Player sender, GuildPlayer player) {
         guildService.transfer(sender, player);
     }
 
@@ -128,7 +128,6 @@ public class GuildCMD {
     }
 
     @Subcommand("bank balance")
-    @DefaultFor({"g bank", "guild bank"})
     public void bankBalance(Player sender) {
         Guild guild = guildsManager.getGuildByPlayer(sender);
         Economy economy = plugin.getEconomy();
@@ -172,7 +171,7 @@ public class GuildCMD {
     }
 
     @Subcommand("kick")
-    public void kick(Player sender, OfflinePlayer target) {
+    public void kick(Player sender, GuildPlayer target) {
         guildService.kick(sender, target);
     }
 
@@ -184,7 +183,7 @@ public class GuildCMD {
     @Subcommand("info")
     public void info(BukkitCommandActor sender, @Optional Guild guild) {
         if (guild == null) {
-            Player player = sender.getAsPlayer();
+                Player player = sender.asPlayer();
             if (player != null) {
                 guild = guildsManager.getGuildByPlayer(player);
                 if (guild != null) {
@@ -248,7 +247,7 @@ public class GuildCMD {
     @Subcommand("logs")
     public void logs(BukkitCommandActor sender, @Default("1") @Range(min = 1) @Named("page") int page, @Optional Guild guild) {
         if (guild == null && sender.isPlayer()) {
-            Player player = sender.getAsPlayer();
+            Player player = sender.asPlayer();
             if (player != null) {
                 guild = guildsManager.getGuildByPlayer(player);
             }

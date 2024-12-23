@@ -106,8 +106,10 @@ public class Guild {
     }
 
     public List<UUID> getOnlinePlayers() {
-        return CoreBukkitPlugin.getInstance().getPlayerManager().getOnlinePlayers().keySet().stream()
-                .filter(uuid -> getMembers().containsKey(uuid)).toList();
+        return members.values().stream()
+                .map(GuildPlayer::getUniqueId)
+                .filter(uniqueId -> CoreBukkitPlugin.getInstance().getPlayerManager().isOnline(uniqueId))
+                .toList();
     }
 
     public int getOnlinePlayerAmount() {

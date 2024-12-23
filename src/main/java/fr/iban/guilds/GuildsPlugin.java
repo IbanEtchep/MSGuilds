@@ -8,6 +8,7 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import fr.iban.bukkitcore.CoreBukkitPlugin;
+import fr.iban.bukkitcore.commands.CoreCommandHandlerVisitor;
 import fr.iban.bukkitcore.manager.MessagingManager;
 import fr.iban.guilds.api.GuildManager;
 import fr.iban.guilds.api.service.GuildAllianceService;
@@ -15,12 +16,15 @@ import fr.iban.guilds.api.service.GuildBankService;
 import fr.iban.guilds.api.service.GuildRankService;
 import fr.iban.guilds.api.service.GuildService;
 import fr.iban.guilds.command.GuildCMD;
+import fr.iban.guilds.command.parametertypes.GuildParameterType;
+import fr.iban.guilds.command.parametertypes.GuildPlayerParameterType;
 import fr.iban.guilds.lang.LangManager;
 import fr.iban.guilds.listener.ChatListeners;
 import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.ServiceListeners;
 import fr.iban.guilds.manager.GuildsManagerImpl;
 import fr.iban.guilds.model.Guild;
+import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.placeholderapi.GuildsPlaceholderExpansion;
 import fr.iban.guilds.service.GuildAllianceServiceImpl;
 import fr.iban.guilds.service.GuildBankServiceImpl;
@@ -35,8 +39,9 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.ServicesManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import revxrsal.commands.bukkit.BukkitCommandHandler;
-import revxrsal.commands.exception.CommandErrorException;
+import revxrsal.commands.Lamp;
+import revxrsal.commands.bukkit.BukkitLamp;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,22 +136,15 @@ public final class GuildsPlugin extends JavaPlugin {
     }
 
     private void registerCommands() {
-        BukkitCommandHandler commandHandler = BukkitCommandHandler.create(this);
-        commandHandler.accept(CoreBukkitPlugin.getInstance().getCommandHandlerVisitor());
+        Lamp<BukkitCommandActor> lamp =  BukkitLamp.builder(this)
+                .parameterTypes(builder ->
+                        builder
+                                .addParameterType(GuildPlayer.class, new GuildPlayerParameterType(this))
+                                .addParameterType(Guild.class, new GuildParameterType(this)))
+                .accept(new CoreCommandHandlerVisitor(CoreBukkitPlugin.getInstance()).visitor())
+                .build();
 
-        //Guild resolver
-        commandHandler.getAutoCompleter().registerParameterSuggestions(Guild.class, (args, sender, command) -> guildsManager.getGuildNames());
-        commandHandler.registerValueResolver(Guild.class, context -> {
-            String value = context.arguments().pop();
-            Guild guild = guildsManager.getGuildByName(value);
-            if (guild == null) {
-                throw new CommandErrorException("La guilde " + value + " n''existe pas.");
-            }
-            return guild;
-        });
-
-        commandHandler.register(new GuildCMD(this));
-        commandHandler.registerBrigadier();
+        lamp.register(new GuildCMD(this));
     }
 
     public void runAsyncQueued(Runnable runnable) {

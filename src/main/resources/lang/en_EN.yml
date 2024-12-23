@@ -143,6 +143,7 @@ messages:
     no_permission: "<red>You don't have permission to do this!"
     not_guild_member: "<red>You are not a member of a guild!"
     player_not_found: "<red>Player not found!"
+    guild_not_found: "<red>Guild not found!"
     self_already_in_guild: "<red>You are already in a guild!"
     already_in_guild: "<red>This player is already in a guild!"
     not_invited: "<red>You haven't been invited to this guild!"

@@ -143,6 +143,7 @@ messages:
     no_permission: "<red>Vous n'avez pas la permission de faire cela !"
     not_guild_member: "<red>Vous n'êtes pas membre d'une guilde !"
     player_not_found: "<red>Joueur introuvable !"
+    guild_not_found: "<red>Cette guilde n'existe pas !"
     self_already_in_guild: "<red>Vous êtes déjà dans une guilde !"
     already_in_guild: "<red>Ce joueur est déjà dans une guilde !"
     not_invited: "<red>Vous n'avez pas été invité à rejoindre cette guilde !"
