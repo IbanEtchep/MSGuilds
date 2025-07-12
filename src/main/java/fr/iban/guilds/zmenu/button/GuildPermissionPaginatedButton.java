@@ -5,11 +5,10 @@ import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.enums.GuildPermission;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildRank;
-import fr.maxlego08.menu.MenuItemStack;
-import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.MenuItemStack;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.engine.Pagination;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
-import fr.maxlego08.menu.zcore.utils.inventory.Pagination;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,14 +17,14 @@ import org.bukkit.plugin.Plugin;
 import java.util.Arrays;
 import java.util.List;
 
-public class GuildPermissionPaginatedButton extends AbstractToggleButton implements PaginateButton {
+public class GuildPermissionPaginatedButton extends AbstractTogglePaginatedButton {
 
     public GuildPermissionPaginatedButton(Plugin plugin, Material enabledMaterial, Material disabledMaterial) {
         super((GuildsPlugin) plugin, enabledMaterial, disabledMaterial);
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
         List<GuildPermission> permissions = Arrays.stream(GuildPermission.values()).toList();
 
         Pagination<GuildPermission> pagination = new Pagination<>();
@@ -69,7 +68,7 @@ public class GuildPermissionPaginatedButton extends AbstractToggleButton impleme
     }
 
     @Override
-    public void onInventoryClose(Player player, InventoryDefault inventory) {
+    public void onInventoryClose(Player player, InventoryEngine inventory) {
         super.onInventoryClose(player, inventory);
         Guild guild = menuManager.getMenuData(player).getGuild();
         plugin.getGuildManager().saveGuild(guild);

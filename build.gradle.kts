@@ -30,6 +30,14 @@ repositories {
     maven {
         url = uri("https://repo.maven.apache.org/maven2/")
     }
+
+    maven {
+        url = uri("https://repo.groupez.dev/releases")
+    }
+
+    maven {
+        url = uri("https://repo.tcoded.com/releases")
+    }
 }
 
 dependencies {

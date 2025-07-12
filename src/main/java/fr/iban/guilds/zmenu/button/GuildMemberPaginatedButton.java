@@ -6,10 +6,9 @@ import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.util.ChatUtils;
-import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.engine.Pagination;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
-import fr.maxlego08.menu.zcore.utils.inventory.Pagination;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,14 +19,14 @@ import org.bukkit.plugin.Plugin;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GuildMemberPaginatedButton extends AbstractToggleButton implements PaginateButton {
+public class GuildMemberPaginatedButton extends AbstractTogglePaginatedButton {
 
     public GuildMemberPaginatedButton(Plugin plugin, Material enabledMaterial, Material disabledMaterial) {
         super((GuildsPlugin) plugin, enabledMaterial, disabledMaterial);
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
         Guild guild = menuManager.getMenuData(player).getGuild();
         List<GuildPlayer> members = new ArrayList<>(guild.getMembers().values());
 

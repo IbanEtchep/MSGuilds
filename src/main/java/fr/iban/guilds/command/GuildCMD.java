@@ -131,22 +131,14 @@ public class GuildCMD {
         guildService.quitGuild(sender);
     }
 
+    @Subcommand("bank")
+    public void bank(Player sender) {
+        bankBalance(sender);
+    }
+
     @Subcommand("bank balance")
     public void bankBalance(Player sender) {
-        Guild guild = guildsManager.getGuildByPlayer(sender);
-        Economy economy = plugin.getEconomy();
-
-        if (economy == null) {
-            sender.sendMessage(Lang.BANK_ECONOMY_DISABLED.component());
-            return;
-        }
-
-        if (guild == null) {
-            sender.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
-            return;
-        }
-
-        sender.sendMessage(Lang.BANK_BALANCE.component("amount", economy.format(guild.getBalance())));
+        guildBankService.showBalance(sender);
     }
 
     @Subcommand("bank deposit")

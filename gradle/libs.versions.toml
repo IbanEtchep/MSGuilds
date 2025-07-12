@@ -3,18 +3,18 @@
 
 [versions]
 core-paper = "1.1.0"
-com-github-maxlego08-zmenu-api = "1.0.3.5"
+com-github-maxlego08-zmenu-api = "1.1.0.0"
 com-github-milkbowl-vaultapi = "1.7"
 dev-dejvokep-boosted-yaml = "1.3.7"
 io-papermc-paper-paper-api = "1.21.1-R0.1-SNAPSHOT"
 me-clip-placeholderapi = "2.11.6"
-folialib = "main-SNAPSHOT"
+folialib = "0.5.1"
 
 [libraries]
 corePaper = { module = "com.github.IbanEtchep.MSCore:core-paper", version.ref = "core-paper" }
-com-github-maxlego08-zmenu-api = { module = "com.github.Maxlego08:zMenu-API", version.ref = "com-github-maxlego08-zmenu-api" }
+com-github-maxlego08-zmenu-api = { module = "fr.maxlego08.menu:zmenu-api", version.ref = "com-github-maxlego08-zmenu-api" }
 com-github-milkbowl-vaultapi = { module = "com.github.MilkBowl:VaultAPI", version.ref = "com-github-milkbowl-vaultapi" }
 dev-dejvokep-boosted-yaml = { module = "dev.dejvokep:boosted-yaml", version.ref = "dev-dejvokep-boosted-yaml" }
 io-papermc-paper-paper-api = { module = "io.papermc.paper:paper-api", version.ref = "io-papermc-paper-paper-api" }
 me-clip-placeholderapi = { module = "me.clip:placeholderapi", version.ref = "me-clip-placeholderapi" }
-folialib = { module = "com.github.technicallycoded:FoliaLib", version.ref = "folialib" }
+folialib = { module = "com.tcoded:FoliaLib", version.ref = "folialib" }

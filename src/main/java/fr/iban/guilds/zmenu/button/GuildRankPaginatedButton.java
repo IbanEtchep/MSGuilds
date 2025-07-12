@@ -6,23 +6,23 @@ import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.zmenu.data.GuildMenuData;
 import fr.maxlego08.menu.api.button.PaginateButton;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
+import fr.maxlego08.menu.api.engine.Pagination;
 import fr.maxlego08.menu.api.utils.Placeholders;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
-import fr.maxlego08.menu.zcore.utils.inventory.Pagination;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 
-public class GuildRankPaginatedButton extends AbstractGuildMenuButton implements PaginateButton {
+public class GuildRankPaginatedButton extends AbstractGuildPaginatedButton {
 
     public GuildRankPaginatedButton(Plugin plugin) {
         super((GuildsPlugin) plugin);
     }
 
     @Override
-    public void onRender(Player player, InventoryDefault inventory) {
+    public void onRender(Player player, InventoryEngine inventory) {
         GuildMenuData guildMenuData = menuManager.getMenuData(player);
         List<GuildRank> ranks = guildMenuData.getGuild().getRanks();
 

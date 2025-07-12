@@ -5,14 +5,14 @@ import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.zmenu.button.*;
 import fr.iban.guilds.zmenu.data.GuildMenuData;
-import fr.iban.guilds.zmenu.loader.ToggleableButtonLoader;
+import fr.iban.guilds.zmenu.loader.ToggleablePaginatedButtonLoader;
 import fr.maxlego08.menu.api.ButtonManager;
 import fr.maxlego08.menu.api.Inventory;
 import fr.maxlego08.menu.api.InventoryManager;
 import fr.maxlego08.menu.api.event.events.ButtonLoaderRegisterEvent;
-import fr.maxlego08.menu.button.loader.NoneLoader;
-import fr.maxlego08.menu.exceptions.InventoryException;
-import fr.maxlego08.menu.inventory.inventories.InventoryDefault;
+import fr.maxlego08.menu.api.loader.NoneLoader;
+import fr.maxlego08.menu.api.exceptions.InventoryException;
+import fr.maxlego08.menu.api.engine.InventoryEngine;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -69,7 +69,7 @@ public class ZMenuManager implements Listener {
     private void registerButtons() {
         buttonManager.register(new NoneLoader(plugin, GuildRankPaginatedButton.class, "guild_rank_pagination"));
         buttonManager.register(new NoneLoader(plugin, GuildMemberPaginatedButton.class, "guild_member_pagination"));
-        buttonManager.register(new ToggleableButtonLoader(plugin, GuildPermissionPaginatedButton.class, "guild_rank_permission_pagination"));
+        buttonManager.register(new ToggleablePaginatedButtonLoader(plugin, GuildPermissionPaginatedButton.class, "guild_rank_permission_pagination"));
         buttonManager.register(new NoneLoader(plugin, GuildRankRenameButton.class, "guild_rank_rename"));
         buttonManager.register(new NoneLoader(plugin, GuildRankAddButton.class, "guild_rank_add"));
     }
@@ -113,7 +113,7 @@ public class ZMenuManager implements Listener {
     }
 
     public void openInventory(Player player, Inventory inventory) {
-        if (player.getOpenInventory().getTopInventory().getHolder() instanceof InventoryDefault) {
+        if (player.getOpenInventory().getTopInventory().getHolder() instanceof InventoryEngine) {
             this.inventoryManager.openInventoryWithOldInventories(player, inventory, 0);
         } else {
             this.inventoryManager.openInventory(player, inventory);

@@ -6,6 +6,9 @@ import fr.iban.guilds.api.service.GuildBankService;
 import fr.iban.guilds.enums.GuildPermission;
 import fr.iban.guilds.lang.Lang;
 import fr.iban.guilds.model.Guild;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 
@@ -17,6 +20,24 @@ public class GuildBankServiceImpl implements GuildBankService {
     public GuildBankServiceImpl(GuildsPlugin plugin) {
         this.plugin = plugin;
         this.guildManager = plugin.getGuildManager();
+    }
+
+    @Override
+    public void showBalance(Player player) {
+        Guild guild = guildManager.getGuildByPlayer(player);
+        Economy economy = plugin.getEconomy();
+
+        if (economy == null) {
+            player.sendMessage(Lang.BANK_ECONOMY_DISABLED.component());
+            return;
+        }
+
+        if (guild == null) {
+            player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
+            return;
+        }
+
+        player.sendMessage(Lang.BANK_BALANCE.component("amount", economyFormat(guild.getBalance())));
     }
 
     @Override
@@ -42,8 +63,8 @@ public class GuildBankServiceImpl implements GuildBankService {
         double playerBalance = economy.getBalance(player);
         if (playerBalance < amount) {
             player.sendMessage(Lang.PLAYER_INSUFFICIENT_FUNDS.component(
-                    "amount", economy.format(amount),
-                    "balance", economy.format(playerBalance)
+                    "amount", economyFormat(amount),
+                    "balance", economyFormat(playerBalance)
             ));
             return;
         }
@@ -51,13 +72,13 @@ public class GuildBankServiceImpl implements GuildBankService {
         economy.withdrawPlayer(player, amount);
         guild.setBalance(guild.getBalance() + amount);
         player.sendMessage(Lang.BANK_DEPOSIT_SUCCESS.component(
-                "amount", economy.format(amount),
-                "balance", economy.format(guild.getBalance())
+                "amount", economyFormat(amount),
+                "balance", economyFormat(guild.getBalance())
         ));
         guildManager.addLog(guild, Lang.LOG_BANK_DEPOSIT.toString(
                 "player", player.getName(),
-                "amount", economy.format(amount),
-                "balance", economy.format(guild.getBalance())
+                "amount", economyFormat(amount),
+                "balance", economyFormat(guild.getBalance())
         ));
         guildManager.saveGuild(guild);
     }
@@ -96,14 +117,14 @@ public class GuildBankServiceImpl implements GuildBankService {
         economy.depositPlayer(player, amount);
         guild.setBalance(currentBalance - amount);
         player.sendMessage(Lang.BANK_WITHDRAW_SUCCESS.component(
-                "amount", economy.format(amount),
-                "balance", economy.format(guild.getBalance())
+                "amount", economyFormat(amount),
+                "balance", economyFormat(guild.getBalance())
         ));
         guildManager.saveGuild(guild);
         guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.toString(
                 "player", player.getName(),
-                "amount", economy.format(amount),
-                "balance", economy.format(guild.getBalance())
+                "amount", economyFormat(amount),
+                "balance", economyFormat(guild.getBalance())
         ));
     }
 
@@ -144,10 +165,16 @@ public class GuildBankServiceImpl implements GuildBankService {
         if (result) {
             guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.toString(
                     "reason", reason,
-                    "amount", economy.format(amount),
-                    "balance", economy.format(guild.getBalance())
+                    "amount", economyFormat(amount),
+                    "balance", economyFormat(guild.getBalance())
             ));
         }
         return result;
+    }
+    
+    private String economyFormat(double amount) {
+        String legacyMessage = plugin.getEconomy().format(amount);
+        Component message = LegacyComponentSerializer.legacySection().deserialize(legacyMessage);
+        return MiniMessage.miniMessage().serialize(message);
     }
 }

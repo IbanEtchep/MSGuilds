@@ -1,7 +1,7 @@
 package fr.iban.guilds.zmenu.loader;
 
 import fr.iban.guilds.GuildsPlugin;
-import fr.iban.guilds.zmenu.button.AbstractToggleButton;
+import fr.iban.guilds.zmenu.button.AbstractTogglePaginatedButton;
 import fr.maxlego08.menu.api.button.Button;
 import fr.maxlego08.menu.api.button.DefaultButtonValue;
 import fr.maxlego08.menu.api.loader.ButtonLoader;
@@ -10,23 +10,17 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 
-public class ToggleableButtonLoader implements ButtonLoader {
+public class ToggleablePaginatedButtonLoader extends ButtonLoader {
 
-    private final Class<? extends AbstractToggleButton> buttonClass;
+    private final Class<? extends AbstractTogglePaginatedButton> buttonClass;
     private final GuildsPlugin plugin;
     private final String name;
 
-    public ToggleableButtonLoader(GuildsPlugin plugin, Class<? extends AbstractToggleButton> buttonClass, String name) {
-        super();
+    public ToggleablePaginatedButtonLoader(GuildsPlugin plugin, Class<? extends AbstractTogglePaginatedButton> buttonClass, String name) {
+        super(plugin, name);
         this.plugin = plugin;
         this.buttonClass = buttonClass;
         this.name = name;
-    }
-
-
-    @Override
-    public Class<? extends Button> getButton() {
-        return AbstractToggleButton.class;
     }
 
     @Override
