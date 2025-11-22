@@ -10,6 +10,7 @@ import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.bukkitcore.commands.CoreCommandHandlerVisitor;
 import fr.iban.bukkitcore.manager.MessagingManager;
+import fr.iban.guilds.api.GuildLevelingManager;
 import fr.iban.guilds.api.GuildManager;
 import fr.iban.guilds.api.service.GuildAllianceService;
 import fr.iban.guilds.api.service.GuildBankService;
@@ -22,6 +23,7 @@ import fr.iban.guilds.lang.LangManager;
 import fr.iban.guilds.listener.ChatListeners;
 import fr.iban.guilds.listener.CoreMessageListener;
 import fr.iban.guilds.listener.ServiceListeners;
+import fr.iban.guilds.manager.GuildLevelingManagerImpl;
 import fr.iban.guilds.manager.GuildsManagerImpl;
 import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildPlayer;
@@ -53,6 +55,7 @@ public final class GuildsPlugin extends JavaPlugin {
 
     private static GuildsPlugin instance;
     private GuildManager guildsManager;
+    private GuildLevelingManager guildLevelingManager;
 
     public static final String GUILD_SYNC_CHANNEL = "GuildSyncChannel";
     public static final String GUILD_PLAYER_SYNC_CHANNEL = "GuildPlayerSyncChannel";
@@ -85,6 +88,8 @@ public final class GuildsPlugin extends JavaPlugin {
         langManager.load();
 
         this.guildsManager = new GuildsManagerImpl(this);
+        this.guildLevelingManager = new GuildLevelingManagerImpl(this);
+
         this.guildService = new GuildServiceImpl(this);
         this.guildBankService = new GuildBankServiceImpl(this);
         this.guildAllianceService = new GuildAllianceServiceImpl(this);
@@ -167,7 +172,7 @@ public final class GuildsPlugin extends JavaPlugin {
             config = YamlDocument.create(
                     new File(getDataFolder(), "config.yml"),
                     Objects.requireNonNull(getResource("config.yml")),
-                    GeneralSettings.builder().setKeyFormat(GeneralSettings.KeyFormat.OBJECT).build(),
+                    GeneralSettings.builder().setKeyFormat(GeneralSettings.KeyFormat.STRING).build(),
                     LoaderSettings.DEFAULT,
                     DumperSettings.DEFAULT,
                     UpdaterSettings.DEFAULT
@@ -207,6 +212,10 @@ public final class GuildsPlugin extends JavaPlugin {
 
     public GuildAllianceService getGuildAllianceService() {
         return guildAllianceService;
+    }
+
+    public GuildLevelingManager getGuildLevelingManager() {
+        return guildLevelingManager;
     }
 
     public GuildRankService getGuildRankService() {

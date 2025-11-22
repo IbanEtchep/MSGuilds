@@ -11,33 +11,13 @@ plugins {
 
 repositories {
     mavenLocal()
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-
-    maven {
-        url = uri("https://jitpack.io")
-    }
-
-    maven {
-        url = uri("https://repo.extendedclip.com/releases/")
-    }
-
-    maven {
-        url = uri("https://repo.maven.apache.org/maven2/")
-    }
-
-    maven {
-        url = uri("https://repo.groupez.dev/releases")
-    }
-
-    maven {
-        url = uri("https://repo.tcoded.com/releases")
-    }
+    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
+    maven { url = uri("https://oss.sonatype.org/content/groups/public/") }
+    maven { url = uri("https://jitpack.io") }
+    maven { url = uri("https://repo.extendedclip.com/releases/") }
+    maven { url = uri("https://repo.maven.apache.org/maven2/") }
+    maven { url = uri("https://repo.groupez.dev/releases") }
+    maven { url = uri("https://repo.tcoded.com/releases") }
 }
 
 dependencies {
@@ -49,6 +29,8 @@ dependencies {
 
     implementation(libs.dev.dejvokep.boosted.yaml)
     implementation(libs.folialib)
+
+    implementation("net.objecthunter:exp4j:0.4.8")
 }
 
 tasks.shadowJar {
@@ -56,6 +38,7 @@ tasks.shadowJar {
 
     relocate("dev.dejvokep.boostedyaml", "fr.iban.guilds.libs.boostedyaml")
     relocate("com.tcoded.folialib", "fr.iban.guilds.libs.folialib")
+    relocate("net.objecthunter.exp4j", "fr.iban.guilds.libs.exp4j")
 }
 
 publishing {

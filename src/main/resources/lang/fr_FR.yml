@@ -15,6 +15,7 @@ messages:
       <gold>/guild bank withdraw <montant> <gray>→ Retirer de l'argent
 
       <gold>/guild lands <gray>→ Gérer les territoires de la guilde
+      <gold>/guild ranks <gray>→ gérer les grades de la guilde
       <gold>/guild kick <gray>→ Exclure un membre de grade inférieur
       <gold>/guild promote <gray>→ Promouvoir un membre
       <gold>/guild demote <gray>→ Rétrograder un membre

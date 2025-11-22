@@ -5,6 +5,7 @@ import fr.iban.bukkitcore.utils.SLocationUtils;
 import fr.iban.common.model.MSPlayer;
 import fr.iban.common.model.MSPlayerProfile;
 import fr.iban.guilds.GuildsPlugin;
+import fr.iban.guilds.api.GuildLevelingManager;
 import fr.iban.guilds.api.GuildManager;
 import fr.iban.guilds.api.service.GuildService;
 import fr.iban.guilds.enums.ChatMode;
@@ -15,6 +16,7 @@ import fr.iban.guilds.event.GuildDisbandEvent;
 import fr.iban.guilds.event.GuildPostDisbandEvent;
 import fr.iban.guilds.lang.Lang;
 import fr.iban.guilds.model.Guild;
+import fr.iban.guilds.model.GuildLevelInfo;
 import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.util.GuildRequestMessage;
@@ -27,10 +29,12 @@ public class GuildServiceImpl implements GuildService {
 
     private final GuildsPlugin plugin;
     private final GuildManager guildManager;
+    private final GuildLevelingManager guildLevelingManager;
 
     public GuildServiceImpl(GuildsPlugin plugin) {
         this.plugin = plugin;
         this.guildManager = plugin.getGuildManager();
+        this.guildLevelingManager = plugin.getGuildLevelingManager();
     }
 
     @Override
@@ -147,6 +151,11 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
+        GuildLevelInfo levelInfo = guildLevelingManager.getLevelInfo(guild);
+        if (guild.getMembers().size() >= levelInfo.maxMembers() && !player.hasPermission("guilds.bypass")) {
+            player.sendMessage(Lang.ERROR_GUILD_FULL.component());
+            return;
+        }
 
         GuildPlayer guildPlayer = new GuildPlayer(uuid, guild, guild.getDefautRank(), ChatMode.PUBLIC);
         player.sendMessage(Lang.JOIN_SUCCESS.component("guild", guild.getName()));
@@ -196,7 +205,7 @@ public class GuildServiceImpl implements GuildService {
         }
 
         if (guild.getInvites().contains(targetID)) {
-            player.sendMessage(Lang.MEMBER_INVITED.component());
+            player.sendMessage(Lang.MEMBER_INVITED.component("player", target.getName()));
             return;
         }
 
@@ -204,6 +213,13 @@ public class GuildServiceImpl implements GuildService {
             player.sendMessage(Lang.ERROR_ALREADY_IN_GUILD.component());
             return;
         }
+
+        GuildLevelInfo levelInfo = guildLevelingManager.getLevelInfo(guild);
+        if (guild.getMembers().size() >= levelInfo.maxMembers()) {
+            player.sendMessage(Lang.ERROR_GUILD_FULL.component());
+            return;
+        }
+
 
         guild.getInvites().add(targetID);
 

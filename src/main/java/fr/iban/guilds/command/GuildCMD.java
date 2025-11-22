@@ -16,7 +16,6 @@ import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.util.ChatUtils;
 import net.kyori.adventure.text.Component;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;

@@ -114,6 +114,7 @@ public enum Lang {
     ERROR_ALREADY_IN_GUILD("messages.errors.already_in_guild"),
     ERROR_SELF_ALREADY_IN_GUILD("messages.errors.self_already_in_guild"),
     ERROR_NOT_INVITED("messages.errors.not_invited"),
+    ERROR_GUILD_FULL("messages.errors.guild_full"),
     ERROR_INSUFFICIENT_RANK("messages.errors.insufficient_rank"),
     ERROR_SPECIFY_GUILD("messages.errors.specify_guild"),
     ERROR_PLAYER_NOT_IN_GUILD("messages.errors.player_not_in_guild"),

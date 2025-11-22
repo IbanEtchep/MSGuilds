@@ -35,6 +35,7 @@ public class SqlStorage {
                         "name VARCHAR(255) UNIQUE ," +
                         "balance FLOAT DEFAULT 0," +
                         "exp BIGINT DEFAULT 0," +
+                        "level INT DEFAULT 1," +
                         "home VARCHAR(255)," +
                         "owner_uuid UUID," +
                         "createdAt DATETIME DEFAULT NOW()" +
@@ -160,10 +161,11 @@ public class SqlStorage {
         String name = resultSet.getString("name");
         double balance = resultSet.getDouble("balance");
         long exp = resultSet.getLong("exp");
+        int level = resultSet.getInt("level");
         String sloc = resultSet.getString("home");
         Date createdAt = resultSet.getTimestamp("createdAt");
         UUID owner = UUID.fromString(resultSet.getString("owner_uuid"));
-        Guild guild = new Guild(guildId, name, balance, exp, createdAt);
+        Guild guild = new Guild(guildId, name, balance, exp, level, createdAt);
 
         guild.setOwnerUUID(owner);
 
@@ -219,20 +221,21 @@ public class SqlStorage {
     }
 
     public void saveGuild(Guild guild) {
-        String updateStatement = "INSERT INTO guilds(id, balance, name, exp, home, owner_uuid) VALUES (?, ?, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE balance=VALUES(balance), exp=VALUES(exp), balance=VALUES(balance), home=VALUES(home)";
+        String updateStatement = "INSERT INTO guilds(id, balance, name, exp, level, home, owner_uuid) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE balance=VALUES(balance), exp=VALUES(exp), level=VALUES(level), balance=VALUES(balance), home=VALUES(home)";
         try (Connection connection = ds.getConnection()) {
             try (PreparedStatement ps = connection.prepareStatement(updateStatement)) {
                 ps.setString(1, guild.getId().toString());
                 ps.setDouble(2, guild.getBalance());
                 ps.setString(3, guild.getName());
                 ps.setLong(4, guild.getExp());
+                ps.setInt(5, guild.getLevel());
                 if (guild.getHome() == null) {
-                    ps.setNull(5, Types.VARCHAR);
+                    ps.setNull(6, Types.VARCHAR);
                 } else {
-                    ps.setString(5, gson.toJson(guild.getHome()));
+                    ps.setString(6, gson.toJson(guild.getHome()));
                 }
-                ps.setString(6, guild.getOwnerUUID().toString());
+                ps.setString(7, guild.getOwnerUUID().toString());
 
                 ps.executeUpdate();
                 saveRanks(guild);

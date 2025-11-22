@@ -16,6 +16,7 @@ public class Guild {
     private final Map<UUID, GuildPlayer> members = new ConcurrentHashMap<>();
     private double balance;
     private long exp;
+    private int level;
     private SLocation home;
     private final Date createdAt;
 
@@ -24,16 +25,17 @@ public class Guild {
     private final List<Guild> alliances = new ArrayList<>();
     private List<GuildRank> ranks = new ArrayList<>();
 
-    public Guild(UUID id, String name, double balance, long exp, Date createdAt) {
+    public Guild(UUID id, String name, double balance, long exp, int level, Date createdAt) {
         this.id = id;
         this.name = name;
         this.balance = balance;
         this.exp = exp;
+        this.level = level;
         this.createdAt = createdAt;
     }
 
     public Guild(String name) {
-        this(UUID.randomUUID(), name, 0, 0, new Date());
+        this(UUID.randomUUID(), name, 0, 0, 1, new Date());
     }
 
     public UUID getId() {
@@ -78,6 +80,14 @@ public class Guild {
 
     public void setExp(long exp) {
         this.exp = exp;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public SLocation getHome() {
