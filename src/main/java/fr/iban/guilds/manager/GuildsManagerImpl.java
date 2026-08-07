@@ -28,8 +28,9 @@ public class GuildsManagerImpl implements GuildManager {
         load();
     }
 
+    @Override
     public Map<UUID, Guild> getGuilds() {
-        return guilds;
+        return Collections.unmodifiableMap(guilds);
     }
 
     @Override

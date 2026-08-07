@@ -58,6 +58,20 @@ public class ChatListeners implements Listener {
             e.setCancelled(true);
         }
 
+        if (guildPlayer.getChatMode() == ChatMode.PUBLIC && message.startsWith("?")) {
+            String msg = message.substring(1);
+            Component allyMessage = Component.text("[Alliance] ", NamedTextColor.GRAY)
+                    .append(guildPlayer.getRank().getDisplayName())
+                    .append(Component.text(" "))
+                    .append(Component.text(player.getName()))
+                    .append(Component.text(" ➤ ", NamedTextColor.WHITE))
+                    .append(Component.text(msg));
+
+            guild.sendMessageToAllies(allyMessage);
+            plugin.getLogger().info("[Alliance] Chat (" + player.getName() + ") : " + msg);
+            e.setCancelled(true);
+        }
+
         if (guildPlayer.getChatMode() == ChatMode.ALLY && !message.startsWith("!")) {
             Component allyMessage = Component.text("[Alliance] ", NamedTextColor.GRAY)
                     .append(guildPlayer.getRank().getDisplayName())
@@ -72,6 +86,11 @@ public class ChatListeners implements Listener {
         }
 
         if (guildPlayer.getChatMode() != ChatMode.PUBLIC && message.startsWith("!")) {
+            String msg = message.substring(1);
+            e.message(Component.text(msg));
+        }
+
+        if (guildPlayer.getChatMode() != ChatMode.PUBLIC && message.startsWith("?")) {
             String msg = message.substring(1);
             e.message(Component.text(msg));
         }

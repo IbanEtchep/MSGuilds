@@ -1,6 +1,5 @@
 package fr.iban.guilds.zmenu.button;
 
-
 import fr.iban.bukkitcore.CoreBukkitPlugin;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.zmenu.data.GuildMenuData;

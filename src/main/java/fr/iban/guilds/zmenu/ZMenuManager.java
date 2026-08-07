@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class ZMenuManager implements Listener {
 
@@ -79,7 +80,7 @@ public class ZMenuManager implements Listener {
             guildRankMenu = this.inventoryManager.loadInventoryOrSaveResource(this.plugin, "inventories/guild_rank_menu.yml");
             guildRankManageMenu = this.inventoryManager.loadInventoryOrSaveResource(this.plugin, "inventories/guild_rank_manage_menu.yml");
         } catch (InventoryException exception) {
-            exception.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "Failed to load inventories", exception);
         }
     }
 
@@ -119,4 +120,5 @@ public class ZMenuManager implements Listener {
             this.inventoryManager.openInventory(player, inventory);
         }
     }
+
 }

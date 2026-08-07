@@ -16,6 +16,7 @@ import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.model.GuildRank;
 import fr.iban.guilds.util.ChatUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.*;
 import revxrsal.commands.bukkit.actor.BukkitCommandActor;
@@ -193,7 +194,7 @@ public class GuildCMD {
     }
 
     private void sendGuildInfo(BukkitCommandActor actor, Guild guild) {
-        actor.reply(Lang.INFO_HEADER.component("guild", guild.getName()));
+        actor.reply(Lang.INFO_HEADER.component("guild", ChatUtils.legacyToMiniMessage(guild.getName())));
         actor.reply(Lang.INFO_CREATED.component("date", guild.getDate()));
 
         for (GuildRank rank : guild.getRanks()) {
@@ -254,6 +255,11 @@ public class GuildCMD {
         }
 
         guildsManager.getLogsAsync(guild).thenAccept(logs -> {
+            if (logs.isEmpty()) {
+                sender.reply(Lang.LOGS_EMPTY.component());
+                return;
+            }
+
             int maxpages = (int) Math.ceil(logs.size() / 10D);
 
             if (page > maxpages) {
@@ -269,9 +275,13 @@ public class GuildCMD {
             logs.stream()
                     .skip((page - 1) * 10L)
                     .limit(10)
-                    .forEach(log -> sender.reply(Lang.LOGS_ENTRY.component("log", log)));
+                    .forEach(log -> sender.reply(Lang.LOGS_ENTRY.component("log", ChatUtils.legacySectionToMiniMessage(log))));
 
             sender.reply(Lang.LOGS_FOOTER.component());
+        }).exceptionally(ex -> {
+            plugin.getLogger().severe("Error fetching guild logs: " + ex.getMessage());
+            sender.reply(Lang.LOGS_EMPTY.component());
+            return null;
         });
     }
 

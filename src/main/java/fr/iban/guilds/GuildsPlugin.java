@@ -8,7 +8,10 @@ import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import fr.iban.bukkitcore.CoreBukkitPlugin;
-import fr.iban.bukkitcore.commands.CoreCommandHandlerVisitor;
+import fr.iban.common.model.MSPlayer;
+import fr.iban.common.model.MSPlayerProfile;
+import fr.iban.guilds.command.parametertypes.MSPlayerParameterType;
+import fr.iban.guilds.command.parametertypes.MSPlayerProfileParameterType;
 import fr.iban.bukkitcore.manager.MessagingManager;
 import fr.iban.guilds.api.GuildLevelingManager;
 import fr.iban.guilds.api.GuildManager;
@@ -32,6 +35,7 @@ import fr.iban.guilds.service.GuildAllianceServiceImpl;
 import fr.iban.guilds.service.GuildBankServiceImpl;
 import fr.iban.guilds.service.GuildRankServiceImpl;
 import fr.iban.guilds.service.GuildServiceImpl;
+import fr.iban.guilds.storage.MigrationManager;
 import fr.iban.guilds.zmenu.ZMenuManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -81,6 +85,45 @@ public final class GuildsPlugin extends JavaPlugin {
     public void onEnable() {
         instance = this;
         foliaLib = new FoliaLib(this);
+
+        // ÉTAPE 1: Vérifier et exécuter la migration si nécessaire
+        MigrationManager migrationManager = new MigrationManager();
+
+        if (migrationManager.needsMigration()) {
+            getLogger().warning("===================================");
+            getLogger().warning("MIGRATION NECESSAIRE DETECTEE !");
+            getLogger().warning("===================================");
+            getLogger().warning("L'ancienne structure de base de données a été détectée.");
+            getLogger().warning("La migration va démarrer dans 5 secondes...");
+            getLogger().warning("NE PAS ARRETER LE SERVEUR PENDANT LA MIGRATION !");
+
+            try {
+                Thread.sleep(5000); // Donne le temps de lire les logs
+
+                migrationManager.migrate();
+
+                getLogger().info("===================================");
+                getLogger().info("Migration terminée avec succès !");
+                getLogger().info("===================================");
+
+            } catch (InterruptedException e) {
+                getLogger().severe("Migration interrompue !");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            } catch (Exception e) {
+                getLogger().severe("===================================");
+                getLogger().severe("ERREUR CRITIQUE LORS DE LA MIGRATION");
+                getLogger().severe("===================================");
+                getLogger().severe("Le plugin va être désactivé.");
+                getLogger().severe("Vérifiez les logs et contactez un administrateur.");
+                e.printStackTrace();
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+        } else {
+            getLogger().info("Structure de base de données à jour, pas de migration nécessaire.");
+        }
+
 
         loadConfig();
 
@@ -145,8 +188,9 @@ public final class GuildsPlugin extends JavaPlugin {
                 .parameterTypes(builder ->
                         builder
                                 .addParameterType(GuildPlayer.class, new GuildPlayerParameterType(this))
-                                .addParameterType(Guild.class, new GuildParameterType(this)))
-                .accept(new CoreCommandHandlerVisitor(CoreBukkitPlugin.getInstance()).visitor())
+                                .addParameterType(Guild.class, new GuildParameterType(this))
+                                .addParameterType(MSPlayer.class, new MSPlayerParameterType())
+                                .addParameterType(MSPlayerProfile.class, new MSPlayerProfileParameterType()))
                 .build();
 
         lamp.register(new GuildCMD(this));

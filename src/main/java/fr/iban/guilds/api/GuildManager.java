@@ -6,11 +6,13 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface GuildManager {
 
+    Map<UUID, Guild> getGuilds();
     @Nullable Guild getGuildByPlayerId(UUID uuid);
     @Nullable Guild getGuildByPlayer(Player player);
     @Nullable Guild getGuildByName(String name);

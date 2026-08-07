@@ -102,7 +102,6 @@ public class GuildRankServiceImpl implements GuildRankService {
     public void renameRank(Player player, GuildRank rank, Component newName) {
         Guild guild = guildManager.getGuildByPlayer(player);
         String plainTextName = ChatUtils.toPlainText(newName);
-        String miniMessageName = ChatUtils.toMiniMessage(newName);
 
         if (guild == null) {
             player.sendMessage(Lang.ERROR_NOT_GUILD_MEMBER.component());
@@ -119,7 +118,7 @@ public class GuildRankServiceImpl implements GuildRankService {
             return;
         }
 
-        if(plainTextName.length() > 24 || plainTextName.length() < 2) {
+        if(plainTextName.length() > 64 || plainTextName.length() < 2) {
             player.sendMessage(Lang.ERROR_RANK_NAME_LENGTH.component());
             return;
         }
@@ -127,10 +126,10 @@ public class GuildRankServiceImpl implements GuildRankService {
 
         player.sendMessage(Lang.RANK_RENAMED.component(
                 "oldName", rank.getName(),
-                "newName", miniMessageName
+                "newName", plainTextName
         ));
 
-        rank.setName(miniMessageName);
+        rank.setName(plainTextName);
         guildManager.saveGuild(guild);
     }
 
@@ -155,7 +154,7 @@ public class GuildRankServiceImpl implements GuildRankService {
             return;
         }
 
-        if(plainTextName.length() > 24 || plainTextName.length() < 2) {
+        if(plainTextName.length() > 64 || plainTextName.length() < 2) {
             player.sendMessage(Lang.ERROR_RANK_NAME_LENGTH.component());
             return;
         }

@@ -25,7 +25,7 @@ public class GuildPlayerParameterType implements ParameterType<BukkitCommandActo
     }
 
     @Override
-    public GuildPlayer parse(@NotNull MutableStringStream input, @NotNull ExecutionContext<@NotNull BukkitCommandActor> executionContext) {
+    public GuildPlayer parse(@NotNull MutableStringStream input, @NotNull ExecutionContext<BukkitCommandActor> executionContext) {
         String value = input.readString();
         BukkitCommandActor actor = executionContext.actor();
         Player player = actor.asPlayer();
@@ -50,7 +50,7 @@ public class GuildPlayerParameterType implements ParameterType<BukkitCommandActo
     }
 
     @Override
-    public @NotNull SuggestionProvider<@NotNull BukkitCommandActor> defaultSuggestions() {
+    public @NotNull SuggestionProvider<BukkitCommandActor> defaultSuggestions() {
         return (context) -> {
             Player player = context.actor().asPlayer();
 

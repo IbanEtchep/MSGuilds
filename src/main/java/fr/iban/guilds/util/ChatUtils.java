@@ -67,6 +67,16 @@ public class ChatUtils {
         );
     }
 
+    public static String legacySectionToMiniMessage(String legacy) {
+        return MiniMessage.miniMessage().serialize(
+                LegacyComponentSerializer.builder()
+                        .character('§')
+                        .hexColors()
+                        .build()
+                        .deserialize(legacy)
+        );
+    }
+
     public static String toPlainText(Component newName) {
         return PlainTextComponentSerializer.plainText().serialize(newName);
     }

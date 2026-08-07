@@ -75,7 +75,7 @@ public class GuildBankServiceImpl implements GuildBankService {
                 "amount", economyFormat(amount),
                 "balance", economyFormat(guild.getBalance())
         ));
-        guildManager.addLog(guild, Lang.LOG_BANK_DEPOSIT.toString(
+        guildManager.addLog(guild, Lang.LOG_BANK_DEPOSIT.plainText(
                 "player", player.getName(),
                 "amount", economyFormat(amount),
                 "balance", economyFormat(guild.getBalance())
@@ -121,7 +121,7 @@ public class GuildBankServiceImpl implements GuildBankService {
                 "balance", economyFormat(guild.getBalance())
         ));
         guildManager.saveGuild(guild);
-        guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.toString(
+        guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.plainText(
                 "player", player.getName(),
                 "amount", economyFormat(amount),
                 "balance", economyFormat(guild.getBalance())
@@ -163,7 +163,7 @@ public class GuildBankServiceImpl implements GuildBankService {
 
         boolean result = withdraw(guild, amount);
         if (result) {
-            guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.toString(
+            guildManager.addLog(guild, Lang.LOG_BANK_WITHDRAW.plainText(
                     "reason", reason,
                     "amount", economyFormat(amount),
                     "balance", economyFormat(guild.getBalance())

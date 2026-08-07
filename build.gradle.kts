@@ -1,5 +1,5 @@
 group = "com.github.IbanEtchep"
-version = "1.1.0"
+version = "1.1.1"
 description = "MSGuilds"
 java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -21,16 +21,20 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.io.papermc.paper.paper.api)
-    compileOnly(libs.corePaper)
-    compileOnly(libs.com.github.milkbowl.vaultapi)
-    compileOnly(libs.me.clip.placeholderapi)
-    compileOnly(libs.com.github.maxlego08.zmenu.api)
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("com.github.IbanEtchep.MSCore:core-paper:1.1.1")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("me.clip:placeholderapi:2.11.6")
+    compileOnly("fr.maxlego08.menu:zmenu-api:1.1.0.8")
 
-    implementation(libs.dev.dejvokep.boosted.yaml)
-    implementation(libs.folialib)
+    implementation("dev.dejvokep:boosted-yaml:1.3.7")
+    implementation("com.tcoded:FoliaLib:0.5.1")
 
     implementation("net.objecthunter:exp4j:0.4.8")
+
+    implementation("io.github.revxrsal:lamp.common:4.0.0-rc.16")
+    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.16")
+    implementation("io.github.revxrsal:lamp.brigadier:4.0.0-rc.16")
 }
 
 tasks.shadowJar {
@@ -39,6 +43,7 @@ tasks.shadowJar {
     relocate("dev.dejvokep.boostedyaml", "fr.iban.guilds.libs.boostedyaml")
     relocate("com.tcoded.folialib", "fr.iban.guilds.libs.folialib")
     relocate("net.objecthunter.exp4j", "fr.iban.guilds.libs.exp4j")
+    relocate("revxrsal.commands", "fr.iban.guilds.libs.commands")
 }
 
 publishing {

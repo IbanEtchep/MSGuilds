@@ -311,7 +311,8 @@ public class SqlStorage {
                     while (rs.next()) {
                         Date createdAt = rs.getTimestamp("createdAt");
                         String log = rs.getString("log");
-                        logs.add(dateFormat.format(createdAt) + " : " + log);
+                        String dateStr = createdAt != null ? dateFormat.format(createdAt) : "??/??/?? ??:??:??";
+                        logs.add(dateStr + " : " + (log != null ? log : ""));
                     }
                 }
             }
@@ -367,44 +368,38 @@ public class SqlStorage {
     }
 
     public void saveAlliances(Guild guild) {
+        // On remplace l'ensemble des alliances de la guilde : suppression de toutes les
+        // lignes qui la concernent (dans les deux sens), puis réinsertion des alliances
+        // actuelles. La suppression est inconditionnelle afin de gérer correctement le cas
+        // où il ne reste plus aucune alliance (retrait de la dernière alliance).
+        String deleteStatement = "DELETE FROM guilds_alliances WHERE guild_a_id = ? OR guild_b_id = ?";
+
         String insertStatement = """
-        INSERT INTO guilds_alliances(guild_a_id, guild_b_id) 
+        INSERT INTO guilds_alliances(guild_a_id, guild_b_id)
         VALUES (?, ?)
         ON DUPLICATE KEY UPDATE guild_a_id=guild_a_id
-    """;
-
-        String deleteStatement = """
-        DELETE FROM guilds_alliances 
-        WHERE (guild_a_id = ? AND guild_b_id NOT IN (?))
-        OR (guild_b_id = ? AND guild_a_id NOT IN (?))
     """;
 
         try (Connection connection = ds.getConnection()) {
             connection.setAutoCommit(false);
 
             try {
-                // Insert/Update des alliances
-                try (PreparedStatement insertPs = connection.prepareStatement(insertStatement)) {
-                    for (Guild ally : guild.getAlliances()) {
-                        insertPs.setString(1, guild.getId().toString());
-                        insertPs.setString(2, ally.getId().toString());
-                        insertPs.addBatch();
-                    }
-                    insertPs.executeBatch();
+                // Suppression de toutes les alliances existantes de la guilde
+                try (PreparedStatement deletePs = connection.prepareStatement(deleteStatement)) {
+                    deletePs.setString(1, guild.getId().toString());
+                    deletePs.setString(2, guild.getId().toString());
+                    deletePs.executeUpdate();
                 }
 
-                // Suppression des anciennes alliances
+                // Réinsertion des alliances actuelles
                 if (!guild.getAlliances().isEmpty()) {
-                    try (PreparedStatement deletePs = connection.prepareStatement(deleteStatement)) {
-                        String allyIds = guild.getAlliances().stream()
-                                .map(ally -> ally.getId().toString())
-                                .collect(Collectors.joining("','", "'", "'"));
-
-                        deletePs.setString(1, guild.getId().toString());
-                        deletePs.setString(2, allyIds);
-                        deletePs.setString(3, guild.getId().toString());
-                        deletePs.setString(4, allyIds);
-                        deletePs.executeUpdate();
+                    try (PreparedStatement insertPs = connection.prepareStatement(insertStatement)) {
+                        for (Guild ally : guild.getAlliances()) {
+                            insertPs.setString(1, guild.getId().toString());
+                            insertPs.setString(2, ally.getId().toString());
+                            insertPs.addBatch();
+                        }
+                        insertPs.executeBatch();
                     }
                 }
 
@@ -421,7 +416,6 @@ public class SqlStorage {
     public void saveRanks(Guild guild) {
         String insertStatement = "INSERT INTO guilds_ranks(id, guild_id, label, rank_order, permissions) VALUES (?, ?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE guild_id=VALUES(guild_id), label=VALUES(label), rank_order=VALUES(rank_order), permissions=VALUES(permissions)";
-        String deleteStatement = "DELETE FROM guilds_ranks WHERE guild_id=? AND id NOT IN (?)";
 
         try (Connection connection = ds.getConnection()) {
             connection.setAutoCommit(false);
@@ -440,14 +434,21 @@ public class SqlStorage {
                     insertPs.executeBatch();
                 }
 
-                // Delete ranks that no longer exist
                 if (!guild.getRanks().isEmpty()) {
+                    String placeholders = guild.getRanks().stream()
+                            .map(rank -> "?")
+                            .collect(Collectors.joining(","));
+
+                    String deleteStatement = "DELETE FROM guilds_ranks WHERE guild_id=? AND id NOT IN (" + placeholders + ")";
+
                     try (PreparedStatement deletePs = connection.prepareStatement(deleteStatement)) {
                         deletePs.setString(1, guild.getId().toString());
-                        String rankIds = guild.getRanks().stream()
-                                .map(rank -> rank.getId().toString())
-                                .collect(Collectors.joining("','", "'", "'"));
-                        deletePs.setString(2, rankIds);
+
+                        int index = 2;
+                        for (GuildRank rank : guild.getRanks()) {
+                            deletePs.setString(index++, rank.getId().toString());
+                        }
+
                         deletePs.executeUpdate();
                     }
                 }

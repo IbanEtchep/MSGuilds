@@ -65,6 +65,7 @@ public enum Lang {
     LOGS_HEADER("messages.logs.header"),
     LOGS_ENTRY("messages.logs.entry"),
     LOGS_FOOTER("messages.logs.footer"),
+    LOGS_EMPTY("messages.logs.empty"),
     LOG_GUILD_CREATED("messages.logs.guild_created"),
     LOG_GUILD_DISBANDED("messages.logs.guild_disbanded"),
     LOG_BANK_DEPOSIT("messages.logs.bank_deposit"),

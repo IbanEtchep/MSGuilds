@@ -13,6 +13,8 @@ import fr.iban.guilds.enums.DefaultRank;
 import fr.iban.guilds.enums.GuildPermission;
 import fr.iban.guilds.event.GuildCreateEvent;
 import fr.iban.guilds.event.GuildDisbandEvent;
+import fr.iban.guilds.event.GuildMemberJoinEvent;
+import fr.iban.guilds.event.GuildMemberLeaveEvent;
 import fr.iban.guilds.event.GuildPostDisbandEvent;
 import fr.iban.guilds.lang.Lang;
 import fr.iban.guilds.model.Guild;
@@ -77,7 +79,7 @@ public class GuildServiceImpl implements GuildService {
         guildManager.saveGuild(guild);
         guildManager.savePlayer(guildPlayer);
         player.sendMessage(Lang.GUILD_CREATED.component("name", name));
-        guildManager.addLog(guild, Lang.LOG_GUILD_CREATED.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.LOG_GUILD_CREATED.plainText("player", player.getName()));
     }
 
     @Override
@@ -137,7 +139,7 @@ public class GuildServiceImpl implements GuildService {
         guild.sendMessageToOnlineMembers(Lang.GUILD_DISBANDED.component());
         guild.getMembers().forEach((uuid, gp) -> guildManager.deletePlayer(gp));
 
-        guildManager.addLog(guild, Lang.LOG_GUILD_DISBANDED.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.LOG_GUILD_DISBANDED.plainText("player", player.getName()));
         guildManager.deleteGuild(guild);
         new GuildPostDisbandEvent(guild).callEvent();
     }
@@ -160,10 +162,11 @@ public class GuildServiceImpl implements GuildService {
         GuildPlayer guildPlayer = new GuildPlayer(uuid, guild, guild.getDefautRank(), ChatMode.PUBLIC);
         player.sendMessage(Lang.JOIN_SUCCESS.component("guild", guild.getName()));
         guild.sendMessageToOnlineMembers(Lang.MEMBER_JOINED.component("player", player.getName()));
-        guildManager.addLog(guild, Lang.MEMBER_JOINED.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.MEMBER_JOINED.plainText("player", player.getName()));
         guild.getInvites().remove(uuid);
         guild.getMembers().put(uuid, guildPlayer);
         guildManager.savePlayer(guildPlayer);
+        new GuildMemberJoinEvent(guild, uuid).callEvent();
     }
 
     @Override
@@ -185,8 +188,9 @@ public class GuildServiceImpl implements GuildService {
         guild.getMembers().remove(guildPlayer.getUniqueId());
         guildManager.deletePlayer(guildPlayer);
         player.sendMessage(Lang.LEAVE_SUCCESS.component());
-        guildManager.addLog(guild, Lang.MEMBER_LEFT.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.MEMBER_LEFT.plainText("player", player.getName()));
         guild.sendMessageToOnlineMembers(Lang.MEMBER_LEFT.component("player", player.getName()));
+        new GuildMemberLeaveEvent(guild, player.getUniqueId(), GuildMemberLeaveEvent.Reason.QUIT).callEvent();
     }
 
     @Override
@@ -284,8 +288,13 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
+        if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.MANAGE_HOME)) {
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
+            return;
+        }
+
         guild.setHome(SLocationUtils.getSLocation(player.getLocation()));
-        guildManager.addLog(guild, Lang.LOG_HOME_SET.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.LOG_HOME_SET.plainText("player", player.getName()));
         guildManager.saveGuild(guild);
         player.sendMessage(Lang.HOME_SET.component());
     }
@@ -299,9 +308,14 @@ public class GuildServiceImpl implements GuildService {
             return;
         }
 
+        if (!guild.getMember(player.getUniqueId()).isGranted(GuildPermission.MANAGE_HOME)) {
+            player.sendMessage(Lang.ERROR_INSUFFICIENT_RANK.component());
+            return;
+        }
+
         guild.setHome(null);
         guildManager.saveGuild(guild);
-        guildManager.addLog(guild, Lang.LOG_HOME_DELETE.toString("player", player.getName()));
+        guildManager.addLog(guild, Lang.LOG_HOME_DELETE.plainText("player", player.getName()));
         player.sendMessage(Lang.HOME_DELETE.component());
     }
 
@@ -339,8 +353,9 @@ public class GuildServiceImpl implements GuildService {
         guild.getMembers().remove(targetGuildPlayer.getUniqueId());
         guild.sendMessageToOnlineMembers(Lang.KICK_SUCCESS.component("player", target.getName()));
         targetGuildPlayer.sendMessageIfOnline(Lang.KICK_TARGET.component());
-        guildManager.addLog(guild, Lang.KICK_SUCCESS.toString("player", target.getName()));
+        guildManager.addLog(guild, Lang.KICK_SUCCESS.plainText("player", target.getName()));
         guildManager.deletePlayer(targetGuildPlayer);
+        new GuildMemberLeaveEvent(guild, targetGuildPlayer.getUniqueId(), GuildMemberLeaveEvent.Reason.KICKED).callEvent();
     }
 
     @Override
@@ -377,7 +392,7 @@ public class GuildServiceImpl implements GuildService {
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
         ));
-        guildManager.addLog(guild, Lang.DEMOTE_SUCCESS.toString(
+        guildManager.addLog(guild, Lang.DEMOTE_SUCCESS.plainText(
             "player", targetPlayer.getName(),
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
@@ -418,7 +433,7 @@ public class GuildServiceImpl implements GuildService {
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
         ));
-        guildManager.addLog(guild, Lang.PROMOTE_SUCCESS.toString(
+        guildManager.addLog(guild, Lang.PROMOTE_SUCCESS.plainText(
             "player", targetPlayer.getName(),
             "rank", targetPlayer.getRank().getName(),
             "by", player.getName()
@@ -453,7 +468,7 @@ public class GuildServiceImpl implements GuildService {
             "player", player.getName(),
             "target", guildPlayer.getName()
         ));
-        guildManager.addLog(guild, Lang.TRANSFER_SUCCESS.toString(
+        guildManager.addLog(guild, Lang.TRANSFER_SUCCESS.plainText(
             "player", player.getName(),
             "target", guildPlayer.getName()
         ));

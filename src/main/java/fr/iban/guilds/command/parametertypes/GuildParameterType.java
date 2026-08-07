@@ -21,7 +21,7 @@ public class GuildParameterType implements ParameterType<BukkitCommandActor, Gui
     }
 
     @Override
-    public Guild parse(@NotNull MutableStringStream input, @NotNull ExecutionContext<@NotNull BukkitCommandActor> executionContext) {
+    public Guild parse(@NotNull MutableStringStream input, @NotNull ExecutionContext<BukkitCommandActor> executionContext) {
         String value = input.readString();
         Guild guild = plugin.getGuildManager().getGuildByName(value);
 
@@ -33,7 +33,7 @@ public class GuildParameterType implements ParameterType<BukkitCommandActor, Gui
     }
 
     @Override
-    public @NotNull SuggestionProvider<@NotNull BukkitCommandActor> defaultSuggestions() {
+    public @NotNull SuggestionProvider<BukkitCommandActor> defaultSuggestions() {
         return (context) -> plugin.getGuildManager().getGuildNames();
     }
 
