@@ -4,6 +4,7 @@ import fr.iban.guilds.model.Guild;
 import fr.iban.guilds.model.GuildPlayer;
 import fr.iban.guilds.GuildsPlugin;
 import fr.iban.guilds.enums.ChatMode;
+import fr.iban.guilds.lang.Lang;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,6 +14,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class ChatListeners implements Listener {
+
+    private static final String CHAT_PERMISSION = "guilds.chat";
 
     private final GuildsPlugin plugin;
 
@@ -30,6 +33,19 @@ public class ChatListeners implements Listener {
 
         GuildPlayer guildPlayer = guild.getMember(player.getUniqueId());
         String message = PlainTextComponentSerializer.plainText().serialize(e.message());
+
+        if (!player.hasPermission(CHAT_PERMISSION)) {
+            if (guildPlayer.getChatMode() != ChatMode.PUBLIC) {
+                guildPlayer.setChatMode(ChatMode.PUBLIC);
+            }
+
+            if (message.startsWith("!") || message.startsWith("?")) {
+                e.setCancelled(true);
+                player.sendMessage(Lang.ERROR_NO_PERMISSION.component());
+            }
+
+            return;
+        }
 
         if (guildPlayer.getChatMode() == ChatMode.GUILD && !message.startsWith("!")) {
             Component guildMessage = Component.text("[Guilde] ", NamedTextColor.GRAY)

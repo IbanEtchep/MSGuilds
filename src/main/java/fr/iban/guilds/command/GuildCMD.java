@@ -88,6 +88,7 @@ public class GuildCMD {
     }
 
     @Subcommand("chat")
+    @CommandPermission("guilds.chat")
     public void chat(Player sender, @Optional ChatMode chatMode) {
         if (chatMode == null) {
             guildService.toggleChatMode(sender);

@@ -8,3 +8,10 @@ depend: [ Core ]
 softdepend:
   - Vault
   - PlaceholderAPI
+permissions:
+  guilds.chat:
+    description: Permet d'utiliser le chat de guilde et d'alliance
+    default: true
+  guilds.reload:
+    description: Permet de recharger la configuration du plugin
+    default: op
