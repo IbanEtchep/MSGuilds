@@ -1,0 +1,26 @@
+name: ArtisanGuilds
+version: '${version}'
+main: com.github.ibanetchep.artisanguilds.ArtisanGuildsPlugin
+api-version: '1.21'
+description: Guilds, their ranks, bank, home and alliances, on Artisan.
+authors:
+  - ibanetchep
+
+dependencies:
+  server:
+    Artisan:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    Vault:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  guilds.chat:
+    description: Use the guild and alliance chat.
+    default: true
+  guilds.reload:
+    description: Reload the configuration.
+    default: op

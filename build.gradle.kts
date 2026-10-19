@@ -1,70 +1,8 @@
-group = "com.github.IbanEtchep"
-version = "1.1.1"
-description = "MSGuilds"
-java.sourceCompatibility = JavaVersion.VERSION_21
+// ArtisanGuilds, the guilds plugin on Artisan (successor of MSGuilds).
+// The MSGuilds sources under src/ are not built any more: they are the reference while the
+// services move into plugin/, and are deleted once the move is over.
 
-plugins {
-    `java-library`
-    `maven-publish`
-    id("io.github.goooler.shadow") version "8.1.7"
-}
-
-repositories {
-    mavenLocal()
-    maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
-    maven { url = uri("https://oss.sonatype.org/content/groups/public/") }
-    maven { url = uri("https://jitpack.io") }
-    maven { url = uri("https://repo.extendedclip.com/releases/") }
-    maven { url = uri("https://repo.maven.apache.org/maven2/") }
-    maven { url = uri("https://repo.groupez.dev/releases") }
-    maven { url = uri("https://repo.tcoded.com/releases") }
-}
-
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
-    compileOnly("com.github.IbanEtchep.MSCore:core-paper:1.1.1")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly("me.clip:placeholderapi:2.11.6")
-    compileOnly("fr.maxlego08.menu:zmenu-api:1.1.0.8")
-
-    implementation("dev.dejvokep:boosted-yaml:1.3.7")
-    implementation("com.tcoded:FoliaLib:0.5.1")
-
-    implementation("net.objecthunter:exp4j:0.4.8")
-
-    implementation("io.github.revxrsal:lamp.common:4.0.0-rc.16")
-    implementation("io.github.revxrsal:lamp.bukkit:4.0.0-rc.16")
-    implementation("io.github.revxrsal:lamp.brigadier:4.0.0-rc.16")
-}
-
-tasks.shadowJar {
-    archiveClassifier.set("")
-
-    relocate("dev.dejvokep.boostedyaml", "fr.iban.guilds.libs.boostedyaml")
-    relocate("com.tcoded.folialib", "fr.iban.guilds.libs.folialib")
-    relocate("net.objecthunter.exp4j", "fr.iban.guilds.libs.exp4j")
-    relocate("revxrsal.commands", "fr.iban.guilds.libs.commands")
-}
-
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-}
-
-tasks.processResources {
-    filesMatching("plugin.yml") {
-        expand(
-            "project_version" to project.version
-        )
-    }
-}
-
-
-tasks.withType<JavaCompile>() {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType<Javadoc>() {
-    options.encoding = "UTF-8"
+allprojects {
+    group = "com.github.ibanetchep"
+    version = "2.0.0-SNAPSHOT"
 }
