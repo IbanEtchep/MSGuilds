@@ -1,0 +1,222 @@
+package com.github.ibanetchep.artisanguilds.command;
+
+import com.github.ibanetchep.artisanguilds.Fixture;
+import com.github.ibanetchep.artisanguilds.Guilds;
+import com.github.ibanetchep.artisanguilds.api.ChatMode;
+import com.github.ibanetchep.artisanguilds.model.GuildData;
+import com.github.ibanetchep.artisanguilds.service.AllianceService;
+import com.github.ibanetchep.artisanguilds.service.Msg;
+import com.github.ibanetchep.artisanguilds.service.RankService;
+import net.artisanmc.modules.api.playercommand.PlayerCommandContext;
+import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
+import net.artisanmc.modules.api.text.TextApi;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Logger;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+
+class GuildCommandsTest {
+
+    private Fixture f;
+    private Player owner;
+    private final Map<String, PlayerLookup.Found> known = new HashMap<>();
+    private int reloads;
+    private PlayerCommandDeclaration root;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        f = new Fixture();
+        owner = f.player("Iban");
+        GuildData.online = f.platform::isOnline;
+        Guilds guilds = new Guilds(f.registry, f.store, f.leveling, f.sync, f.guilds, f.bank,
+                new RankService(f.registry, f.store, f.messages, TextApi.NOOP),
+                new AllianceService(f.registry, f.store, f.messages, f.network, f.sync));
+        root = new GuildCommands(guilds, f.messages, TextApi.NOOP, known::get, () -> reloads++, p -> { },
+                Logger.getLogger("GuildCommandsTest")).declaration();
+    }
+
+    private GuildData guild() {
+        f.guilds.createGuild(owner, "Alpha");
+        return f.registry.byName("Alpha");
+    }
+
+    private Player member(GuildData guild, String name) {
+        Player player = f.player(name);
+        guild.invites().add(player.getUniqueId());
+        f.guilds.joinGuild(player, guild);
+        return player;
+    }
+
+    private void run(CommandSender sender, String path, Map<String, Object> args) {
+        PlayerCommandDeclaration node = find(root, GuildCommands.ROOT + (path.isEmpty() ? "" : "." + path));
+        assertNotNull(node, path);
+        node.getExecutor().execute(new Context(sender, args));
+    }
+
+    private static @Nullable PlayerCommandDeclaration find(PlayerCommandDeclaration node, String id) {
+        if (node.getId().equals(id)) return node;
+        for (PlayerCommandDeclaration child : node.getChildren()) {
+            PlayerCommandDeclaration found = find(child, id);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    @Test
+    void declaresMsGuildsCommandsUnderTheSameNames() {
+        assertEquals("guild", root.getName());
+        assertEquals(List.of("g"), root.getAliases());
+        assertEquals(List.of("reload", "help", "create", "disband", "chat", "invite", "revoke", "promote", "demote",
+                        "transfer", "kick", "join", "leave", "bank", "home", "sethome", "delhome", "lands", "info",
+                        "list", "logs", "alliance", "ranks"),
+                root.getChildren().stream().map(PlayerCommandDeclaration::getName).toList());
+        assertEquals(List.of("balance", "deposit", "withdraw"),
+                find(root, "guilds:guild.bank").getChildren().stream().map(PlayerCommandDeclaration::getName).toList());
+        assertEquals(List.of("invite", "accept", "remove"),
+                find(root, "guilds:guild.alliance").getChildren().stream().map(PlayerCommandDeclaration::getName).toList());
+        assertEquals("guilds.reload", find(root, "guilds:guild.reload").getPermission());
+        assertTrue(find(root, "guilds:guild.reload").isConsoleAllowed());
+        assertEquals("guilds.chat", find(root, "guilds:guild.chat").getPermission());
+        assertEquals(List.of("public", "guild", "ally"), find(root, "guilds:guild.chat").getArguments().getFirst().getValues());
+        assertTrue(root.getChildren().stream().allMatch(c -> c.getDescription().keySet().containsAll(List.of("en", "fr"))));
+    }
+
+    @Test
+    void ranksAndDisbandOpenTheModuleMenusAndDisbandConfirmRunsIt() {
+        assertEquals(GuildCommands.RANKS_MENU, find(root, "guilds:guild.ranks").getOpensMenu());
+        assertEquals(GuildCommands.DISBAND_MENU, find(root, "guilds:guild.disband").getOpensMenu());
+        GuildData guild = guild();
+
+        run(owner, "disband.confirm", Map.of());
+
+        assertNull(f.registry.get(guild.getId()));
+    }
+
+    @Test
+    void membersAreNamedWithoutCase() {
+        GuildData guild = guild();
+        Player alice = member(guild, "Alice");
+        guild.getMember(alice.getUniqueId()).setName("Alice");
+        var before = guild.getMember(alice.getUniqueId()).getRank();
+
+        run(owner, "promote", Map.of("member", "alice"));
+
+        assertEquals(before.getOrder() + 1, guild.getMember(alice.getUniqueId()).getRank().getOrder());
+    }
+
+    @Test
+    void aMemberOutsideTheGuildOrNoGuildIsRefused() {
+        guild();
+        run(owner, "kick", Map.of("member", "Nobody"));
+        assertTrue(f.bundle.got(owner, Msg.ERROR_PLAYER_NOT_IN_GUILD));
+
+        Player loner = f.player("Loner");
+        run(loner, "kick", Map.of("member", "Iban"));
+        assertTrue(f.bundle.got(loner, Msg.ERROR_NOT_GUILD_MEMBER));
+    }
+
+    @Test
+    void invitesAPlayerFoundOnTheNetwork() {
+        GuildData guild = guild();
+        UUID bob = UUID.randomUUID();
+        known.put("Bob", new PlayerLookup.Found(bob, "Bob"));
+
+        run(owner, "invite", Map.of("player", "Bob"));
+        run(owner, "invite", Map.of("player", "Ghost"));
+
+        assertTrue(guild.invites().contains(bob));
+        assertTrue(f.bundle.got(owner, Msg.ERROR_PLAYER_NOT_FOUND));
+    }
+
+    @Test
+    void readsAmounts() {
+        assertEquals(1.5, GuildCommands.amount("1,5"));
+        assertEquals(200.0, GuildCommands.amount("200"));
+        assertNull(GuildCommands.amount("-3"));
+        assertNull(GuildCommands.amount("0"));
+        assertNull(GuildCommands.amount("abc"));
+        assertNull(GuildCommands.amount("NaN"));
+        assertNull(GuildCommands.amount("Infinity"));
+
+        guild();
+        run(owner, "bank.withdraw", Map.of("amount", "beaucoup"));
+        assertTrue(f.bundle.got(owner, Msg.ERROR_NEED_POSITIVE_AMOUNT));
+    }
+
+    @Test
+    void depositsInTheBank() {
+        GuildData guild = guild();
+        f.economy.balances.put(owner, 500.0);
+
+        run(owner, "bank.deposit", Map.of("amount", "120"));
+
+        assertEquals(120.0, guild.getBalance());
+    }
+
+    @Test
+    void pagesOfTenLines() {
+        assertNull(GuildCommands.Page.of(null, 0));
+        assertEquals(new GuildCommands.Page(1, 2), GuildCommands.Page.of(null, 15));
+        assertEquals(new GuildCommands.Page(2, 2), GuildCommands.Page.of(2, 15));
+        assertNull(GuildCommands.Page.of(3, 15));
+        assertNull(GuildCommands.Page.of(0, 15));
+        List<Integer> lines = java.util.stream.IntStream.range(0, 15).boxed().toList();
+        assertEquals(List.of(10, 11, 12, 13, 14), GuildCommands.Page.of(2, 15).of(lines));
+    }
+
+    @Test
+    void joinsAndChatsByName() {
+        GuildData guild = guild();
+        Player alice = f.player("Alice");
+        run(alice, "join", Map.of("guild", "Nope"));
+        assertTrue(f.bundle.got(alice, Msg.ERROR_GUILD_NOT_FOUND));
+
+        guild.invites().add(alice.getUniqueId());
+        run(alice, "join", Map.of("guild", "Alpha"));
+        run(alice, "chat", Map.of("mode", "ally"));
+
+        assertEquals(ChatMode.ALLY, guild.getMember(alice.getUniqueId()).getChatMode());
+    }
+
+    @Test
+    void theConsoleNamesTheGuildItReads() {
+        guild();
+        CommandSender console = mock(CommandSender.class);
+
+        run(console, "info", Map.of());
+        assertTrue(f.bundle.got(console, Msg.ERROR_SPECIFY_GUILD));
+
+        run(console, "info", Map.of("guild", "Alpha"));
+        assertTrue(f.bundle.got(console, Msg.INFO_HEADER));
+
+        run(console, "list", Map.of());
+        assertTrue(f.bundle.got(console, Msg.LIST_HEADER));
+        assertFalse(f.bundle.got(console, Msg.LIST_INVALID_PAGE));
+
+        run(console, "reload", Map.of());
+        assertEquals(1, reloads);
+        assertTrue(f.bundle.got(console, Msg.RELOAD));
+    }
+
+    private record Context(CommandSender sender, Map<String, Object> args) implements PlayerCommandContext {
+        @Override public String getCommandId() { return GuildCommands.ROOT; }
+        @Override public CommandSender getSender() { return sender; }
+        @Override public @Nullable Player getPlayer() { return sender instanceof Player p ? p : null; }
+        @Override public String getLanguage() { return "en"; }
+        @Override public Map<String, Object> getArguments() { return args; }
+    }
+}

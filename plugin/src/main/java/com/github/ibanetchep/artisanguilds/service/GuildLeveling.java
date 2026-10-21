@@ -13,13 +13,23 @@ import java.util.logging.Logger;
 /** The levels of config.yml: a guild's level follows its experience. */
 public final class GuildLeveling {
 
-    private final NavigableMap<Integer, GuildLevelInfo> levels = new TreeMap<>();
+    /** Replaced whole by {@link #replace}: readers on any thread see one table or the other. */
+    private volatile NavigableMap<Integer, GuildLevelInfo> levels;
     private final GuildStore store;
 
     public GuildLeveling(NavigableMap<Integer, GuildLevelInfo> levels, GuildStore store) {
-        if (levels.isEmpty()) throw new IllegalStateException("No levels defined in config.yml");
-        this.levels.putAll(levels);
+        this.levels = copy(levels);
         this.store = store;
+    }
+
+    /** The levels of a reloaded config.yml; the guilds keep their experience. */
+    public void replace(NavigableMap<Integer, GuildLevelInfo> levels) {
+        this.levels = copy(levels);
+    }
+
+    private static NavigableMap<Integer, GuildLevelInfo> copy(NavigableMap<Integer, GuildLevelInfo> levels) {
+        if (levels.isEmpty()) throw new IllegalStateException("No levels defined in config.yml");
+        return java.util.Collections.unmodifiableNavigableMap(new TreeMap<>(levels));
     }
 
     /** {@code levels: {1: {xp: 0, max-members: 50}, ...}}; invalid keys are logged and skipped. */
@@ -40,6 +50,7 @@ public final class GuildLeveling {
     }
 
     public int levelFor(long exp) {
+        NavigableMap<Integer, GuildLevelInfo> levels = this.levels;
         int level = levels.firstKey();
         for (GuildLevelInfo info : levels.values()) {
             if (exp < info.requiredXp()) break;
@@ -73,6 +84,7 @@ public final class GuildLeveling {
 
     /** Below the first level: the first. A level config.yml lacks: {@link IllegalArgumentException}. */
     public void setLevel(GuildData guild, int level) {
+        NavigableMap<Integer, GuildLevelInfo> levels = this.levels;
         int target = Math.max(level, levels.firstKey());
         GuildLevelInfo info = levels.get(target);
         if (info == null) throw new IllegalArgumentException("Level " + level + " does not exist");

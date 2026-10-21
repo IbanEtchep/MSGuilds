@@ -55,6 +55,16 @@ public final class GuildMessages {
         }
     }
 
+    /** Like {@link #send}, with {@code rich} values inserted as MiniMessage: a rank's name, a log line. */
+    public void sendRich(CommandSender to, Msg msg, Map<String, String> rich, Object... placeholders) {
+        text.send(to, bundle.format(insert(bundle.raw(to, msg.key()), rich), map(placeholders)));
+    }
+
+    /** {@code lang/*.yml} read again (edits of the server's files). */
+    public void reload() {
+        bundle.reload();
+    }
+
     private static String insert(String template, Map<String, String> values) {
         for (Map.Entry<String, String> e : values.entrySet()) {
             String k = e.getKey();

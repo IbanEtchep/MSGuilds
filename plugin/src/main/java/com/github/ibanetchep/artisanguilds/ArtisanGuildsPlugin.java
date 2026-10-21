@@ -1,6 +1,8 @@
 package com.github.ibanetchep.artisanguilds;
 
 import com.github.ibanetchep.artisanguilds.api.ArtisanGuildsApi;
+import com.github.ibanetchep.artisanguilds.command.GuildCommands;
+import com.github.ibanetchep.artisanguilds.command.PlayerLookup;
 import com.github.ibanetchep.artisanguilds.model.GuildData;
 import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
 import com.github.ibanetchep.artisanguilds.service.AllianceService;
@@ -153,7 +155,23 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                 new GuildChat(registry, messages, getLogger()), messages), this);
         getServer().getServicesManager().register(ArtisanGuildsApi.class,
                 new GuildsApiImpl(registry, store, bank, leveling), this, ServicePriority.Normal);
+        // Removed by Artisan when this plugin disables.
+        api.getPlayerCommands().register(new GuildCommands(running, messages, api.getText(),
+                PlayerLookup.of(network.getPresence(), getServer()),
+                () -> reload(messages, leveling), player -> player.performCommand("lands guild"), getLogger())
+                .declaration());
         return running;
+    }
+
+    /** {@code /guild reload}: config.yml's levels and the lang files, read again. */
+    private void reload(GuildMessages messages, GuildLeveling leveling) {
+        reloadConfig();
+        messages.reload();
+        try {
+            leveling.replace(GuildLeveling.read(getConfig().getConfigurationSection("levels"), getLogger()));
+        } catch (IllegalStateException e) {
+            getLogger().warning("config.yml defines no level: the previous levels stay.");
+        }
     }
 
     /**
