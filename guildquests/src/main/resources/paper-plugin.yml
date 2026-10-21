@@ -1,0 +1,19 @@
+name: ArtisanGuildQuests
+version: '${version}'
+main: com.github.ibanetchep.artisanguildquests.ArtisanGuildQuestsPlugin
+api-version: '1.21'
+folia-supported: true
+authors:
+  - ibanetchep
+description: Bridges ArtisanGuilds guilds into MSQuests as a "guild" quest actor type.
+
+dependencies:
+  server:
+    MSQuests:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    ArtisanGuilds:
+      load: BEFORE
+      required: true
+      join-classpath: true
