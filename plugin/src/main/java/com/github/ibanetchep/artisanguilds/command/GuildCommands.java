@@ -11,6 +11,7 @@ import net.artisanmc.modules.api.playercommand.CommandArgument;
 import net.artisanmc.modules.api.playercommand.PlayerCommandContext;
 import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.playercommand.PlayerCommandExecutor;
+import net.artisanmc.modules.api.playercommand.SuggestionProvider;
 import net.artisanmc.modules.api.text.TextApi;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -47,16 +48,18 @@ public final class GuildCommands {
     private final PlayerLookup players;
     private final Runnable reload;
     private final Consumer<Player> lands;
+    private final GuildSuggestions suggest;
     private final Logger logger;
 
     public GuildCommands(Guilds guilds, GuildMessages messages, TextApi text, PlayerLookup players,
-                         Runnable reload, Consumer<Player> lands, Logger logger) {
+                         GuildSuggestions suggest, Runnable reload, Consumer<Player> lands, Logger logger) {
         this.guilds = guilds;
         this.messages = messages;
         this.text = text;
         this.players = players;
         this.reload = reload;
         this.lands = lands;
+        this.suggest = suggest;
         this.logger = logger;
     }
 
@@ -94,10 +97,10 @@ public final class GuildCommands {
                         .executor(player(this::chat))
                         .build())
                 .child(sub("invite", "Invite a player into your guild", "Inviter un joueur dans votre guilde")
-                        .argument(CommandArgument.string("player"))
+                        .argument(CommandArgument.string("player").suggestions(suggest.invitable()))
                         .executor(player(this::invite)).build())
                 .child(sub("revoke", "Withdraw an invitation", "Annuler une invitation")
-                        .argument(CommandArgument.string("player"))
+                        .argument(CommandArgument.string("player").suggestions(suggest.invited()))
                         .executor(player(this::revoke)).build())
                 .child(memberCommand("promote", "Promote a member", "Promouvoir un membre",
                         (p, member) -> guilds.guilds().promote(p, member.getPlayerId())))
@@ -108,7 +111,7 @@ public final class GuildCommands {
                 .child(memberCommand("kick", "Kick a member out", "Expulser un membre",
                         (p, member) -> guilds.guilds().kick(p, member.getPlayerId())))
                 .child(sub("join", "Join a guild that invited you", "Rejoindre une guilde qui vous a invité")
-                        .argument(CommandArgument.string("guild"))
+                        .argument(CommandArgument.string("guild").suggestions(suggest.guilds()))
                         .executor(player((p, ctx) -> withGuild(p, ctx.get("guild", String.class),
                                 guild -> guilds.guilds().joinGuild(p, guild))))
                         .build())
@@ -136,7 +139,7 @@ public final class GuildCommands {
                 .child(sub("lands", "Your guild's lands", "Les territoires de la guilde")
                         .executor(player((p, ctx) -> lands.accept(p))).build())
                 .child(sub("info", "Show a guild", "Afficher une guilde")
-                        .argument(CommandArgument.string("guild").optional())
+                        .argument(CommandArgument.string("guild").suggestions(suggest.guilds()).optional())
                         .consoleAllowed(true)
                         .executor(this::info).build())
                 .child(sub("list", "List the guilds online", "Lister les guildes en ligne")
@@ -145,16 +148,16 @@ public final class GuildCommands {
                         .executor(this::list).build())
                 .child(sub("logs", "Read a guild's log", "Lire le journal d'une guilde")
                         .argument(CommandArgument.integer("page").optional())
-                        .argument(CommandArgument.string("guild").optional())
+                        .argument(CommandArgument.string("guild").suggestions(suggest.guilds()).optional())
                         .consoleAllowed(true)
                         .executor(this::logs).build())
                 .child(sub("alliance", "Your guild's alliances", "Les alliances de la guilde")
                         .child(allianceCommand("invite", "Offer an alliance to a guild", "Proposer une alliance à une guilde",
-                                (p, guild) -> guilds.alliances().request(p, guild)))
+                                suggest.allianceTargets(), (p, guild) -> guilds.alliances().request(p, guild)))
                         .child(allianceCommand("accept", "Accept a guild's alliance", "Accepter l'alliance d'une guilde",
-                                (p, guild) -> guilds.alliances().accept(p, guild)))
+                                suggest.allianceOffers(), (p, guild) -> guilds.alliances().accept(p, guild)))
                         .child(allianceCommand("remove", "End an alliance", "Rompre une alliance",
-                                (p, guild) -> guilds.alliances().revoke(p, guild)))
+                                suggest.allies(), (p, guild) -> guilds.alliances().revoke(p, guild)))
                         .build())
                 .child(sub("ranks", "Manage your guild's ranks", "Gérer les grades de la guilde")
                         .opensMenu(RANKS_MENU).build())
@@ -331,7 +334,7 @@ public final class GuildCommands {
     private PlayerCommandDeclaration memberCommand(String name, String en, String fr,
                                                    java.util.function.BiConsumer<Player, MemberData> then) {
         return sub(name, en, fr)
-                .argument(CommandArgument.string("member"))
+                .argument(CommandArgument.string("member").suggestions(suggest.members()))
                 .executor(player((p, ctx) -> {
                     MemberData member = member(p, ctx.get("member", String.class));
                     if (member != null) then.accept(p, member);
@@ -339,10 +342,10 @@ public final class GuildCommands {
                 .build();
     }
 
-    private PlayerCommandDeclaration allianceCommand(String name, String en, String fr,
+    private PlayerCommandDeclaration allianceCommand(String name, String en, String fr, SuggestionProvider guilds,
                                                      java.util.function.BiConsumer<Player, GuildData> then) {
         return sub("alliance." + name, name, en, fr)
-                .argument(CommandArgument.string("guild"))
+                .argument(CommandArgument.string("guild").suggestions(guilds))
                 .executor(player((p, ctx) -> withGuild(p, ctx.get("guild", String.class), guild -> then.accept(p, guild))))
                 .build();
     }

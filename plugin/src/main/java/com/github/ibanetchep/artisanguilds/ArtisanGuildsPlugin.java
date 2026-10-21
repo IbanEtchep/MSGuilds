@@ -2,6 +2,7 @@ package com.github.ibanetchep.artisanguilds;
 
 import com.github.ibanetchep.artisanguilds.api.ArtisanGuildsApi;
 import com.github.ibanetchep.artisanguilds.command.GuildCommands;
+import com.github.ibanetchep.artisanguilds.command.GuildSuggestions;
 import com.github.ibanetchep.artisanguilds.command.PlayerLookup;
 import com.github.ibanetchep.artisanguilds.menu.GuildsModule;
 import com.github.ibanetchep.artisanguilds.model.GuildData;
@@ -49,8 +50,8 @@ import java.util.logging.Level;
  */
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
-    /** Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0). */
-    public static final String MIN_API_VERSION = "2.13.0";
+    /** Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument suggestions (2.14.0). */
+    public static final String MIN_API_VERSION = "2.14.0";
 
     /** The namespace of the tables: {@code artisan_guilds_*} by default. */
     public static final String TABLES = "guilds";
@@ -160,6 +161,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         // Removed by Artisan when this plugin disables.
         api.getPlayerCommands().register(new GuildCommands(running, messages, api.getText(),
                 PlayerLookup.of(network.getPresence(), getServer()),
+                new GuildSuggestions(registry, () -> network.getPresence().getOnline(),
+                        id -> getServer().getOfflinePlayer(id).getName()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"), getLogger())
                 .declaration());
         // The ranks and disband menus those commands open, with their data sources and actions.

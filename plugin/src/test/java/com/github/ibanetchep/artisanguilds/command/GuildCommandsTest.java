@@ -7,7 +7,10 @@ import com.github.ibanetchep.artisanguilds.model.GuildData;
 import com.github.ibanetchep.artisanguilds.service.AllianceService;
 import com.github.ibanetchep.artisanguilds.service.Msg;
 import com.github.ibanetchep.artisanguilds.service.RankService;
+import net.artisanmc.modules.api.network.NetworkPlayer;
+import net.artisanmc.modules.api.playercommand.CommandArgument;
 import net.artisanmc.modules.api.playercommand.PlayerCommandContext;
+import net.artisanmc.modules.api.playercommand.SuggestionContext;
 import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.text.TextApi;
 import org.bukkit.command.CommandSender;
@@ -16,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,9 @@ class GuildCommandsTest {
     private final Map<String, PlayerLookup.Found> known = new HashMap<>();
     private int reloads;
     private PlayerCommandDeclaration root;
+    private GuildSuggestions suggestions;
+    private final List<NetworkPlayer> online = new ArrayList<>();
+    private final Map<UUID, String> names = new HashMap<>();
 
     @BeforeEach
     void setUp() throws Exception {
@@ -45,7 +52,8 @@ class GuildCommandsTest {
         Guilds guilds = new Guilds(f.registry, f.store, f.leveling, f.sync, f.guilds, f.bank,
                 new RankService(f.registry, f.store, f.messages, TextApi.NOOP),
                 new AllianceService(f.registry, f.store, f.messages, f.network, f.sync));
-        root = new GuildCommands(guilds, f.messages, TextApi.NOOP, known::get, () -> reloads++, p -> { },
+        suggestions = new GuildSuggestions(f.registry, () -> online, id -> names.get(id));
+        root = new GuildCommands(guilds, f.messages, TextApi.NOOP, known::get, suggestions, () -> reloads++, p -> { },
                 Logger.getLogger("GuildCommandsTest")).declaration();
     }
 
@@ -210,6 +218,54 @@ class GuildCommandsTest {
         run(console, "reload", Map.of());
         assertEquals(1, reloads);
         assertTrue(f.bundle.got(console, Msg.RELOAD));
+    }
+
+    private List<String> suggest(CommandSender sender, String path, String argument) {
+        PlayerCommandDeclaration node = find(root, GuildCommands.ROOT + "." + path);
+        assertNotNull(node, path);
+        CommandArgument arg = node.getArguments().stream().filter(a -> a.getName().equals(argument)).findFirst().orElseThrow();
+        assertNotNull(arg.getSuggestions(), path + " " + argument);
+        return arg.getSuggestions().suggest(new SuggestionContext() {
+            @Override public CommandSender getSender() { return sender; }
+            @Override public List<String> getPreviousArguments() { return List.of(); }
+            @Override public String getInput() { return ""; }
+        });
+    }
+
+    @Test
+    void suggestsGuildsMembersAndPlayersFromMemory() {
+        GuildData alpha = guild();
+        Player bob = member(alpha, "Bob");
+        f.guilds.createGuild(f.player("Carl"), "Beta");
+        GuildData beta = f.registry.byName("Beta");
+
+        assertEquals(java.util.Set.of("Alpha", "Beta"), java.util.Set.copyOf(suggest(owner, "join", "guild")));
+        assertEquals(List.of("Bob"), suggest(owner, "kick", "member"));
+        assertEquals(List.of("Iban"), suggest(bob, "promote", "member"));
+
+        UUID dave = UUID.randomUUID();
+        online.add(new NetworkPlayer(dave, "Dave", "survie"));
+        online.add(new NetworkPlayer(bob.getUniqueId(), "Bob", "lobby"));
+        assertEquals(List.of("Dave"), suggest(owner, "invite", "player"));
+
+        names.put(dave, "Dave");
+        alpha.invites().add(dave);
+        assertEquals(List.of("Dave"), suggest(owner, "revoke", "player"));
+
+        assertEquals(List.of("Beta"), suggest(owner, "alliance.invite", "guild"));
+        beta.allianceInvites().add(alpha.getId());
+        assertEquals(List.of("Beta"), suggest(owner, "alliance.accept", "guild"));
+        assertEquals(List.of(), suggest(owner, "alliance.remove", "guild"));
+        alpha.allianceIds().add(beta.getId());
+        assertEquals(List.of("Beta"), suggest(owner, "alliance.remove", "guild"));
+        assertEquals(List.of(), suggest(owner, "alliance.invite", "guild"));
+    }
+
+    @Test
+    void aPlayerWithoutGuildIsOfferedNoMember() {
+        guild();
+        assertEquals(List.of(), suggest(f.player("Eve"), "kick", "member"));
+        assertEquals(List.of(), suggest(f.player("Fay"), "revoke", "player"));
     }
 
     private record Context(CommandSender sender, Map<String, Object> args) implements PlayerCommandContext {
