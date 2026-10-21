@@ -29,3 +29,9 @@ permissions:
   guilds.reload:
     description: Reload the configuration.
     default: op
+  guilds.bypass:
+    description: Join without an invitation, past the member cap, and act as if every rank permission were granted.
+    default: op
+  guilds.admin:
+    description: Disband or transfer any guild.
+    default: op

@@ -9,18 +9,22 @@ repositories {
     mavenLocal()
     maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
     maven { url = uri("https://repo.artisanmc.net/releases") }
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     // Artisan is required and provides its API at runtime: never shaded.
     compileOnly("net.artisanmc:artisan-core-api:$artisanApiVersion")
+    // Optional at runtime (softdepend): the bank needs an economy.
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") { isTransitive = false }
 
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     testImplementation("net.artisanmc:artisan-core-api:$artisanApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
     testImplementation("com.h2database:h2:2.3.232")
     testImplementation("org.mariadb.jdbc:mariadb-java-client:3.5.1")
+    testImplementation("org.mockito:mockito-core:5.14.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -1,0 +1,8 @@
+config-version: 1
+
+language: en_EN
+
+levels:
+  1:
+    xp: 0
+    max-members: 50
