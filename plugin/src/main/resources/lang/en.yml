@@ -182,3 +182,7 @@ messages:
     bank_withdraw: "Withdraw from the bank"
     manage_alliances: "Manage alliances"
     manage_ranks: "Manage ranks"
+
+  # %msguilds_name% for a player in no guild
+  placeholders:
+    no_guild: "none"

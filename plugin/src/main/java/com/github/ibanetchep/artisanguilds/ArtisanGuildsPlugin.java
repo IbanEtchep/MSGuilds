@@ -4,6 +4,7 @@ import com.github.ibanetchep.artisanguilds.api.ArtisanGuildsApi;
 import com.github.ibanetchep.artisanguilds.command.GuildCommands;
 import com.github.ibanetchep.artisanguilds.command.GuildSuggestions;
 import com.github.ibanetchep.artisanguilds.command.PlayerLookup;
+import com.github.ibanetchep.artisanguilds.placeholder.GuildPlaceholders;
 import com.github.ibanetchep.artisanguilds.menu.GuildsModule;
 import com.github.ibanetchep.artisanguilds.model.GuildData;
 import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
@@ -165,6 +166,13 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                         id -> getServer().getOfflinePlayer(id).getName()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"), getLogger())
                 .declaration());
+        // %msguilds_…% as MSGuilds named them, for PlaceholderAPI too; removed by Artisan on disable.
+        try {
+            api.getPlaceholders().register(GuildPlaceholders.NAMESPACE, new GuildPlaceholders(registry, messages), true);
+        } catch (IllegalStateException e) {
+            getLogger().warning("%" + GuildPlaceholders.NAMESPACE + "_…% not registered: " + e.getMessage()
+                    + " (is MSGuilds still installed?)");
+        }
         // The ranks and disband menus those commands open, with their data sources and actions.
         try {
             api.getModules().register(new GuildsModule(running, messages, getLogger()));
