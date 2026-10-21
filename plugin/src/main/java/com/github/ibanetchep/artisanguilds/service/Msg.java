@@ -102,6 +102,7 @@ public enum Msg {
     ERROR_PLAYER_NOT_INVITED("messages.errors.player_not_invited"),
     ERROR_ALREADY_LOWEST_RANK("messages.errors.already_lowest_rank"),
     ERROR_ALREADY_HIGHEST_RANK("messages.errors.already_highest_rank"),
+    ERROR_RANK_NOT_FOUND("messages.errors.rank_not_found"),
     RANK_CREATED("messages.guild.rank.created");
 
     private final String key;

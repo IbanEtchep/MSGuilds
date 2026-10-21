@@ -3,6 +3,7 @@ package com.github.ibanetchep.artisanguilds;
 import com.github.ibanetchep.artisanguilds.api.ArtisanGuildsApi;
 import com.github.ibanetchep.artisanguilds.command.GuildCommands;
 import com.github.ibanetchep.artisanguilds.command.PlayerLookup;
+import com.github.ibanetchep.artisanguilds.menu.GuildsModule;
 import com.github.ibanetchep.artisanguilds.model.GuildData;
 import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
 import com.github.ibanetchep.artisanguilds.service.AllianceService;
@@ -92,6 +93,7 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         getServer().getServicesManager().unregisterAll(this);
+        if (api != null && api.getModules().has(GuildsModule.ID)) api.getModules().unregister(GuildsModule.ID);
         if (database != null) {
             // Queued writes finish before the pool closes (Artisan waits 5 seconds).
             database.shutdown();
@@ -160,6 +162,12 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                 PlayerLookup.of(network.getPresence(), getServer()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"), getLogger())
                 .declaration());
+        // The ranks and disband menus those commands open, with their data sources and actions.
+        try {
+            api.getModules().register(new GuildsModule(running, messages, getLogger()));
+        } catch (RuntimeException e) {
+            getLogger().log(Level.WARNING, "The guild menus are not available", e);
+        }
         return running;
     }
 

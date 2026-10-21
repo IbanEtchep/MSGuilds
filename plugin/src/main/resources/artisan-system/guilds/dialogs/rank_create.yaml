@@ -1,0 +1,25 @@
+schema: dialog/v1
+title:
+  en: "Add a rank"
+  fr: "Ajouter un rang"
+inputs:
+  - id: name
+    type: text
+    label:
+      en: "Name (2 to 64 characters, MiniMessage allowed)"
+      fr: "Nom (2 à 64 caractères, MiniMessage accepté)"
+    max_length: 256
+buttons:
+  - id: create
+    label:
+      en: "Add"
+      fr: "Ajouter"
+    actions:
+      - guilds:rank_create: "{name}"
+      - open_previous_menu
+  - id: cancel
+    label:
+      en: "Cancel"
+      fr: "Annuler"
+    actions:
+      - open_previous_menu

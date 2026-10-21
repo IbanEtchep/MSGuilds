@@ -6,6 +6,7 @@ import net.artisanmc.modules.api.text.TextApi;
 import net.artisanmc.modules.api.translation.MessageBundle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +59,18 @@ public final class GuildMessages {
     /** Like {@link #send}, with {@code rich} values inserted as MiniMessage: a rank's name, a log line. */
     public void sendRich(CommandSender to, Msg msg, Map<String, String> rich, Object... placeholders) {
         text.send(to, bundle.format(insert(bundle.raw(to, msg.key()), rich), map(placeholders)));
+    }
+
+    /**
+     * The raw text of {@code key} in the viewer's language (the default one without a viewer,
+     * as in the editor's preview), else {@code fallback}: for the rows of the menus. A server's
+     * lang file copied from MSGuilds lacks the keys added since, hence the fallback.
+     */
+    public String text(@Nullable CommandSender viewer, String key, String fallback) {
+        String lang = viewer != null ? bundle.langOf(viewer) : bundle.getDefaultLang();
+        String found = bundle.find(lang, key);
+        if (found == null) found = bundle.find(bundle.getDefaultLang(), key);
+        return found != null ? found : fallback;
     }
 
     /** {@code lang/*.yml} read again (edits of the server's files). */

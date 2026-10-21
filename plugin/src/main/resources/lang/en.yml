@@ -169,3 +169,16 @@ messages:
     player_not_invited: "<red>This player has not been invited"
     already_lowest_rank: "<red>Player is already the lowest rank"
     already_highest_rank: "<red>Player is already the highest rank"
+    rank_not_found: "<red>This rank no longer exists"
+
+  # Names of the rank permissions, in the ranks menu
+  permissions:
+    kick_member: "Kick a member"
+    invite_member: "Invite a member"
+    manage_lands: "Manage lands"
+    promote_member: "Promote a member"
+    demote_member: "Demote a member"
+    manage_home: "Manage the home"
+    bank_withdraw: "Withdraw from the bank"
+    manage_alliances: "Manage alliances"
+    manage_ranks: "Manage ranks"

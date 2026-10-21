@@ -1,0 +1,74 @@
+schema: menu/v1
+title:
+  - kind: plain
+    value:
+      en: "<dark_purple>Rank permissions"
+      fr: "<dark_purple>Permissions du grade"
+size: 54
+inputs:
+  # The rank's id, given by the ranks menu.
+  - name: rank
+    type: string
+  - name: info
+    type: list
+    source: { ref: "guilds:ranks", filter: { id: "{rank}" } }
+  # Empty unless the viewer may manage the ranks of the guild of that rank.
+  - name: permissions
+    type: list
+    source: { ref: "guilds:rank_permissions", params: { rank: "{rank}" } }
+elements:
+  - id: frame
+    positions: "0-9,17-18,26-27,35-36,44-53"
+    material: WHITE_STAINED_GLASS_PANE
+    title: " "
+  - id: rank
+    positions: "4"
+    iterates: { source: info, alias: r }
+    material: PAINTING
+    title: "{r.name}"
+    lore:
+      - en: "<gray>Members: <white>{r.members}"
+        fr: "<gray>Membres : <white>{r.members}"
+  - id: permissions
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: { source: permissions, alias: p }
+    material: GRAY_DYE
+    title: "<red>✘ <gray>{p.name}"
+    lore:
+      - en: "<aqua>[Click] <white>grant"
+        fr: "<aqua>[Clic] <white>accorder"
+    click:
+      left:
+        - guilds:rank_permission: { rank: "{rank}", permission: "{p.key}", granted: "true" }
+        - set_arg: { arg: refresh, value: "{p.key}" }
+    states:
+      - if:
+          - placeholder_equals: { placeholder: "{p.granted}", value: "true" }
+        material: LIME_DYE
+        title: "<green>✔ <white>{p.name}"
+        lore:
+          - en: "<aqua>[Click] <white>revoke"
+            fr: "<aqua>[Clic] <white>retirer"
+        click:
+          left:
+            - guilds:rank_permission: { rank: "{rank}", permission: "{p.key}", granted: "false" }
+            - set_arg: { arg: refresh, value: "{p.key}" }
+  - id: back
+    positions: "49"
+    material: RED_STAINED_GLASS_PANE
+    title:
+      en: "<red>Back"
+      fr: "<red>Retour"
+    click:
+      left:
+        - open_previous_menu
+  - id: rename
+    positions: "53"
+    iterates: { source: info, alias: r }
+    material: NAME_TAG
+    title:
+      en: "<dark_green><bold>Rename the rank"
+      fr: "<dark_green><bold>Renommer le rang"
+    click:
+      left:
+        - open_dialog: { dialog_id: rank_rename, context: { rank: "{r.id}" } }
