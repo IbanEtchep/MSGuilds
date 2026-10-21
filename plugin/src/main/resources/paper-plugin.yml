@@ -12,6 +12,11 @@ dependencies:
       load: BEFORE
       required: true
       join-classpath: true
+    # Only for the one-time import of MSGuilds' guilds from Core's database (LegacyImport).
+    Core:
+      load: BEFORE
+      required: false
+      join-classpath: false
     Vault:
       load: BEFORE
       required: false

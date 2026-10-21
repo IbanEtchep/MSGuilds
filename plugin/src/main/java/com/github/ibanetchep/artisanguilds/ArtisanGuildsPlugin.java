@@ -1,6 +1,9 @@
 package com.github.ibanetchep.artisanguilds;
 
+import com.github.ibanetchep.artisanguilds.storage.CoreDatabase;
 import com.github.ibanetchep.artisanguilds.storage.GuildSchema;
+import com.github.ibanetchep.artisanguilds.storage.GuildTables;
+import com.github.ibanetchep.artisanguilds.storage.LegacyImport;
 import net.artisanmc.modules.api.ArtisanAPI;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
@@ -11,13 +14,16 @@ import java.util.logging.Level;
 
 /**
  * Entry point. Artisan is required: it lends the database, and will serve the commands, menus
- * and messages. Without a compatible Artisan, or with tables it cannot take over, the plugin
+ * and messages. Without a compatible Artisan, or with guilds it cannot import, the plugin
  * disables itself and says why.
  */
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
-    /** Lowest Artisan API this plugin compiles against: {@code moduleFolder} (2.8.0). */
-    public static final String MIN_API_VERSION = "2.8.0";
+    /** Lowest Artisan API this plugin compiles against: {@code tablePrefix} (2.9.0). */
+    public static final String MIN_API_VERSION = "2.9.0";
+
+    /** The namespace of the tables: {@code artisan_guilds_*} by default. */
+    public static final String TABLES = "guilds";
 
     private @Nullable ArtisanAPI api;
 
@@ -31,13 +37,17 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
 
         try {
             DataSource dataSource = api.getDatabase().dataSource(this);
-            GuildSchema.Result result = new GuildSchema(dataSource, api.getDatabase().getDialect()).migrate();
-            logSchema(result);
-        } catch (GuildSchema.LegacySchemaException e) {
+            GuildTables tables = new GuildTables(api.getDatabase().tablePrefix(TABLES));
+            GuildSchema.Result schema = new GuildSchema(dataSource, api.getDatabase().getDialect(), tables).migrate();
+            if (schema.created()) getLogger().info("Guild tables created (" + tables.prefix() + "*).");
+            if (schema.upgraded()) getLogger().info("Guild tables upgraded from version " + schema.fromVersion()
+                    + " to " + schema.toVersion() + ".");
+            importLegacy(dataSource, tables);
+        } catch (LegacyImport.LegacySchemaException e) {
             getLogger().severe("ArtisanGuilds is disabled: " + e.getMessage());
             disable();
             return;
-        } catch (SQLException | IllegalStateException e) {
+        } catch (SQLException | IllegalStateException | IllegalArgumentException e) {
             getLogger().log(Level.SEVERE, "The database is not available, ArtisanGuilds is disabled. "
                     + "Check plugins/Artisan/environment.yml.", e);
             disable();
@@ -52,15 +62,22 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         api = null;
     }
 
-    private void logSchema(GuildSchema.Result result) {
+    /**
+     * The guilds of MSGuilds come from Core's database when Core is enabled, else from Artisan's
+     * own database when MSGuilds' tables are there. Once only; an error stops the start, so that
+     * players never play on an empty copy.
+     */
+    private void importLegacy(DataSource target, GuildTables tables) throws SQLException {
+        DataSource core = CoreDatabase.find(getServer().getPluginManager().getPlugin("Core"));
+        DataSource source = core != null ? core : target;
+        String label = core != null ? "the Core plugin's database" : "Artisan's database";
+        LegacyImport.Result result = new LegacyImport(tables).run(source, label, target);
         switch (result.outcome()) {
-            case CREATED -> getLogger().info("Guild tables created (schema version " + result.toVersion() + ").");
-            case ADOPTED -> getLogger().info("MSGuilds tables taken over as they are"
-                    + (result.addedColumns().isEmpty() ? "" : ", columns added: " + result.addedColumns())
-                    + " (schema version " + result.toVersion() + ").");
-            case UPGRADED -> getLogger().info("Guild tables upgraded from version " + result.fromVersion()
-                    + " to " + result.toVersion() + ".");
-            case UP_TO_DATE -> { }
+            case IMPORTED -> getLogger().info("MSGuilds data imported from " + label + ": " + result.counts()
+                    + ". MSGuilds' tables were left as they are.");
+            case TARGET_NOT_EMPTY -> getLogger().warning("MSGuilds tables found in " + label + ", but ArtisanGuilds "
+                    + "already holds guilds: nothing imported. Empty " + tables.prefix() + "* to import them.");
+            case NO_SOURCE, ALREADY_IMPORTED -> { }
         }
     }
 
