@@ -15,6 +15,8 @@ public enum Msg {
     GUILD_NAME_INVALID_LENGTH("messages.guild.name.invalid_length"),
     GUILD_RANK_CHANGE("messages.guild.rank.change"),
     CHAT_MODE_CHANGED("messages.chat.mode_changed"),
+    CHAT_GUILD_FORMAT("messages.chat.guild_format"),
+    CHAT_ALLY_FORMAT("messages.chat.ally_format"),
     MEMBER_INVITED("messages.members.invite.sent"),
     MEMBER_INVITE_RECEIVED("messages.members.invite.received"),
     MEMBER_INVITE_REVOKED("messages.members.invite.revoked"),

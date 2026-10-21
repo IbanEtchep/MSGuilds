@@ -79,6 +79,8 @@ messages:
     enabled: "<green>Guild chat enabled"
     disabled: "<green>Guild chat disabled"
     mode_changed: "<green>Chat mode set to: <gold>%mode%"
+    guild_format: "<gray>[Guild] %rank% <reset>%player%<white> ➤ %message%"
+    ally_format: "<gray>[Alliance] %rank% <reset>%player%<white> ➤ %message%"
 
   members:
     invite:

@@ -7,6 +7,8 @@ import com.github.ibanetchep.artisanguilds.service.AllianceService;
 import com.github.ibanetchep.artisanguilds.service.BankService;
 import com.github.ibanetchep.artisanguilds.service.GuildEconomy;
 import com.github.ibanetchep.artisanguilds.service.GuildLeveling;
+import com.github.ibanetchep.artisanguilds.chat.ChatListener;
+import com.github.ibanetchep.artisanguilds.chat.GuildChat;
 import com.github.ibanetchep.artisanguilds.service.GuildMessages;
 import com.github.ibanetchep.artisanguilds.service.GuildService;
 import com.github.ibanetchep.artisanguilds.service.RankService;
@@ -147,6 +149,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                 new GuildService(registry, store, leveling, messages, platform, network, sync), bank,
                 new RankService(registry, store, messages, api.getText()),
                 new AllianceService(registry, store, messages, network, sync));
+        getServer().getPluginManager().registerEvents(new ChatListener(registry, store,
+                new GuildChat(registry, messages, getLogger()), messages), this);
         getServer().getServicesManager().register(ArtisanGuildsApi.class,
                 new GuildsApiImpl(registry, store, bank, leveling), this, ServicePriority.Normal);
         return running;

@@ -80,6 +80,8 @@ messages:
     enabled: "<green>Chat de guilde activé"
     disabled: "<green>Chat de guilde désactivé"
     mode_changed: "<green>Mode de chat défini sur : <gold>%mode%"
+    guild_format: "<gray>[Guilde] %rank% <reset>%player%<white> ➤ %message%"
+    ally_format: "<gray>[Alliance] %rank% <reset>%player%<white> ➤ %message%"
 
   members:
     invite:

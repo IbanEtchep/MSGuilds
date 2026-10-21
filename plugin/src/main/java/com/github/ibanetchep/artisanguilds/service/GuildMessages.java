@@ -42,6 +42,27 @@ public final class GuildMessages {
         }
     }
 
+    /**
+     * Like {@link #sendTo}, with {@code rich} values inserted as MiniMessage before the escaped
+     * {@code placeholders}: a rank's colours in a line a player typed.
+     */
+    public void sendRich(UUID playerId, Msg msg, Map<String, String> rich, Object... placeholders) {
+        Player player = platform.player(playerId);
+        if (player != null) {
+            text.send(player, bundle.format(insert(bundle.raw(player, msg.key()), rich), map(placeholders)));
+        } else if (platform.isOnline(playerId)) {
+            platform.sendRemote(playerId, bundle.format(insert(bundle.raw(bundle.getDefaultLang(), msg.key()), rich), map(placeholders)));
+        }
+    }
+
+    private static String insert(String template, Map<String, String> values) {
+        for (Map.Entry<String, String> e : values.entrySet()) {
+            String k = e.getKey();
+            template = template.replace("%" + k + "%", e.getValue()).replace("<" + k + ">", e.getValue()).replace("{" + k + "}", e.getValue());
+        }
+        return template;
+    }
+
     public void sendToMembers(GuildData guild, Msg msg, Object... placeholders) {
         guild.members().forEach(m -> sendTo(m.getPlayerId(), msg, placeholders));
     }
