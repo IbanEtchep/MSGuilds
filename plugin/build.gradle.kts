@@ -1,5 +1,6 @@
 plugins {
     java
+    `maven-publish`
 }
 
 val artisanApiVersion: String by project
@@ -56,4 +57,16 @@ tasks.test {
 
 tasks.jar {
     archiveFileName.set("ArtisanGuilds-${project.version}.jar")
+}
+
+// Plugins that integrate with ArtisanGuilds (MSLands, ArtisanGuildQuests) compile against this jar:
+//   ./gradlew :artisan-guilds-plugin:publishToMavenLocal
+// It is the plugin itself: they use com.github.ibanetchep.artisanguilds.api only.
+publishing {
+    publications {
+        create<MavenPublication>("plugin") {
+            artifactId = "artisan-guilds-plugin"
+            from(components["java"])
+        }
+    }
 }
