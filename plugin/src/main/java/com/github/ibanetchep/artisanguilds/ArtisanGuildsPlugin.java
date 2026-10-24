@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -141,7 +142,11 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         GuildRepository repository = new GuildRepository(dataSource, tables);
         GuildStore store = new GuildStore(repository, database, network, getLogger());
         GuildRegistry registry = new GuildRegistry();
-        registry.load(repository.loadAll());
+        for (GuildData guild : registry.load(repository.loadAll())) {
+            getLogger().warning("Guild " + guild.getName() + " had no rank: the default ranks were given to it.");
+            repository.saveGuild(guild);
+            for (UUID id : guild.getMembers().keySet()) repository.saveMember(guild.getMember(id));
+        }
 
         MessageBundle bundle = api.getTranslations().register(MessageBundleDeclaration.files(this, TABLES, "en", "fr")
                 .withDefaultLang(getConfig().getString("language")));
