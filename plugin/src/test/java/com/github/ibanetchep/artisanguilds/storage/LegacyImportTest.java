@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,8 +46,8 @@ class LegacyImportTest {
         assertTrue(schema.migrate().created());
         GuildSchema.Result again = schema.migrate();
 
-        assertEquals(1, again.fromVersion());
-        assertEquals(1, again.toVersion());
+        assertEquals(2, again.fromVersion());
+        assertEquals(2, again.toVersion());
         sql(empty, "INSERT INTO artisan_guilds_guilds (id, name) VALUES ('" + GUILD + "', 'Alpha')");
         sql(empty, "INSERT INTO artisan_guilds_logs (guild_id, log) VALUES ('" + GUILD + "', 'a')");
         sql(empty, "INSERT INTO artisan_guilds_logs (guild_id, log) VALUES ('" + GUILD + "', 'b')");
@@ -83,6 +84,25 @@ class LegacyImportTest {
         legacyImport.run(core, "Core", artisan);
 
         assertEquals(4, intValue(artisan, "SELECT level FROM artisan_guilds_guilds"));
+    }
+
+    /** Iban's guild-levels build: levels from 0, and the chest's pages. */
+    @Test
+    void importsTheGuildChestAndLevelZero() throws SQLException {
+        createMsGuildsTables(core, true);
+        sql(core, "INSERT INTO guilds (id, name, level) VALUES ('" + GUILD + "', 'Alpha', 0)");
+        sql(core, "CREATE TABLE guilds_chests (guild_id UUID, page INT, contents BLOB, PRIMARY KEY (guild_id, page), "
+                + "FOREIGN KEY (guild_id) REFERENCES guilds(id) ON DELETE CASCADE)");
+        sql(core, "INSERT INTO guilds_chests VALUES ('" + GUILD + "', 1, X'01020304')");
+        sql(core, "INSERT INTO guilds_chests VALUES ('" + GUILD + "', 2, X'05')");
+
+        LegacyImport.Result result = legacyImport.run(core, "Core", artisan);
+
+        assertEquals(2, result.counts().get("chests"));
+        assertEquals(0, intValue(artisan, "SELECT level FROM artisan_guilds_guilds"));
+        var pages = new GuildChestRepository(artisan, TABLES).loadAll().get(UUID.fromString(GUILD));
+        assertEquals(2, pages.size());
+        assertArrayEquals(new byte[]{1, 2, 3, 4}, pages.get(1));
     }
 
     @Test

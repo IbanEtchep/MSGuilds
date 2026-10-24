@@ -1,6 +1,7 @@
 package com.github.ibanetchep.artisanguilds;
 
 import com.github.ibanetchep.artisanguilds.api.ArtisanGuildsApi;
+import com.github.ibanetchep.artisanguilds.chest.GuildChestService;
 import com.github.ibanetchep.artisanguilds.command.GuildCommands;
 import com.github.ibanetchep.artisanguilds.command.GuildSuggestions;
 import com.github.ibanetchep.artisanguilds.command.PlayerLookup;
@@ -19,6 +20,7 @@ import com.github.ibanetchep.artisanguilds.service.GuildService;
 import com.github.ibanetchep.artisanguilds.service.RankService;
 import com.github.ibanetchep.artisanguilds.service.VaultEconomy;
 import com.github.ibanetchep.artisanguilds.storage.CoreDatabase;
+import com.github.ibanetchep.artisanguilds.storage.GuildChestRepository;
 import com.github.ibanetchep.artisanguilds.storage.GuildRepository;
 import com.github.ibanetchep.artisanguilds.storage.GuildSchema;
 import com.github.ibanetchep.artisanguilds.storage.GuildStore;
@@ -96,6 +98,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
     public void onDisable() {
         getServer().getServicesManager().unregisterAll(this);
         if (api != null && api.getModules().has(GuildsModule.ID)) api.getModules().unregister(GuildsModule.ID);
+        // Its open pages are written before the writer stops.
+        if (guilds != null) guilds.chest().shutdown();
         if (database != null) {
             // Queued writes finish before the pool closes (Artisan waits 5 seconds).
             database.shutdown();
@@ -151,10 +155,13 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         sync.subscribe(this, network);
 
         BankService bank = new BankService(registry, store, economy, messages);
+        GuildChestService chest = new GuildChestService(registry, leveling, messages, store,
+                new GuildChestRepository(dataSource, tables), getConfig().getBoolean("chest.enabled", true), getLogger());
+        getServer().getPluginManager().registerEvents(chest, this);
         Guilds running = new Guilds(registry, store, leveling, sync,
-                new GuildService(registry, store, leveling, messages, platform, network, sync), bank,
+                new GuildService(registry, store, leveling, messages, platform, network, sync, chest::isEmpty), bank,
                 new RankService(registry, store, messages, api.getText()),
-                new AllianceService(registry, store, messages, network, sync));
+                new AllianceService(registry, store, messages, network, sync), chest);
         getServer().getPluginManager().registerEvents(new ChatListener(registry, store,
                 new GuildChat(registry, messages, getLogger()), messages), this);
         getServer().getServicesManager().register(ArtisanGuildsApi.class,
@@ -164,7 +171,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                 PlayerLookup.of(network.getPresence(), getServer()),
                 new GuildSuggestions(registry, () -> network.getPresence().getOnline(),
                         id -> getServer().getOfflinePlayer(id).getName()),
-                () -> reload(messages, leveling), player -> player.performCommand("lands guild"), getLogger())
+                () -> reload(messages, leveling), player -> player.performCommand("lands guild"),
+                player -> api.getMenus().open(player, GuildCommands.MAIN_MENU), getLogger())
                 .declaration());
         // %msguilds_…% as MSGuilds named them, for PlaceholderAPI too; removed by Artisan on disable.
         try {
@@ -173,7 +181,7 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
             getLogger().warning("%" + GuildPlaceholders.NAMESPACE + "_…% not registered: " + e.getMessage()
                     + " (is MSGuilds still installed?)");
         }
-        // The ranks and disband menus those commands open, with their data sources and actions.
+        // The guild, members, ranks and disband menus those commands open, with their data sources and actions.
         try {
             api.getModules().register(new GuildsModule(running, messages, getLogger()));
         } catch (RuntimeException e) {

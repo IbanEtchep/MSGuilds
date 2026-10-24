@@ -14,6 +14,7 @@ public record GuildTables(String prefix) {
     public String alliances() { return prefix + "alliances"; }
     public String schemaVersion() { return prefix + "schema_version"; }
     public String imports() { return prefix + "imports"; }
+    public String chests() { return prefix + "chests"; }
 
     /** Constraint names are unique per database on MySQL: prefixed like the tables. */
     String rankLabelKey() { return prefix + "ranks_label"; }

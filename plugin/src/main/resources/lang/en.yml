@@ -14,6 +14,7 @@ messages:
       <gold>/guild bank deposit <amount> <gray>→ Deposit money
       <gold>/guild bank withdraw <amount> <gray>→ Withdraw money
       
+      <gold>/guild chest [page] <gray>→ Open the guild chest
       <gold>/guild lands <gray>→ Manage guild territories
       <gold>/guild kick <gray>→ Kick a lower rank member
       <gold>/guild promote <gray>→ Promote a member
@@ -32,6 +33,16 @@ messages:
       <gold>/guild disband <gray>→ Dissolve your guild
 
   reload: "<green>Guilds plugin reloaded successfully"
+  level:
+    set: "<green>Guild %guild% is now level %level%."
+    unknown: "<red>Level %level% does not exist."
+
+  chest:
+    title: "Guild chest (%page%/%pages%)"
+    locked: "<red>The guild chest unlocks at level %level%."
+    disabled: "<red>The guild chest is not available on this server."
+    page_unavailable: "<red>Chest page %page% is not available (pages: %pages%)."
+    not_empty_disband: "<red>Empty the guild chest before disbanding the guild."
 
   guild:
     created: "<green>Guild successfully created!"
@@ -127,6 +138,7 @@ messages:
     bank_deposit: "%player% deposited %amount%. New balance: %balance%"
     bank_withdraw: "%player% withdrew %amount%. New balance: %balance%"
     guild_disbanded: "Guild disbanded by %player%"
+    chest: "Chest p.%page% (%players%) - deposited: %added%; withdrew: %removed%"
     rank:
       change: "%player% has been %action% to %rank% by %by%"
     home:
@@ -169,6 +181,7 @@ messages:
     player_not_invited: "<red>This player has not been invited"
     already_lowest_rank: "<red>Player is already the lowest rank"
     already_highest_rank: "<red>Player is already the highest rank"
+    cannot_demote_owner: "<red>The founder cannot be demoted. Use /guild transfer to change founder."
     rank_not_found: "<red>This rank no longer exists"
 
   # Names of the rank permissions, in the ranks menu
@@ -182,6 +195,8 @@ messages:
     bank_withdraw: "Withdraw from the bank"
     manage_alliances: "Manage alliances"
     manage_ranks: "Manage ranks"
+    chest_deposit: "Deposit in the guild chest"
+    chest_withdraw: "Take from the guild chest"
 
   # %msguilds_name% for a player in no guild
   placeholders:

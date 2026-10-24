@@ -14,6 +14,7 @@ messages:
       <gold>/guild bank deposit <montant> <gray>→ Déposer de l'argent
       <gold>/guild bank withdraw <montant> <gray>→ Retirer de l'argent
 
+      <gold>/guild chest [page] <gray>→ Ouvrir le coffre de guilde
       <gold>/guild lands <gray>→ Gérer les territoires de la guilde
       <gold>/guild ranks <gray>→ gérer les grades de la guilde
       <gold>/guild kick <gray>→ Exclure un membre de grade inférieur
@@ -33,6 +34,16 @@ messages:
       <gold>/guild disband <gray>→ Dissoudre la guilde
 
   reload: "<green>Plugin Guilds rechargé avec succès"
+  level:
+    set: "<green>La guilde %guild% est maintenant au niveau %level%."
+    unknown: "<red>Le niveau %level% n'existe pas."
+
+  chest:
+    title: "Coffre de guilde (%page%/%pages%)"
+    locked: "<red>Le coffre de guilde se débloque au niveau %level%."
+    disabled: "<red>Le coffre de guilde n'est pas disponible sur ce serveur."
+    page_unavailable: "<red>La page %page% du coffre n'est pas disponible (pages : %pages%)."
+    not_empty_disband: "<red>Videz le coffre de guilde avant de dissoudre la guilde."
 
   guild:
     created: "<green>Guilde créée avec succès !"
@@ -128,6 +139,7 @@ messages:
     bank_deposit: "%player% a déposé %amount%. Nouveau solde : %balance%"
     bank_withdraw: "%player% a retiré %amount%. Nouveau solde : %balance%"
     guild_disbanded: "Guilde dissoute par %player%"
+    chest: "Coffre p.%page% (%players%) - déposé : %added% ; retiré : %removed%"
     rank:
       change: "%player% a été %action% %rank% par %by%"
     home:
@@ -170,6 +182,7 @@ messages:
     player_not_invited: "<red>Ce joueur n'a pas été invité"
     already_lowest_rank: "<red>Le joueur est déjà le plus bas rang"
     already_highest_rank: "<red>Le joueur est déjà le plus haut rang"
+    cannot_demote_owner: "<red>Le fondateur ne peut pas être rétrogradé. Utilisez /guild transfer pour changer de fondateur."
     rank_not_found: "<red>Ce rang n'existe plus"
 
   # Noms des permissions des rangs, dans le menu des rangs
@@ -183,6 +196,8 @@ messages:
     bank_withdraw: "Retirer de l'argent de la banque"
     manage_alliances: "Gérer les alliances"
     manage_ranks: "Gérer les grades"
+    chest_deposit: "Déposer dans le coffre de guilde"
+    chest_withdraw: "Retirer du coffre de guilde"
 
   # %msguilds_name% for a player in no guild
   placeholders:

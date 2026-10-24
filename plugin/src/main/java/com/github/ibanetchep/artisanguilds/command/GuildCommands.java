@@ -36,8 +36,12 @@ public final class GuildCommands {
 
     public static final String ROOT = "guilds:guild";
     /** Menus of the module's folder (lot 4), opened by Artisan in place of an executor. */
+    public static final String MAIN_MENU = "guilds:main";
     public static final String RANKS_MENU = "guilds:ranks";
+    public static final String MEMBERS_MENU = "guilds:members";
     public static final String DISBAND_MENU = "guilds:disband_confirm";
+    /** Also a quest's reward, from the console: {@code guild admin setlevel {actor_name} 3}. */
+    public static final String SETLEVEL_PERMISSION = "guilds.admin.setlevel";
 
     static final int PAGE_SIZE = 10;
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss");
@@ -48,17 +52,20 @@ public final class GuildCommands {
     private final PlayerLookup players;
     private final Runnable reload;
     private final Consumer<Player> lands;
+    private final Consumer<Player> mainMenu;
     private final GuildSuggestions suggest;
     private final Logger logger;
 
     public GuildCommands(Guilds guilds, GuildMessages messages, TextApi text, PlayerLookup players,
-                         GuildSuggestions suggest, Runnable reload, Consumer<Player> lands, Logger logger) {
+                         GuildSuggestions suggest, Runnable reload, Consumer<Player> lands, Consumer<Player> mainMenu,
+                         Logger logger) {
         this.guilds = guilds;
         this.messages = messages;
         this.text = text;
         this.players = players;
         this.reload = reload;
         this.lands = lands;
+        this.mainMenu = mainMenu;
         this.suggest = suggest;
         this.logger = logger;
     }
@@ -69,7 +76,7 @@ public final class GuildCommands {
                 .name("guild")
                 .aliases("g")
                 .description(Map.of("en", "Guilds", "fr", "Guildes"))
-                .executor(player(this::help))
+                .executor(player(this::root))
                 .child(sub("reload", "Reload the configuration and messages", "Recharger la configuration et les messages")
                         .permission("guilds.reload")
                         .consoleAllowed(true)
@@ -130,6 +137,10 @@ public final class GuildCommands {
                                 .executor(player((p, ctx) -> withAmount(p, ctx, amount -> guilds.bank().withdraw(p, amount))))
                                 .build())
                         .build())
+                .child(sub("chest", "Open your guild's chest", "Ouvrir le coffre de la guilde")
+                        .argument(CommandArgument.integer("page").optional())
+                        .executor(player((p, ctx) -> guilds.chest().open(p, ctx.get("page", Integer.class))))
+                        .build())
                 .child(sub("home", "Teleport to your guild's home", "Se téléporter au home de la guilde")
                         .executor(player((p, ctx) -> guilds.guilds().teleportHome(p))).build())
                 .child(sub("sethome", "Set your guild's home here", "Placer le home de la guilde ici")
@@ -161,10 +172,46 @@ public final class GuildCommands {
                         .build())
                 .child(sub("ranks", "Manage your guild's ranks", "Gérer les grades de la guilde")
                         .opensMenu(RANKS_MENU).build())
+                .child(sub("members", "Your guild's members", "Les membres de la guilde")
+                        .opensMenu(MEMBERS_MENU).build())
+                .child(sub("admin", "Guild administration", "Administration des guildes")
+                        // Hidden from players without it; its only sub-command needs it anyway.
+                        .permission(SETLEVEL_PERMISSION)
+                        .child(sub("admin.setlevel", "setlevel", "Set a guild's level", "Définir le niveau d'une guilde")
+                                .permission(SETLEVEL_PERMISSION)
+                                .argument(CommandArgument.string("guild").suggestions(suggest.guilds()))
+                                .argument(CommandArgument.integer("level"))
+                                .consoleAllowed(true)
+                                .executor(this::setLevel).build())
+                        .build())
                 .build();
     }
 
     // --- Executors -------------------------------------------------------------------------------
+
+    /** {@code /guild}: a member gets the guild's menu, anyone else the commands. */
+    void root(Player player, PlayerCommandContext ctx) {
+        if (guilds.registry().member(player.getUniqueId()) != null) mainMenu.accept(player);
+        else help(player, ctx);
+    }
+
+    /** Below the first level: the first. */
+    void setLevel(PlayerCommandContext ctx) {
+        CommandSender sender = ctx.getSender();
+        GuildData guild = guilds.registry().byName(ctx.get("guild", String.class));
+        if (guild == null) {
+            messages.send(sender, Msg.ERROR_GUILD_NOT_FOUND);
+            return;
+        }
+        Integer level = ctx.get("level", Integer.class);
+        try {
+            guilds.leveling().setLevel(guild, level);
+        } catch (IllegalArgumentException e) {
+            messages.send(sender, Msg.LEVEL_UNKNOWN, "level", level);
+            return;
+        }
+        messages.send(sender, Msg.LEVEL_SET, "guild", guild.getName(), "level", guild.getLevel());
+    }
 
     void help(Player player, PlayerCommandContext ctx) {
         player.sendMessage("");

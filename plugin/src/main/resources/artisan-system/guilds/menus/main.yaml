@@ -1,0 +1,125 @@
+schema: menu/v1
+title:
+  - kind: plain
+    value:
+      en: "Guild"
+      fr: "Guilde"
+size: 27
+inputs:
+  # One row: the viewer's guild. Not named "guild": the commands below take an argument of
+  # that name, which module_command would fill from it.
+  - name: info
+    type: list
+    source: { ref: "guilds:guild" }
+background:
+  material: BLACK_STAINED_GLASS_PANE
+  title: " "
+elements:
+  - id: guild
+    positions: "4"
+    iterates: { source: info, alias: g }
+    material: WHITE_BANNER
+    title: "<gold><bold>{g.name}"
+    lore:
+      - en: "<gray>Level: <white>{g.level}<gray>/{g.max_level}"
+        fr: "<gray>Niveau : <white>{g.level}<gray>/{g.max_level}"
+      - en: "<gray>Members: <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} online)"
+        fr: "<gray>Membres : <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} en ligne)"
+      - en: "<gray>Bank: <white>{g.balance}"
+        fr: "<gray>Banque : <white>{g.balance}"
+      - en: "<gray>Founder: <white>{g.owner}"
+        fr: "<gray>Fondateur : <white>{g.owner}"
+      - en: "<gray>Your rank: {g.rank}"
+        fr: "<gray>Ton grade : {g.rank}"
+      - en: "<gray>Created: <white>{g.created}"
+        fr: "<gray>Créée le : <white>{g.created}"
+  - id: members
+    positions: "10"
+    material: PLAYER_HEAD
+    head: "playerhead:{player.name}"
+    title:
+      en: "<yellow>Members"
+      fr: "<yellow>Membres"
+    lore:
+      - en: "<gray>See the members, promote,"
+        fr: "<gray>Voir les membres, les promouvoir,"
+      - en: "<gray>demote or kick them."
+        fr: "<gray>les rétrograder ou les exclure."
+    click:
+      left:
+        - module_command: { command: "guilds:guild.members" }
+  - id: ranks
+    positions: "11"
+    material: NAME_TAG
+    title:
+      en: "<yellow>Ranks"
+      fr: "<yellow>Grades"
+    lore:
+      - en: "<gray>The guild's ranks and permissions."
+        fr: "<gray>Grades et permissions de la guilde."
+    click:
+      left:
+        - module_command: { command: "guilds:guild.ranks" }
+  - id: chest
+    positions: "12"
+    iterates: { source: info, alias: g }
+    material: CHEST
+    title:
+      en: "<yellow>Guild chest"
+      fr: "<yellow>Coffre de guilde"
+    lore:
+      - en: "<gray>Pages: <white>{g.chest_pages}"
+        fr: "<gray>Pages : <white>{g.chest_pages}"
+    click:
+      left:
+        - module_command: { command: "guilds:guild.chest" }
+  - id: bank
+    positions: "13"
+    iterates: { source: info, alias: g }
+    material: GOLD_INGOT
+    title:
+      en: "<yellow>Bank"
+      fr: "<yellow>Banque"
+    lore:
+      - en: "<gray>Balance: <white>{g.balance}"
+        fr: "<gray>Solde : <white>{g.balance}"
+      - ""
+      - en: "<gray>/g bank deposit <amount>"
+        fr: "<gray>/g bank deposit <montant>"
+      - en: "<gray>/g bank withdraw <amount>"
+        fr: "<gray>/g bank withdraw <montant>"
+  - id: home
+    positions: "14"
+    material: RED_BED
+    title:
+      en: "<yellow>Home"
+      fr: "<yellow>Résidence"
+    lore:
+      - en: "<gray>Click: teleport there"
+        fr: "<gray>Clic : s'y téléporter"
+    click:
+      left:
+        - close_menu
+        - module_command: { command: "guilds:guild.home" }
+  - id: logs
+    positions: "15"
+    material: WRITABLE_BOOK
+    title:
+      en: "<yellow>Log"
+      fr: "<yellow>Journal"
+    lore:
+      - en: "<gray>The guild's latest actions."
+        fr: "<gray>Dernières actions de la guilde."
+    click:
+      left:
+        - close_menu
+        - module_command: { command: "guilds:guild.logs" }
+  - id: close
+    positions: "22"
+    material: BARRIER
+    title:
+      en: "<red>Close"
+      fr: "<red>Fermer"
+    click:
+      left:
+        - close_menu

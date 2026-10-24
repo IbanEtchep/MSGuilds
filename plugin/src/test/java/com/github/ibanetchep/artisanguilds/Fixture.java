@@ -1,6 +1,7 @@
 package com.github.ibanetchep.artisanguilds;
 
 import com.github.ibanetchep.artisanguilds.api.GuildLevelInfo;
+import com.github.ibanetchep.artisanguilds.chest.GuildChestService;
 import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
 import com.github.ibanetchep.artisanguilds.model.MemberData;
 import com.github.ibanetchep.artisanguilds.service.BankService;
@@ -9,6 +10,7 @@ import com.github.ibanetchep.artisanguilds.service.GuildLeveling;
 import com.github.ibanetchep.artisanguilds.service.GuildMessages;
 import com.github.ibanetchep.artisanguilds.service.GuildService;
 import com.github.ibanetchep.artisanguilds.service.Msg;
+import com.github.ibanetchep.artisanguilds.storage.GuildChestRepository;
 import com.github.ibanetchep.artisanguilds.storage.GuildRepository;
 import com.github.ibanetchep.artisanguilds.storage.GuildSchema;
 import com.github.ibanetchep.artisanguilds.storage.GuildStore;
@@ -68,6 +70,9 @@ public final class Fixture {
     public final GuildMessages messages;
     public final GuildService guilds;
     public final BankService bank;
+    public final GuildChestService chest;
+    /** What the disband check finds in every guild's chest. */
+    public boolean chestEmpty = true;
 
     public Fixture() throws SQLException {
         this(h2());
@@ -87,8 +92,11 @@ public final class Fixture {
         levels.put(3, new GuildLevelInfo(3, 300, 10));
         leveling = new GuildLeveling(levels, store);
         messages = new GuildMessages(bundle, TextApi.NOOP, platform);
-        guilds = new GuildService(registry, store, leveling, messages, platform, network, sync);
+        guilds = new GuildService(registry, store, leveling, messages, platform, network, sync, id -> chestEmpty);
         bank = new BankService(registry, store, economy, messages);
+        // Disabled: it reads the database only, Paper's items being out of reach here.
+        chest = new GuildChestService(registry, leveling, messages, store, new GuildChestRepository(dataSource, TABLES),
+                false, logger);
         MemberData.names = id -> "player-" + id.toString().substring(0, 4);
     }
 

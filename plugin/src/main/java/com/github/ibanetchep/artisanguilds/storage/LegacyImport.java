@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 /**
  * Copies the guilds of MSGuilds 1.1 ({@code guilds}, {@code guilds_ranks}, {@code guilds_members},
- * {@code guilds_logs}, {@code guilds_alliances}, usually in the database of the Core plugin) into
- * ArtisanGuilds' tables, once.
+ * {@code guilds_logs}, {@code guilds_alliances}, and {@code guilds_chests} where it exists; usually
+ * in the database of the Core plugin) into ArtisanGuilds' tables, once.
  *
  * <p>Runs only when ArtisanGuilds' tables are empty and no import is recorded. The copy is one
  * transaction on the target: on any error nothing is kept and the next start tries again. Each
@@ -37,6 +37,8 @@ public final class LegacyImport {
     static final String MEMBERS = "guilds_members";
     static final String LOGS = "guilds_logs";
     static final String ALLIANCES = "guilds_alliances";
+    /** The guild chest of MSGuilds' guild-levels build, when a server ran it. */
+    static final String CHESTS = "guilds_chests";
 
     private final GuildTables t;
 
@@ -98,7 +100,8 @@ public final class LegacyImport {
                     p.setDouble(3, r.getDouble("balance"));
                     p.setLong(4, r.getLong("exp"));
                     int level = r.getInt("level");
-                    p.setInt(5, r.wasNull() || level < 1 ? 1 : level);
+                    // Levels start at 0 since the guild-levels build; 1.1 had 1 at least.
+                    p.setInt(5, r.wasNull() || level < 0 ? 1 : level);
                     p.setString(6, r.getString("home"));
                     p.setString(7, r.getString("owner_uuid"));
                     p.setTimestamp(8, createdAt(r));
@@ -138,12 +141,22 @@ public final class LegacyImport {
                     p.setString(2, r.getString("guild_b_id"));
                 }));
 
+        counts.put("chests", copyRows(from, to,
+                "SELECT guild_id, page, contents FROM " + CHESTS,
+                "INSERT INTO " + t.chests() + " (guild_id, page, contents) VALUES (?, ?, ?)",
+                (r, p) -> {
+                    p.setString(1, r.getString("guild_id"));
+                    p.setInt(2, r.getInt("page"));
+                    p.setBytes(3, r.getBytes("contents"));
+                }));
+
         // The copy must be whole: a row lost on the way rolls everything back.
         check(from, to, GUILDS, t.guilds());
         check(from, to, RANKS, t.ranks());
         check(from, to, MEMBERS, t.members());
         check(from, to, LOGS, t.logs());
         check(from, to, ALLIANCES, t.alliances());
+        check(from, to, CHESTS, t.chests());
         return counts;
     }
 

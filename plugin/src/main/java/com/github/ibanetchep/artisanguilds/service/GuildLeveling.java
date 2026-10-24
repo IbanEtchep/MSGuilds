@@ -6,6 +6,7 @@ import com.github.ibanetchep.artisanguilds.storage.GuildStore;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -32,19 +33,30 @@ public final class GuildLeveling {
         return java.util.Collections.unmodifiableNavigableMap(new TreeMap<>(levels));
     }
 
-    /** {@code levels: {1: {xp: 0, max-members: 50}, ...}}; invalid keys are logged and skipped. */
+    /**
+     * {@code levels: {0: {xp: 0, max-members: 5}, 2: {xp: 2, chest-rows: 3, chest-pages: 1}, ...}};
+     * invalid keys are logged and skipped. The chest is cumulative: a level that does not set
+     * {@code chest-rows} or {@code chest-pages} keeps the previous level's; rows are 0 to 6.
+     */
     public static NavigableMap<Integer, GuildLevelInfo> read(@Nullable ConfigurationSection section, Logger logger) {
         NavigableMap<Integer, GuildLevelInfo> levels = new TreeMap<>();
         if (section == null) return levels;
+        NavigableMap<Integer, String> keys = new TreeMap<>();
         for (String key : section.getKeys(false)) {
-            int level;
             try {
-                level = Integer.parseInt(key);
+                keys.put(Integer.parseInt(key), key);
             } catch (NumberFormatException e) {
                 logger.warning("Invalid level key in config.yml: " + key);
-                continue;
             }
-            levels.put(level, new GuildLevelInfo(level, section.getLong(key + ".xp", 0L), section.getInt(key + ".max-members", 0)));
+        }
+        int rows = 0;
+        int pages = 0;
+        for (Map.Entry<Integer, String> e : keys.entrySet()) {
+            String key = e.getValue();
+            rows = section.getInt(key + ".chest-rows", rows);
+            pages = section.getInt(key + ".chest-pages", pages);
+            levels.put(e.getKey(), new GuildLevelInfo(e.getKey(), section.getLong(key + ".xp", 0L),
+                    section.getInt(key + ".max-members", 0), Math.max(0, Math.min(6, rows)), Math.max(0, pages)));
         }
         return levels;
     }
@@ -66,6 +78,16 @@ public final class GuildLeveling {
     /** The guild's level as its experience gives it. */
     public GuildLevelInfo info(GuildData guild) {
         return levels.get(levelFor(guild.getExp()));
+    }
+
+    /** The highest level config.yml defines. */
+    public int maxLevel() {
+        return levels.lastKey();
+    }
+
+    /** The first level with a guild chest; -1 when none has one. */
+    public int chestUnlockLevel() {
+        return levels.values().stream().filter(l -> l.chestPages() > 0).mapToInt(GuildLevelInfo::level).findFirst().orElse(-1);
     }
 
     public void addExp(GuildData guild, long exp) {

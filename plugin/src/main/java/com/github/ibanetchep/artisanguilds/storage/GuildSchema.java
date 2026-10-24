@@ -84,7 +84,14 @@ public final class GuildSchema {
                         "CREATE TABLE " + t.imports() + " ("
                                 + "source VARCHAR(255) NOT NULL, "
                                 + "imported_at " + timestamp + " NOT NULL, "
-                                + "counts VARCHAR(255) NOT NULL)"));
+                                + "counts VARCHAR(255) NOT NULL)"),
+                // The guild chest: one row per non-empty page, its items as Paper serializes them.
+                List.of("CREATE TABLE " + t.chests() + " ("
+                        + "guild_id CHAR(36) NOT NULL, "
+                        + "page INT NOT NULL, "
+                        + "contents " + (dialect == DatabaseDialect.H2 ? "BLOB" : "MEDIUMBLOB") + " NOT NULL, "
+                        + "PRIMARY KEY (guild_id, page), "
+                        + "FOREIGN KEY (guild_id) REFERENCES " + t.guilds() + "(id) ON DELETE CASCADE)"));
     }
 
     public Result migrate() throws SQLException {

@@ -1,0 +1,80 @@
+schema: menu/v1
+title:
+  - kind: plain
+    value:
+      en: "Guild members"
+      fr: "Membres de la guilde"
+size: 54
+inputs:
+  - name: members
+    type: list
+    source: { ref: "guilds:members" }
+background:
+  material: BLACK_STAINED_GLASS_PANE
+  title: " "
+elements:
+  - id: list
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: { source: members, alias: m }
+    material: PLAYER_HEAD
+    head: "playerhead:{m.name}"
+    title: "<white>{m.name}"
+    lore:
+      - en: "<gray>Rank: {m.rank}"
+        fr: "<gray>Grade : {m.rank}"
+      # Status, then only what the viewer may do to this member (the commands' own rules).
+      - en: '{(m.online ? "<green>Online" : "<gray>Offline") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Left click <gray>: promote" : "") + (m.can_demote ? "\n<yellow>Right click <gray>: demote" : "") + (m.can_kick ? "\n<red>Shift + right click <gray>: kick" : "")}'
+        fr: '{(m.online ? "<green>En ligne" : "<gray>Hors ligne") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Clic gauche <gray>: promouvoir" : "") + (m.can_demote ? "\n<yellow>Clic droit <gray>: rétrograder" : "") + (m.can_kick ? "\n<red>Shift + clic droit <gray>: exclure" : "")}'
+    click:
+      left:
+        - if:
+            - expression: m.can_promote
+          do:
+            - module_command: { command: "guilds:guild.promote", args: { member: "{m.name}" } }
+            - set_arg: { arg: refresh, value: "1" }
+      right:
+        - if:
+            - expression: m.can_demote
+          do:
+            - module_command: { command: "guilds:guild.demote", args: { member: "{m.name}" } }
+            - set_arg: { arg: refresh, value: "1" }
+      shift_right:
+        - if:
+            - expression: m.can_kick
+          do:
+            - open_dialog: { dialog_id: kick, context: { target: "{m.name}" } }
+  - id: previous
+    positions: "45"
+    states:
+      - if:
+          - not:
+              pagination_at_first: list
+        material: ARROW
+        title:
+          en: "<yellow>Previous page"
+          fr: "<yellow>Page précédente"
+        click:
+          left:
+            - pagination_prev: list
+  - id: next
+    positions: "53"
+    states:
+      - if:
+          - not:
+              pagination_at_last: list
+        material: ARROW
+        title:
+          en: "<yellow>Next page"
+          fr: "<yellow>Page suivante"
+        click:
+          left:
+            - pagination_next: list
+  - id: back
+    positions: "49"
+    material: ARROW
+    title:
+      en: "<gray>Back"
+      fr: "<gray>Retour"
+    click:
+      left:
+        - open_previous_menu

@@ -14,7 +14,11 @@ public enum GuildPermission {
     MANAGE_HOME("Gérer le home"),
     BANK_WITHDRAW("Retirer de l'argent de la banque"),
     MANAGE_ALLIANCES("Gérer les alliances"),
-    MANAGE_RANKS("Gérer les grades");
+    MANAGE_RANKS("Gérer les grades"),
+
+    // Guild chest
+    CHEST_DEPOSIT("Déposer dans le coffre de guilde"),
+    CHEST_WITHDRAW("Retirer du coffre de guilde");
 
     private final String name;
 

@@ -4,6 +4,8 @@ import com.github.ibanetchep.artisanguilds.GuildPlatform;
 import com.github.ibanetchep.artisanguilds.model.GuildData;
 import net.artisanmc.modules.api.text.TextApi;
 import net.artisanmc.modules.api.translation.MessageBundle;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -71,6 +73,11 @@ public final class GuildMessages {
         String found = bundle.find(lang, key);
         if (found == null) found = bundle.find(bundle.getDefaultLang(), key);
         return found != null ? found : fallback;
+    }
+
+    /** The message as a component in the viewer's language: an inventory's title. */
+    public Component component(CommandSender viewer, Msg msg, Object... placeholders) {
+        return MiniMessage.miniMessage().deserialize(bundle.format(bundle.raw(viewer, msg.key()), map(placeholders)));
     }
 
     /** {@code lang/*.yml} read again (edits of the server's files). */

@@ -39,6 +39,8 @@ class GuildCommandsTest {
     private Player owner;
     private final Map<String, PlayerLookup.Found> known = new HashMap<>();
     private int reloads;
+    /** Who {@code /guild} sent to the guild menu. */
+    private final java.util.List<Player> menus = new java.util.ArrayList<>();
     private PlayerCommandDeclaration root;
     private GuildSuggestions suggestions;
     private final List<NetworkPlayer> online = new ArrayList<>();
@@ -51,10 +53,10 @@ class GuildCommandsTest {
         GuildData.online = f.platform::isOnline;
         Guilds guilds = new Guilds(f.registry, f.store, f.leveling, f.sync, f.guilds, f.bank,
                 new RankService(f.registry, f.store, f.messages, TextApi.NOOP),
-                new AllianceService(f.registry, f.store, f.messages, f.network, f.sync));
+                new AllianceService(f.registry, f.store, f.messages, f.network, f.sync), f.chest);
         suggestions = new GuildSuggestions(f.registry, () -> online, id -> names.get(id));
         root = new GuildCommands(guilds, f.messages, TextApi.NOOP, known::get, suggestions, () -> reloads++, p -> { },
-                Logger.getLogger("GuildCommandsTest")).declaration();
+                p -> menus.add(p), Logger.getLogger("GuildCommandsTest")).declaration();
     }
 
     private GuildData guild() {
@@ -89,8 +91,8 @@ class GuildCommandsTest {
         assertEquals("guild", root.getName());
         assertEquals(List.of("g"), root.getAliases());
         assertEquals(List.of("reload", "help", "create", "disband", "chat", "invite", "revoke", "promote", "demote",
-                        "transfer", "kick", "join", "leave", "bank", "home", "sethome", "delhome", "lands", "info",
-                        "list", "logs", "alliance", "ranks"),
+                        "transfer", "kick", "join", "leave", "bank", "chest", "home", "sethome", "delhome", "lands",
+                        "info", "list", "logs", "alliance", "ranks", "members", "admin"),
                 root.getChildren().stream().map(PlayerCommandDeclaration::getName).toList());
         assertEquals(List.of("balance", "deposit", "withdraw"),
                 find(root, "guilds:guild.bank").getChildren().stream().map(PlayerCommandDeclaration::getName).toList());
@@ -266,6 +268,58 @@ class GuildCommandsTest {
         guild();
         assertEquals(List.of(), suggest(f.player("Eve"), "kick", "member"));
         assertEquals(List.of(), suggest(f.player("Fay"), "revoke", "player"));
+    }
+
+    @Test
+    void guildOpensTheMenuForAMemberAndTheHelpForAnyoneElse() {
+        Player stranger = f.player("Eve");
+        run(stranger, "", Map.of());
+        assertTrue(f.bundle.got(stranger, Msg.HELP_NO_GUILD));
+        assertEquals(List.of(), menus);
+
+        guild();
+        run(owner, "", Map.of());
+        assertEquals(List.of(owner), menus);
+        assertEquals(GuildCommands.MEMBERS_MENU, find(root, "guilds:guild.members").getOpensMenu());
+    }
+
+    @Test
+    void setLevelPutsTheGuildAtTheLevelsExperienceFromTheConsole() {
+        GuildData guild = guild();
+        CommandSender console = mock(CommandSender.class);
+        PlayerCommandDeclaration setlevel = find(root, "guilds:guild.admin.setlevel");
+        assertTrue(setlevel.isConsoleAllowed());
+        assertEquals(GuildCommands.SETLEVEL_PERMISSION, setlevel.getPermission());
+
+        run(console, "admin.setlevel", Map.of("guild", "alpha", "level", 3));
+        assertEquals(3, guild.getLevel());
+        assertEquals(300, guild.getExp());
+        assertTrue(f.bundle.got(console, Msg.LEVEL_SET));
+
+        run(console, "admin.setlevel", Map.of("guild", "Alpha", "level", 9));
+        assertEquals(3, guild.getLevel());
+        assertTrue(f.bundle.got(console, Msg.LEVEL_UNKNOWN));
+
+        run(console, "admin.setlevel", Map.of("guild", "Nope", "level", 1));
+        assertTrue(f.bundle.got(console, Msg.ERROR_GUILD_NOT_FOUND));
+    }
+
+    /** Every {@code module_command} of the shipped menus names a command of the tree. */
+    @Test
+    void shippedMenusCallCommandsThatExist() {
+        var system = net.artisanmc.modules.api.template.TemplateDeclaration.fromResources(getClass().getClassLoader(),
+                "artisan-system/guilds", "guilds_menus", 1, List.of(
+                        "menus/main.yaml", "menus/members.yaml", "menus/disband_confirm.yaml", "dialogs/kick.yaml")).build();
+        java.util.regex.Pattern call = java.util.regex.Pattern.compile("module_command: \\{ command: \"([^\"]+)\"");
+        int calls = 0;
+        for (String path : system.getPaths()) {
+            var m = call.matcher(new String(system.getFile(path), java.nio.charset.StandardCharsets.UTF_8));
+            while (m.find()) {
+                calls++;
+                assertNotNull(find(root, m.group(1)), path + ": " + m.group(1));
+            }
+        }
+        assertTrue(calls >= 9, "calls found: " + calls);
     }
 
     private record Context(CommandSender sender, Map<String, Object> args) implements PlayerCommandContext {

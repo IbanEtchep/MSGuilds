@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * A player's actions on their guild, as MSGuilds' {@code GuildServiceImpl}: each checks, tells
@@ -39,9 +40,11 @@ public final class GuildService {
     private final GuildPlatform platform;
     private final NetworkApi network;
     private final GuildSync sync;
+    private final Predicate<UUID> chestEmpty;
 
+    /** {@code chestEmpty}: nothing is left in the guild's chest, which disbanding would lose. */
     public GuildService(GuildRegistry registry, GuildStore store, GuildLeveling leveling, GuildMessages messages,
-                        GuildPlatform platform, NetworkApi network, GuildSync sync) {
+                        GuildPlatform platform, NetworkApi network, GuildSync sync, Predicate<UUID> chestEmpty) {
         this.registry = registry;
         this.store = store;
         this.leveling = leveling;
@@ -49,6 +52,7 @@ public final class GuildService {
         this.platform = platform;
         this.network = network;
         this.sync = sync;
+        this.chestEmpty = chestEmpty;
     }
 
     public void createGuild(Player player, String name) {
@@ -119,6 +123,10 @@ public final class GuildService {
         }
         if (!guild.getMember(player.getUniqueId()).isOwner() && !player.hasPermission(ADMIN)) {
             messages.send(player, Msg.ERROR_NOT_GUILD_OWNER);
+            return;
+        }
+        if (!chestEmpty.test(guild.getId())) {
+            messages.send(player, Msg.CHEST_NOT_EMPTY_DISBAND);
             return;
         }
         GuildDisbandEvent event = new GuildDisbandEvent(guild);
@@ -272,29 +280,21 @@ public final class GuildService {
         return guild;
     }
 
-    /** Only a member of a lower rank. */
+    /** Only a member of a lower rank ({@link MemberRules#kickRefusal}). */
     public void kick(Player player, UUID targetId) {
-        if (player.getUniqueId().equals(targetId)) {
-            messages.send(player, Msg.ERROR_KICK_SELF);
-            return;
-        }
         GuildData guild = registry.byPlayer(player.getUniqueId());
         if (guild == null) {
             messages.send(player, Msg.ERROR_NOT_GUILD_MEMBER);
             return;
         }
-        MemberData self = guild.getMember(player.getUniqueId());
-        if (!self.isGranted(GuildPermission.KICK_MEMBER)) {
-            messages.send(player, Msg.ERROR_INSUFFICIENT_RANK);
-            return;
-        }
         MemberData target = guild.getMember(targetId);
         if (target == null) {
-            messages.send(player, Msg.ERROR_PLAYER_NOT_IN_GUILD);
+            messages.send(player, player.getUniqueId().equals(targetId) ? Msg.ERROR_KICK_SELF : Msg.ERROR_PLAYER_NOT_IN_GUILD);
             return;
         }
-        if (target.isOwner() || (self.getRank().getOrder() <= target.getRank().getOrder() && !self.isOwner())) {
-            messages.send(player, Msg.ERROR_KICK_RANK);
+        Msg refusal = MemberRules.kickRefusal(guild.getMember(player.getUniqueId()), target);
+        if (refusal != null) {
+            messages.send(player, refusal);
             return;
         }
 
@@ -322,19 +322,12 @@ public final class GuildService {
             return;
         }
         MemberData self = guild.getMember(player.getUniqueId());
-        if (self.getRank().getOrder() <= target.getRank().getOrder() && !self.isOwner()) {
-            messages.send(player, up ? Msg.ERROR_TARGET_RANK_TOO_HIGH : Msg.ERROR_RANK_TOO_HIGH);
-            return;
-        }
-        if (!self.isGranted(up ? GuildPermission.PROMOTE_MEMBER : GuildPermission.DEMOTE_MEMBER)) {
-            messages.send(player, Msg.ERROR_INSUFFICIENT_RANK);
+        Msg refusal = up ? MemberRules.promoteRefusal(self, target) : MemberRules.demoteRefusal(self, target);
+        if (refusal != null) {
+            messages.send(player, refusal);
             return;
         }
         RankData next = up ? guild.rankAbove(target.getRank()) : guild.rankBelow(target.getRank());
-        if (next == null) {
-            messages.send(player, up ? Msg.ERROR_ALREADY_HIGHEST_RANK : Msg.ERROR_ALREADY_LOWEST_RANK);
-            return;
-        }
 
         target.setRank(next);
         store.saveMember(target);

@@ -78,9 +78,15 @@ public final class RankService {
         messages.send(player, Msg.RANK_CREATED, "rank", rank.getName());
     }
 
+    /** From above only ({@link MemberRules#rankRefusal}): nobody grants permissions to their own rank. */
     public void setPermission(Player player, RankData rank, GuildPermission permission, boolean granted) {
         GuildData guild = managed(player);
         if (guild == null) return;
+        Msg refusal = MemberRules.rankRefusal(guild.getMember(player.getUniqueId()), rank);
+        if (refusal != null) {
+            messages.send(player, refusal);
+            return;
+        }
         rank.setPermission(permission, granted);
         store.saveGuild(guild);
     }

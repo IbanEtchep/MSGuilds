@@ -58,8 +58,8 @@ class GuildMenuTest {
         f = new Fixture();
         guilds = new Guilds(f.registry, f.store, f.leveling, f.sync, f.guilds, f.bank,
                 new RankService(f.registry, f.store, f.messages, TextApi.NOOP),
-                new AllianceService(f.registry, f.store, f.messages, f.network, f.sync));
-        data = new GuildMenuData(f.registry, f.messages);
+                new AllianceService(f.registry, f.store, f.messages, f.network, f.sync), f.chest);
+        data = new GuildMenuData(f.registry, f.leveling, f.messages);
         actions = new GuildMenuActions(f.registry, guilds.ranks(), f.messages);
         owner = f.player("Iban");
         f.guilds.createGuild(owner, "Alpha");
@@ -98,6 +98,39 @@ class GuildMenuTest {
         assertEquals(false, data.viewer(member).getFirst().get("can_manage_ranks"));
         assertEquals(false, data.viewer(outsider).getFirst().get("in_guild"));
         assertEquals(true, data.viewer(null).getFirst().get("can_manage_ranks"), "the editor's preview shows the managed menu");
+    }
+
+    @Test
+    void guildRowShowsTheLevelAndItsChestToMembersOnly() {
+        Map<String, Object> row = data.guild(owner).getFirst();
+        assertEquals("Alpha", row.get("name"));
+        assertEquals(1, row.get("level"));
+        assertEquals(3, row.get("max_level"));
+        assertEquals(1, row.get("members"));
+        assertEquals(2, row.get("max_members"));
+        assertEquals(0, row.get("chest_pages"));
+        assertEquals("Iban", row.get("owner"));
+        assertEquals(true, row.get("can_manage_ranks"));
+        assertTrue(data.guild(f.player("Eve")).isEmpty());
+        assertEquals(1, data.guild(null).size(), "the editor's preview");
+    }
+
+    @Test
+    void memberRowsSayWhatTheViewerMayDoToEach() {
+        Player bob = member(guild, "Bob");
+        guild.getMember(bob.getUniqueId()).setName("Bob");
+
+        Map<String, Object> seenByOwner = data.members(owner).stream().filter(r -> r.get("name").equals("Bob")).findFirst().orElseThrow();
+        assertEquals(true, seenByOwner.get("can_promote"));
+        assertEquals(false, seenByOwner.get("can_demote"), "already the lowest rank");
+        assertEquals(true, seenByOwner.get("can_kick"));
+        assertEquals(false, seenByOwner.get("self"));
+
+        Map<String, Object> founderSeenByBob = data.members(bob).getFirst();
+        assertEquals(true, founderSeenByBob.get("owner"));
+        assertEquals(false, founderSeenByBob.get("can_kick"));
+        assertEquals(false, founderSeenByBob.get("can_demote"));
+        assertTrue(data.ranks(owner).stream().allMatch(r -> r.get("can_manage").equals(true)), "the founder manages every rank");
     }
 
     @Test
@@ -284,7 +317,8 @@ class GuildMenuTest {
         new GuildsModule(guilds, f.messages, Logger.getLogger("GuildMenuTest")).onEnable(api);
 
         verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
-        assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS, GuildsModule.MEMBERS),
+        assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.GUILD, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS,
+                        GuildsModule.MEMBERS),
                 sources.refs());
         assertEquals(Set.of(GuildsModule.RANK_MOVE, GuildsModule.RANK_DELETE, GuildsModule.RANK_RENAME,
                 GuildsModule.RANK_CREATE, GuildsModule.RANK_PERMISSION), actionRegistry.names());
@@ -306,7 +340,8 @@ class GuildMenuTest {
             String kind = path.startsWith("menus/") ? "menu/v1" : "dialog/v1";
             assertEquals(kind, doc.get("schema"), path);
         }
-        for (String ref : List.of(GuildCommands.RANKS_MENU, GuildCommands.DISBAND_MENU)) {
+        for (String ref : List.of(GuildCommands.MAIN_MENU, GuildCommands.MEMBERS_MENU, GuildCommands.RANKS_MENU,
+                GuildCommands.DISBAND_MENU)) {
             String[] parts = ref.split(":");
             assertEquals(GuildsModule.FOLDER, parts[0]);
             assertTrue(system.getPaths().contains("menus/" + parts[1] + ".yaml"), ref);

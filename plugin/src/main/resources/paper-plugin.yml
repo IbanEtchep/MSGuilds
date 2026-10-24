@@ -35,3 +35,6 @@ permissions:
   guilds.admin:
     description: Disband or transfer any guild.
     default: op
+  guilds.admin.setlevel:
+    description: "Set a guild's level: /guild admin setlevel <guild> <level> (also from the console, a quest's reward)."
+    default: op
