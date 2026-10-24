@@ -1,5 +1,6 @@
 package com.github.ibanetchep.artisanguilds.model;
 
+import com.github.ibanetchep.artisanguilds.service.DefaultRank;
 import com.github.ibanetchep.artisanguilds.storage.GuildRepository.GuildRow;
 import com.github.ibanetchep.artisanguilds.storage.GuildRepository.MemberRow;
 import com.github.ibanetchep.artisanguilds.storage.GuildRepository.RankRow;
@@ -51,18 +52,25 @@ public final class GuildRegistry {
         return removed;
     }
 
-    /** Replaces everything with what the database holds. */
-    public void load(List<GuildRow> rows) {
+    /**
+     * Replaces everything with what the database holds. Returns the guilds stored without any rank,
+     * which were given the default ones and must be saved.
+     */
+    public List<GuildData> load(List<GuildRow> rows) {
         guilds.clear();
+        List<GuildData> repaired = new ArrayList<>();
         for (GuildRow row : rows) {
             GuildData guild = create(row);
             guilds.put(guild.getId(), guild);
+            if (row.ranks().isEmpty()) repaired.add(guild);
         }
+        return repaired;
     }
 
     public GuildData create(GuildRow row) {
         GuildData guild = new GuildData(row.id(), row.name(), row.ownerId(), row.balance(), row.exp(), row.level(),
                 row.home(), row.createdAt(), this::get);
+        if (row.ranks().isEmpty()) DefaultRank.create().forEach(guild::addRank);
         apply(guild, row);
         return guild;
     }
@@ -99,7 +107,7 @@ public final class GuildRegistry {
         for (MemberRow m : row.members()) {
             after.add(m.playerId());
             RankData rank = m.rankId() != null ? guild.getRank(m.rankId()) : null;
-            if (rank == null) rank = guild.defaultRank();
+            if (rank == null) rank = m.playerId().equals(guild.getOwnerId()) ? guild.getRanks().getLast() : guild.defaultRank();
             MemberData member = guild.getMember(m.playerId());
             if (member == null) guild.putMember(new MemberData(m.playerId(), guild, rank, m.chatMode()));
             else {
