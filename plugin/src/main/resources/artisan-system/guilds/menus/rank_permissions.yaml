@@ -27,16 +27,20 @@ elements:
     material: PAINTING
     title: "{r.name}"
     lore:
-      - en: "<gray>Members: <white>{r.members}"
-        fr: "<gray>Membres : <white>{r.members}"
+      en:
+        - "<gray>Members: <white>{r.members}"
+      fr:
+        - "<gray>Membres : <white>{r.members}"
   - id: permissions
     positions: "10-16,19-25,28-34,37-43"
     iterates: { source: permissions, alias: p }
     material: GRAY_DYE
     title: "<red>✘ <gray>{p.name}"
     lore:
-      - en: "<aqua>[Click] <white>grant"
-        fr: "<aqua>[Clic] <white>accorder"
+      en:
+        - "<aqua>[Click] <white>grant"
+      fr:
+        - "<aqua>[Clic] <white>accorder"
     click:
       left:
         - guilds:rank_permission: { rank: "{rank}", permission: "{p.key}", granted: "true" }
@@ -47,8 +51,10 @@ elements:
         material: LIME_DYE
         title: "<green>✔ <white>{p.name}"
         lore:
-          - en: "<aqua>[Click] <white>revoke"
-            fr: "<aqua>[Clic] <white>retirer"
+          en:
+            - "<aqua>[Click] <white>revoke"
+          fr:
+            - "<aqua>[Clic] <white>retirer"
         click:
           left:
             - guilds:rank_permission: { rank: "{rank}", permission: "{p.key}", granted: "false" }

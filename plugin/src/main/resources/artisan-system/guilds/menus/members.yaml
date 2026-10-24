@@ -19,12 +19,14 @@ elements:
     material: PLAYER_HEAD
     head: "playerhead:{m.name}"
     title: "<white>{m.name}"
+    # The rank, the status, then only what the viewer may do to this member (the commands' own rules).
     lore:
-      - en: "<gray>Rank: {m.rank}"
-        fr: "<gray>Grade : {m.rank}"
-      # Status, then only what the viewer may do to this member (the commands' own rules).
-      - en: '{(m.online ? "<green>Online" : "<gray>Offline") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Left click <gray>: promote" : "") + (m.can_demote ? "\n<yellow>Right click <gray>: demote" : "") + (m.can_kick ? "\n<red>Shift + right click <gray>: kick" : "")}'
-        fr: '{(m.online ? "<green>En ligne" : "<gray>Hors ligne") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Clic gauche <gray>: promouvoir" : "") + (m.can_demote ? "\n<yellow>Clic droit <gray>: rétrograder" : "") + (m.can_kick ? "\n<red>Shift + clic droit <gray>: exclure" : "")}'
+      en:
+        - "<gray>Rank: {m.rank}"
+        - '{(m.online ? "<green>Online" : "<gray>Offline") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Left click <gray>: promote" : "") + (m.can_demote ? "\n<yellow>Right click <gray>: demote" : "") + (m.can_kick ? "\n<red>Shift + right click <gray>: kick" : "")}'
+      fr:
+        - "<gray>Grade : {m.rank}"
+        - '{(m.online ? "<green>En ligne" : "<gray>Hors ligne") + (m.can_promote || m.can_demote || m.can_kick ? "\n" : "") + (m.can_promote ? "\n<yellow>Clic gauche <gray>: promouvoir" : "") + (m.can_demote ? "\n<yellow>Clic droit <gray>: rétrograder" : "") + (m.can_kick ? "\n<red>Shift + clic droit <gray>: exclure" : "")}'
     click:
       left:
         - if:

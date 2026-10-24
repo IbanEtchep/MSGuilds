@@ -22,10 +22,12 @@ elements:
     material: PAINTING
     title: "{r.name}"
     lore:
-      - en: "<gray>Members: <white>{r.members}"
-        fr: "<gray>Membres : <white>{r.members}"
-      - en: "<gray>Only a rank without members can be deleted."
-        fr: "<gray>Seul un grade sans membre peut être supprimé."
+      en:
+        - "<gray>Members: <white>{r.members}"
+        - "<gray>Only a rank without members can be deleted."
+      fr:
+        - "<gray>Membres : <white>{r.members}"
+        - "<gray>Seul un grade sans membre peut être supprimé."
   - id: confirm
     positions: "11"
     iterates: { source: info, alias: r }

@@ -20,10 +20,12 @@ elements:
     material: TNT
     title: "<gold>{v.guild_name}"
     lore:
-      - en: "<red>Its members, bank and lands are lost."
-        fr: "<red>Ses membres, sa banque et ses territoires sont perdus."
-      - en: "<red>This cannot be undone."
-        fr: "<red>C'est définitif."
+      en:
+        - "<red>Its members, bank and lands are lost."
+        - "<red>This cannot be undone."
+      fr:
+        - "<red>Ses membres, sa banque et ses territoires sont perdus."
+        - "<red>C'est définitif."
   - id: confirm
     positions: "11"
     material: LIME_CONCRETE

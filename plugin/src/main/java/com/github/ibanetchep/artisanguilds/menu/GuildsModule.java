@@ -39,7 +39,7 @@ public final class GuildsModule implements ArtisanModule {
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
-    static final int SYSTEM_VERSION = 2;
+    static final int SYSTEM_VERSION = 3;
     static final String SYSTEM_ROOT = "artisan-system/guilds";
     static final List<String> SYSTEM_FILES = List.of(
             "menus/main.yaml",

@@ -21,18 +21,20 @@ elements:
     material: WHITE_BANNER
     title: "<gold><bold>{g.name}"
     lore:
-      - en: "<gray>Level: <white>{g.level}<gray>/{g.max_level}"
-        fr: "<gray>Niveau : <white>{g.level}<gray>/{g.max_level}"
-      - en: "<gray>Members: <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} online)"
-        fr: "<gray>Membres : <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} en ligne)"
-      - en: "<gray>Bank: <white>{g.balance}"
-        fr: "<gray>Banque : <white>{g.balance}"
-      - en: "<gray>Founder: <white>{g.owner}"
-        fr: "<gray>Fondateur : <white>{g.owner}"
-      - en: "<gray>Your rank: {g.rank}"
-        fr: "<gray>Ton grade : {g.rank}"
-      - en: "<gray>Created: <white>{g.created}"
-        fr: "<gray>Créée le : <white>{g.created}"
+      en:
+        - "<gray>Level: <white>{g.level}<gray>/{g.max_level}"
+        - "<gray>Members: <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} online)"
+        - "<gray>Bank: <white>{g.balance}"
+        - "<gray>Founder: <white>{g.owner}"
+        - "<gray>Your rank: {g.rank}"
+        - "<gray>Created: <white>{g.created}"
+      fr:
+        - "<gray>Niveau : <white>{g.level}<gray>/{g.max_level}"
+        - "<gray>Membres : <white>{g.members}<gray>/{g.max_members} <dark_gray>({g.online} en ligne)"
+        - "<gray>Banque : <white>{g.balance}"
+        - "<gray>Fondateur : <white>{g.owner}"
+        - "<gray>Ton grade : {g.rank}"
+        - "<gray>Créée le : <white>{g.created}"
   - id: members
     positions: "10"
     material: PLAYER_HEAD
@@ -41,10 +43,12 @@ elements:
       en: "<yellow>Members"
       fr: "<yellow>Membres"
     lore:
-      - en: "<gray>See the members, promote,"
-        fr: "<gray>Voir les membres, les promouvoir,"
-      - en: "<gray>demote or kick them."
-        fr: "<gray>les rétrograder ou les exclure."
+      en:
+        - "<gray>See the members, promote,"
+        - "<gray>demote or kick them."
+      fr:
+        - "<gray>Voir les membres, les promouvoir,"
+        - "<gray>les rétrograder ou les exclure."
     click:
       left:
         - module_command: { command: "guilds:guild.members" }
@@ -55,8 +59,10 @@ elements:
       en: "<yellow>Ranks"
       fr: "<yellow>Grades"
     lore:
-      - en: "<gray>The guild's ranks and permissions."
-        fr: "<gray>Grades et permissions de la guilde."
+      en:
+        - "<gray>The guild's ranks and permissions."
+      fr:
+        - "<gray>Grades et permissions de la guilde."
     click:
       left:
         - module_command: { command: "guilds:guild.ranks" }
@@ -68,8 +74,10 @@ elements:
       en: "<yellow>Guild chest"
       fr: "<yellow>Coffre de guilde"
     lore:
-      - en: "<gray>Pages: <white>{g.chest_pages}"
-        fr: "<gray>Pages : <white>{g.chest_pages}"
+      en:
+        - "<gray>Pages: <white>{g.chest_pages}"
+      fr:
+        - "<gray>Pages : <white>{g.chest_pages}"
     click:
       left:
         - module_command: { command: "guilds:guild.chest" }
@@ -81,13 +89,16 @@ elements:
       en: "<yellow>Bank"
       fr: "<yellow>Banque"
     lore:
-      - en: "<gray>Balance: <white>{g.balance}"
-        fr: "<gray>Solde : <white>{g.balance}"
-      - ""
-      - en: "<gray>/g bank deposit <amount>"
-        fr: "<gray>/g bank deposit <montant>"
-      - en: "<gray>/g bank withdraw <amount>"
-        fr: "<gray>/g bank withdraw <montant>"
+      en:
+        - "<gray>Balance: <white>{g.balance}"
+        - ""
+        - "<gray>/g bank deposit <amount>"
+        - "<gray>/g bank withdraw <amount>"
+      fr:
+        - "<gray>Solde : <white>{g.balance}"
+        - ""
+        - "<gray>/g bank deposit <montant>"
+        - "<gray>/g bank withdraw <montant>"
   - id: home
     positions: "14"
     material: RED_BED
@@ -95,8 +106,10 @@ elements:
       en: "<yellow>Home"
       fr: "<yellow>Résidence"
     lore:
-      - en: "<gray>Click: teleport there"
-        fr: "<gray>Clic : s'y téléporter"
+      en:
+        - "<gray>Click: teleport there"
+      fr:
+        - "<gray>Clic : s'y téléporter"
     click:
       left:
         - close_menu
@@ -108,8 +121,10 @@ elements:
       en: "<yellow>Log"
       fr: "<yellow>Journal"
     lore:
-      - en: "<gray>The guild's latest actions."
-        fr: "<gray>Dernières actions de la guilde."
+      en:
+        - "<gray>The guild's latest actions."
+      fr:
+        - "<gray>Dernières actions de la guilde."
     click:
       left:
         - close_menu

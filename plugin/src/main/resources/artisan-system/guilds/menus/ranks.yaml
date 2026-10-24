@@ -24,18 +24,22 @@ elements:
     material: PAINTING
     title: "{r.name}"
     lore:
-      - en: "<gray>Members: <white>{r.members}"
-        fr: "<gray>Membres : <white>{r.members}"
-      - ""
-      - en: "<aqua>[Left click] <white>manage the permissions"
-        fr: "<aqua>[Clic gauche] <white>gérer les permissions"
-      - en: "<aqua>[Right click] <white>delete the rank"
-        fr: "<aqua>[Clic droit] <white>supprimer le grade"
-      - ""
-      - en: "<aqua>[Shift + left click] <white>move down"
-        fr: "<aqua>[Shift + clic gauche] <white>déplacer vers le bas"
-      - en: "<aqua>[Shift + right click] <white>move up"
-        fr: "<aqua>[Shift + clic droit] <white>déplacer vers le haut"
+      en:
+        - "<gray>Members: <white>{r.members}"
+        - ""
+        - "<aqua>[Left click] <white>manage the permissions"
+        - "<aqua>[Right click] <white>delete the rank"
+        - ""
+        - "<aqua>[Shift + left click] <white>move down"
+        - "<aqua>[Shift + right click] <white>move up"
+      fr:
+        - "<gray>Membres : <white>{r.members}"
+        - ""
+        - "<aqua>[Clic gauche] <white>gérer les permissions"
+        - "<aqua>[Clic droit] <white>supprimer le grade"
+        - ""
+        - "<aqua>[Shift + clic gauche] <white>déplacer vers le bas"
+        - "<aqua>[Shift + clic droit] <white>déplacer vers le haut"
     click:
       left:
         - open_menu: { menu_id: rank_permissions, context: { rank: "{r.id}" } }
@@ -88,8 +92,10 @@ elements:
           en: "<red>You cannot manage the ranks"
           fr: "<red>Vous ne pouvez pas gérer les grades"
         lore:
-          - en: "<gray>Ask your guild's owner for the permission."
-            fr: "<gray>Demandez la permission au chef de votre guilde."
+          en:
+            - "<gray>Ask your guild's owner for the permission."
+          fr:
+            - "<gray>Demandez la permission au chef de votre guilde."
   - id: add_rank
     positions: "53"
     iterates: { source: viewer, alias: v }
