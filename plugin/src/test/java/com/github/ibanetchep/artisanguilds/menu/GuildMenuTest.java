@@ -1,6 +1,10 @@
 package com.github.ibanetchep.artisanguilds.menu;
 
 import com.github.ibanetchep.artisanguilds.Fixture;
+import com.github.ibanetchep.artisanguilds.settings.GuildSettings;
+import net.artisanmc.modules.api.model.ModelRegistry;
+import net.artisanmc.modules.api.screen.EditorScreenDeclaration;
+import net.artisanmc.modules.api.screen.EditorScreenRegistry;
 import com.github.ibanetchep.artisanguilds.Guilds;
 import com.github.ibanetchep.artisanguilds.api.GuildPermission;
 import com.github.ibanetchep.artisanguilds.command.GuildCommands;
@@ -306,6 +310,10 @@ class GuildMenuTest {
         DataSourceRegistry sources = new DataSourceRegistry();
         ActionRegistry actionRegistry = new ActionRegistry();
         TemplateRegistry templates = new TemplateRegistry();
+        ModelRegistry models = new ModelRegistry();
+        EditorScreenRegistry screens = new EditorScreenRegistry();
+        models.bindOwner(GuildsModule.ID);
+        screens.bindOwner(GuildsModule.ID);
         sources.bindOwner(GuildsModule.ID);
         actionRegistry.bindOwner(GuildsModule.ID);
         templates.bindOwner(GuildsModule.ID);
@@ -313,8 +321,10 @@ class GuildMenuTest {
         when(api.getDataSources()).thenReturn(sources);
         when(api.getActionRegistry()).thenReturn(actionRegistry);
         when(api.getTemplates()).thenReturn(templates);
+        when(api.getModels()).thenReturn(models);
+        when(api.getScreens()).thenReturn(screens);
 
-        new GuildsModule(guilds, f.messages, Logger.getLogger("GuildMenuTest")).onEnable(api);
+        new GuildsModule(guilds, f.messages, () -> {}, Logger.getLogger("GuildMenuTest")).onEnable(api);
 
         verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
         assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.GUILD, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS,
@@ -327,6 +337,9 @@ class GuildMenuTest {
         assertTrue(system.isSystem());
         assertEquals(GuildsModule.SYSTEM_FILES, system.getPaths());
         assertEquals(1, sources.fetch(GuildsModule.VIEWER, owner, Map.of()).size());
+        assertTrue(models.has(GuildSettings.MODEL));
+        assertEquals(List.of(GuildSettings.TABLE),
+                screens.declared().stream().map(EditorScreenDeclaration::getTable).toList());
     }
 
     /** The menus the commands open are shipped, and every file reads as YAML of its kind. */

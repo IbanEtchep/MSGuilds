@@ -47,7 +47,7 @@ public interface ArtisanGuildsApi {
 
     GuildLevelInfo getLevelInfo(Guild guild);
 
-    /** Null for a level config.yml does not define. */
+    /** Null for a level data/settings.yml does not define. */
     @Nullable GuildLevelInfo getLevelInfo(int level);
 
     void addExp(Guild guild, long exp);

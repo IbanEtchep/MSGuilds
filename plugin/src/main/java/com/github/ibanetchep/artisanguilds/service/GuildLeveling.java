@@ -11,7 +11,7 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-/** The levels of config.yml: a guild's level follows its experience. */
+/** The levels of data/settings.yml: a guild's level follows its experience. */
 public final class GuildLeveling {
 
     /** Replaced whole by {@link #replace}: readers on any thread see one table or the other. */
@@ -23,13 +23,13 @@ public final class GuildLeveling {
         this.store = store;
     }
 
-    /** The levels of a reloaded config.yml; the guilds keep their experience. */
+    /** The levels of a reloaded data/settings.yml; the guilds keep their experience. */
     public void replace(NavigableMap<Integer, GuildLevelInfo> levels) {
         this.levels = copy(levels);
     }
 
     private static NavigableMap<Integer, GuildLevelInfo> copy(NavigableMap<Integer, GuildLevelInfo> levels) {
-        if (levels.isEmpty()) throw new IllegalStateException("No levels defined in config.yml");
+        if (levels.isEmpty()) throw new IllegalStateException("No levels defined in data/settings.yml");
         return java.util.Collections.unmodifiableNavigableMap(new TreeMap<>(levels));
     }
 
