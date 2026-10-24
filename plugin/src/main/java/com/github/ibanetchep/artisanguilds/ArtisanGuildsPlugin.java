@@ -36,6 +36,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,8 +54,11 @@ import java.util.logging.Level;
  */
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
-    /** Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument suggestions (2.14.0). */
-    public static final String MIN_API_VERSION = "2.14.0";
+    /**
+     * Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument
+     * suggestions (2.14.0), messages in the module's folder (2.17.0).
+     */
+    public static final String MIN_API_VERSION = "2.17.0";
 
     /** The namespace of the tables: {@code artisan_guilds_*} by default. */
     public static final String TABLES = "guilds";
@@ -128,7 +132,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
 
     /** Reads the guilds, wires the services and serves {@link ArtisanGuildsApi}. */
     private Guilds start(ArtisanAPI api, DataSource dataSource, GuildTables tables) throws SQLException {
-        copyLegacyFiles();
+        File moduleFolder = moduleFolder(api);
+        copyLegacyFiles(moduleFolder);
         saveDefaultConfig();
         reloadConfig();
 
@@ -143,8 +148,11 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         GuildRegistry registry = new GuildRegistry();
         registry.load(repository.loadAll());
 
-        MessageBundle bundle = api.getTranslations().register(MessageBundleDeclaration.files(this, TABLES, "en", "fr")
-                .withDefaultLang(getConfig().getString("language")));
+        // The edited lang files of plugins/ArtisanGuilds/lang/ move to the module's folder once.
+        MessageBundleDeclaration messageFiles = MessageBundleDeclaration.files(this, TABLES, "en", "fr")
+                .withDefaultLang(getConfig().getString("language"));
+        MessageBundle bundle = api.getTranslations().register(
+                moduleFolder != null ? messageFiles.inFolder(moduleFolder) : messageFiles);
         GuildMessages messages = new GuildMessages(bundle, api.getText(), platform);
         GuildEconomy economy = getServer().getPluginManager().getPlugin("Vault") != null
                 ? new VaultEconomy(api.getText()) : VaultEconomy.NONE;
@@ -202,17 +210,35 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
     }
 
     /**
-     * MSGuilds' config.yml and edited lang files, copied once into this plugin's folder when it
-     * has none: the levels and messages a server set keep applying.
+     * plugins/Artisan/modules/guilds/, where the messages live beside the menus; null when Artisan
+     * gives none, the messages then staying in this plugin's folder.
      */
-    private void copyLegacyFiles() {
+    private @Nullable File moduleFolder(ArtisanAPI api) {
+        try {
+            return api.getProjectRoots().moduleFolder(GuildsModule.FOLDER, GuildsModule.ID, null);
+        } catch (RuntimeException e) {
+            getLogger().log(Level.WARNING, "No folder plugins/Artisan/modules/" + GuildsModule.FOLDER
+                    + ": the messages stay in plugins/" + getName() + "/lang/", e);
+            return null;
+        }
+    }
+
+    /**
+     * MSGuilds' config.yml and edited lang files, copied once when this plugin has none: the
+     * levels and messages a server set keep applying. A lang file goes to the data folder, from
+     * where the bundle moves it to the module's folder; one the module's folder holds is not
+     * copied again.
+     */
+    private void copyLegacyFiles(@Nullable File moduleFolder) {
         Path legacy = getDataFolder().toPath().resolveSibling("MSGuilds");
         Map<String, String> files = Map.of("config.yml", "config.yml",
                 "lang/en_EN.yml", "lang/en.yml", "lang/fr_FR.yml", "lang/fr.yml");
         files.forEach((from, to) -> {
             Path source = legacy.resolve(from);
             Path target = getDataFolder().toPath().resolve(to);
-            if (!Files.isRegularFile(source) || Files.exists(target)) return;
+            boolean moved = moduleFolder != null && to.startsWith("lang/") && (Files.exists(moduleFolder.toPath().resolve(to))
+                    || Files.exists(moduleFolder.toPath().resolve(to.replace(".yml", ".yaml"))));
+            if (!Files.isRegularFile(source) || Files.exists(target) || moved) return;
             try {
                 Files.createDirectories(target.getParent());
                 Files.copy(source, target);

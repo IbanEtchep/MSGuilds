@@ -35,7 +35,7 @@ public final class GuildsModule implements ArtisanModule {
 
     public static final String ID = "guilds";
     /** The module's folder: the {@code guilds} of {@code guilds:ranks}. */
-    static final String FOLDER = "guilds";
+    public static final String FOLDER = "guilds";
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
