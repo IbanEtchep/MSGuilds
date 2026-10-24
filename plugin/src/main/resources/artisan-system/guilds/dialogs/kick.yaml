@@ -1,0 +1,23 @@
+schema: dialog/v1
+title:
+  en: "Kick a member"
+  fr: "Exclure un membre"
+body:
+  - type: text
+    text:
+      en: "<gray>Kick <white>{target}<gray> from the guild?"
+      fr: "<gray>Exclure <white>{target}<gray> de la guilde ?"
+buttons:
+  - id: kick
+    label:
+      en: "<red>Kick"
+      fr: "<red>Exclure"
+    actions:
+      - module_command: { command: "guilds:guild.kick", args: { member: "{target}" } }
+      - open_previous_menu
+  - id: cancel
+    label:
+      en: "<gray>Cancel"
+      fr: "<gray>Annuler"
+    actions:
+      - open_previous_menu

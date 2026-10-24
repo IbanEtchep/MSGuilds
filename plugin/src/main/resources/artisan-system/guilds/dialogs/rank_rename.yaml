@@ -1,0 +1,25 @@
+schema: dialog/v1
+title:
+  en: "Rename the rank"
+  fr: "Renommer le rang"
+inputs:
+  - id: name
+    type: text
+    label:
+      en: "New name (2 to 64 characters, MiniMessage allowed)"
+      fr: "Nouveau nom (2 à 64 caractères, MiniMessage accepté)"
+    max_length: 256
+buttons:
+  - id: rename
+    label:
+      en: "Rename"
+      fr: "Renommer"
+    actions:
+      - guilds:rank_rename: { rank: "{rank}", name: "{name}" }
+      - open_previous_menu
+  - id: cancel
+    label:
+      en: "Cancel"
+      fr: "Annuler"
+    actions:
+      - open_previous_menu

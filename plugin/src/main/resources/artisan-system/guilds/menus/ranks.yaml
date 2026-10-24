@@ -1,0 +1,113 @@
+schema: menu/v1
+title:
+  - kind: plain
+    value:
+      en: "<dark_purple>Guild ranks"
+      fr: "<dark_purple>Grades de guilde"
+size: 54
+inputs:
+  - name: viewer
+    type: list
+    source: { ref: "guilds:viewer" }
+  # Empty unless the viewer may manage the ranks (owner or MANAGE_RANKS).
+  - name: ranks
+    type: list
+    source: { ref: "guilds:ranks" }
+elements:
+  - id: frame
+    positions: "0-9,17-18,26-27,35-36,44-53"
+    material: WHITE_STAINED_GLASS_PANE
+    title: " "
+  - id: ranks
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: { source: ranks, alias: r }
+    material: PAINTING
+    title: "{r.name}"
+    lore:
+      en:
+        - "<gray>Members: <white>{r.members}"
+        - ""
+        - "<aqua>[Left click] <white>manage the permissions"
+        - "<aqua>[Right click] <white>delete the rank"
+        - ""
+        - "<aqua>[Shift + left click] <white>move down"
+        - "<aqua>[Shift + right click] <white>move up"
+      fr:
+        - "<gray>Membres : <white>{r.members}"
+        - ""
+        - "<aqua>[Clic gauche] <white>gérer les permissions"
+        - "<aqua>[Clic droit] <white>supprimer le grade"
+        - ""
+        - "<aqua>[Shift + clic gauche] <white>déplacer vers le bas"
+        - "<aqua>[Shift + clic droit] <white>déplacer vers le haut"
+    click:
+      left:
+        - open_menu: { menu_id: rank_permissions, context: { rank: "{r.id}" } }
+      right:
+        - open_menu: { menu_id: rank_delete_confirm, context: { rank: "{r.id}" } }
+      shift_left:
+        - guilds:rank_move: { rank: "{r.id}", direction: down }
+        - set_arg: { arg: refresh, value: "{r.id}" }
+      shift_right:
+        - guilds:rank_move: { rank: "{r.id}", direction: up }
+        - set_arg: { arg: refresh, value: "{r.id}" }
+  - id: previous
+    positions: "48"
+    material: ARROW
+    title:
+      en: "<yellow>Previous"
+      fr: "<yellow>Précédent"
+    click:
+      left:
+        - pagination_prev: ranks
+    states:
+      - if:
+          - pagination_at_first: ranks
+        material: WHITE_STAINED_GLASS_PANE
+        title: " "
+  - id: next
+    positions: "50"
+    material: ARROW
+    title:
+      en: "<yellow>Next"
+      fr: "<yellow>Suivant"
+    click:
+      left:
+        - pagination_next: ranks
+    states:
+      - if:
+          - pagination_at_last: ranks
+        material: WHITE_STAINED_GLASS_PANE
+        title: " "
+  - id: access
+    positions: "49"
+    iterates: { source: viewer, alias: v }
+    material: WHITE_STAINED_GLASS_PANE
+    title: " "
+    states:
+      - if:
+          - placeholder_equals: { placeholder: "{v.can_manage_ranks}", value: "false" }
+        material: BARRIER
+        title:
+          en: "<red>You cannot manage the ranks"
+          fr: "<red>Vous ne pouvez pas gérer les grades"
+        lore:
+          en:
+            - "<gray>Ask your guild's owner for the permission."
+          fr:
+            - "<gray>Demandez la permission au chef de votre guilde."
+  - id: add_rank
+    positions: "53"
+    iterates: { source: viewer, alias: v }
+    material: EMERALD
+    title:
+      en: "<dark_green><bold>Add a rank"
+      fr: "<dark_green><bold>Ajouter un rang"
+    click:
+      left:
+        - open_dialog: rank_create
+    states:
+      - if:
+          - placeholder_equals: { placeholder: "{v.can_manage_ranks}", value: "false" }
+        material: WHITE_STAINED_GLASS_PANE
+        title: " "

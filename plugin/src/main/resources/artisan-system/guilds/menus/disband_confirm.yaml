@@ -1,0 +1,47 @@
+schema: menu/v1
+title:
+  - kind: plain
+    value:
+      en: "<dark_red>Disband your guild?"
+      fr: "<dark_red>Dissoudre votre guilde ?"
+size: 27
+inputs:
+  - name: viewer
+    type: list
+    source: { ref: "guilds:viewer" }
+elements:
+  - id: frame
+    positions: "0-26"
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
+  - id: guild
+    positions: "13"
+    iterates: { source: viewer, alias: v }
+    material: TNT
+    title: "<gold>{v.guild_name}"
+    lore:
+      en:
+        - "<red>Its members, bank and lands are lost."
+        - "<red>This cannot be undone."
+      fr:
+        - "<red>Ses membres, sa banque et ses territoires sont perdus."
+        - "<red>C'est définitif."
+  - id: confirm
+    positions: "11"
+    material: LIME_CONCRETE
+    title:
+      en: "<green>Disband"
+      fr: "<green>Dissoudre"
+    click:
+      left:
+        - module_command: { command: "guilds:guild.disband.confirm" }
+        - close_menu
+  - id: cancel
+    positions: "15"
+    material: RED_CONCRETE
+    title:
+      en: "<red>Cancel"
+      fr: "<red>Annuler"
+    click:
+      left:
+        - close_menu

@@ -1,0 +1,40 @@
+name: ArtisanGuilds
+version: '${version}'
+main: com.github.ibanetchep.artisanguilds.ArtisanGuildsPlugin
+api-version: '1.21'
+description: Guilds, their ranks, bank, home and alliances, on Artisan.
+authors:
+  - ibanetchep
+
+dependencies:
+  server:
+    Artisan:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    # Only for the one-time import of MSGuilds' guilds from Core's database (LegacyImport).
+    Core:
+      load: BEFORE
+      required: false
+      join-classpath: false
+    Vault:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  guilds.chat:
+    description: Use the guild and alliance chat.
+    default: true
+  guilds.reload:
+    description: Reload the configuration.
+    default: op
+  guilds.bypass:
+    description: Join without an invitation, past the member cap, and act as if every rank permission were granted.
+    default: op
+  guilds.admin:
+    description: Disband or transfer any guild.
+    default: op
+  guilds.admin.setlevel:
+    description: "Set a guild's level: /guild admin setlevel <guild> <level> (also from the console, a quest's reward)."
+    default: op
