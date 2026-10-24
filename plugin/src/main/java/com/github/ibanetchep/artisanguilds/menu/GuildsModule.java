@@ -1,6 +1,7 @@
 package com.github.ibanetchep.artisanguilds.menu;
 
 import com.github.ibanetchep.artisanguilds.Guilds;
+import com.github.ibanetchep.artisanguilds.settings.GuildSettings;
 import com.github.ibanetchep.artisanguilds.service.GuildMessages;
 import net.artisanmc.modules.api.ArtisanAPI;
 import net.artisanmc.modules.api.ArtisanModule;
@@ -35,7 +36,7 @@ public final class GuildsModule implements ArtisanModule {
 
     public static final String ID = "guilds";
     /** The module's folder: the {@code guilds} of {@code guilds:ranks}. */
-    static final String FOLDER = "guilds";
+    public static final String FOLDER = "guilds";
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
@@ -66,11 +67,14 @@ public final class GuildsModule implements ArtisanModule {
 
     private final GuildMenuData data;
     private final GuildMenuActions actions;
+    /** Reads data/settings.yml again: a Deploy may have changed the levels. */
+    private final Runnable reloadSettings;
     private final Logger logger;
 
-    public GuildsModule(Guilds guilds, GuildMessages messages, Logger logger) {
+    public GuildsModule(Guilds guilds, GuildMessages messages, Runnable reloadSettings, Logger logger) {
         this.data = new GuildMenuData(guilds.registry(), guilds.leveling(), messages);
         this.actions = new GuildMenuActions(guilds.registry(), guilds.ranks(), messages);
+        this.reloadSettings = reloadSettings;
         this.logger = logger;
     }
 
@@ -88,8 +92,14 @@ public final class GuildsModule implements ArtisanModule {
     public void onEnable(ArtisanAPI api) {
         claimFolder(api);
         registerSystemFiles(api);
+        registerSettings(api);
         registerDataSources(api);
         registerActions(api);
+    }
+
+    @Override
+    public void onReload() {
+        reloadSettings.run();
     }
 
     @Override
@@ -120,6 +130,16 @@ public final class GuildsModule implements ArtisanModule {
         }
     }
 
+    /** The form of data/settings.yml (language, levels): the Settings screen of the guilds folder. */
+    private void registerSettings(ArtisanAPI api) {
+        try {
+            api.getModels().declare(GuildSettings.declaration());
+            api.getScreens().declare(GuildSettings.SCREEN, "Settings", GuildSettings.TABLE, FOLDER);
+        } catch (RuntimeException e) {
+            logger.log(Level.WARNING, "The guild settings screen is not available", e);
+        }
+    }
+
     private void registerDataSources(ArtisanAPI api) {
         api.getDataSources().register(new DataSourceDeclaration(VIEWER, (player, params) -> data.viewer(player), List.of(
                 new DataSourceField("in_guild", ModelFieldType.bool(), "The viewer is in a guild"),
@@ -132,7 +152,7 @@ public final class GuildsModule implements ArtisanModule {
                 new DataSourceField("id", ModelFieldType.string(), null),
                 new DataSourceField("name", ModelFieldType.string(), null),
                 new DataSourceField("level", ModelFieldType.integer(), null),
-                new DataSourceField("max_level", ModelFieldType.integer(), "The highest level of config.yml"),
+                new DataSourceField("max_level", ModelFieldType.integer(), "The highest level of data/settings.yml"),
                 new DataSourceField("balance", ModelFieldType.integer(), "The bank, rounded"),
                 new DataSourceField("members", ModelFieldType.integer(), null),
                 new DataSourceField("max_members", ModelFieldType.integer(), "At this level"),

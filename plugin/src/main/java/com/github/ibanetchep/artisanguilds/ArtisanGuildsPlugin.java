@@ -36,6 +36,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.util.NavigableMap;
+import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import org.bukkit.configuration.ConfigurationSection;
+import com.github.ibanetchep.artisanguilds.api.GuildLevelInfo;
+import com.github.ibanetchep.artisanguilds.settings.GuildSettings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,13 +60,18 @@ import java.util.logging.Level;
  */
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
-    /** Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument suggestions (2.14.0). */
-    public static final String MIN_API_VERSION = "2.14.0";
+    /**
+     * Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument
+     * suggestions (2.14.0), messages in the module's folder (2.17.0).
+     */
+    public static final String MIN_API_VERSION = "2.17.0";
 
     /** The namespace of the tables: {@code artisan_guilds_*} by default. */
     public static final String TABLES = "guilds";
 
     private @Nullable ArtisanAPI api;
+    /** plugins/Artisan/modules/guilds/, null when Artisan gives none. */
+    private @Nullable File moduleFolder;
     private @Nullable Guilds guilds;
     private @Nullable ExecutorService database;
 
@@ -128,9 +140,13 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
 
     /** Reads the guilds, wires the services and serves {@link ArtisanGuildsApi}. */
     private Guilds start(ArtisanAPI api, DataSource dataSource, GuildTables tables) throws SQLException {
-        copyLegacyFiles();
+        File moduleFolder = moduleFolder(api);
+        this.moduleFolder = moduleFolder;
+        copyLegacyFiles(moduleFolder);
         saveDefaultConfig();
         reloadConfig();
+        if (moduleFolder != null) moveSettings(moduleFolder);
+        ConfigurationSection settings = settings();
 
         NetworkApi network = api.getNetwork();
         var scheduler = api.getScheduler().forPlugin(this);
@@ -143,13 +159,16 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         GuildRegistry registry = new GuildRegistry();
         registry.load(repository.loadAll());
 
-        MessageBundle bundle = api.getTranslations().register(MessageBundleDeclaration.files(this, TABLES, "en", "fr")
-                .withDefaultLang(getConfig().getString("language")));
+        // The edited lang files of plugins/ArtisanGuilds/lang/ move to the module's folder once.
+        MessageBundleDeclaration messageFiles = MessageBundleDeclaration.files(this, TABLES, "en", "fr")
+                .withDefaultLang(settings.getString("language"));
+        MessageBundle bundle = api.getTranslations().register(
+                moduleFolder != null ? messageFiles.inFolder(moduleFolder) : messageFiles);
         GuildMessages messages = new GuildMessages(bundle, api.getText(), platform);
         GuildEconomy economy = getServer().getPluginManager().getPlugin("Vault") != null
                 ? new VaultEconomy(api.getText()) : VaultEconomy.NONE;
         GuildLeveling leveling = new GuildLeveling(
-                GuildLeveling.read(getConfig().getConfigurationSection("levels"), getLogger()), store);
+                GuildLeveling.read(settings.getConfigurationSection("levels"), getLogger()), store);
 
         GuildSync sync = new GuildSync(registry, repository, database, platform, getLogger());
         sync.subscribe(this, network);
@@ -183,36 +202,91 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         }
         // The guild, members, ranks and disband menus those commands open, with their data sources and actions.
         try {
-            api.getModules().register(new GuildsModule(running, messages, getLogger()));
+            api.getModules().register(new GuildsModule(running, messages, () -> reloadLevels(leveling), getLogger()));
         } catch (RuntimeException e) {
             getLogger().log(Level.WARNING, "The guild menus are not available", e);
         }
         return running;
     }
 
-    /** {@code /guild reload}: config.yml's levels and the lang files, read again. */
+    /** {@code /guild reload}: config.yml, the levels and the lang files, read again. */
     private void reload(GuildMessages messages, GuildLeveling leveling) {
         reloadConfig();
         messages.reload();
-        try {
-            leveling.replace(GuildLeveling.read(getConfig().getConfigurationSection("levels"), getLogger()));
-        } catch (IllegalStateException e) {
-            getLogger().warning("config.yml defines no level: the previous levels stay.");
+        reloadLevels(leveling);
+    }
+
+    /** The levels of data/settings.yml, read again: {@code /guild reload} and each Deploy. */
+    private void reloadLevels(GuildLeveling leveling) {
+        NavigableMap<Integer, GuildLevelInfo> levels =
+                GuildLeveling.read(settings().getConfigurationSection("levels"), getLogger());
+        if (levels.isEmpty()) {
+            getLogger().warning(GuildSettings.PATH + " defines no level: the previous levels stay.");
+            return;
+        }
+        leveling.replace(levels);
+    }
+
+    /** data/settings.yml of the module's folder, else the jar's. */
+    private ConfigurationSection settings() {
+        return GuildSettings.load(moduleFolder, this::getResource, getLogger());
+    }
+
+    /**
+     * The language and the levels of a config.yml from before, moved once to the module's
+     * data/settings.yml; config.yml is then written again with what stays on this server.
+     */
+    private void moveSettings(File folder) {
+        boolean legacy = getConfig().isConfigurationSection("levels");
+        if (!GuildSettings.ensure(folder, legacy ? getConfig() : null, this::getResource, getLogger())) {
+            if (legacy) getLogger().warning("config.yml still holds levels, but plugins/Artisan/modules/"
+                    + GuildsModule.FOLDER + "/" + GuildSettings.PATH + " is the one read: remove them from config.yml.");
+            return;
+        }
+        boolean chest = getConfig().getBoolean("chest.enabled", true);
+        try (InputStream in = getResource("config.yml")) {
+            if (in == null) return;
+            String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            if (!chest) text = text.replace("  enabled: true", "  enabled: false");
+            Files.writeString(new File(getDataFolder(), "config.yml").toPath(), text, StandardCharsets.UTF_8);
+            reloadConfig();
+            getLogger().info("The language and the levels of config.yml moved to plugins/Artisan/modules/"
+                    + GuildsModule.FOLDER + "/" + GuildSettings.PATH + ", edited in the Artisan editor.");
+        } catch (IOException e) {
+            getLogger().log(Level.WARNING, "Could not write config.yml again: its levels are no longer read", e);
         }
     }
 
     /**
-     * MSGuilds' config.yml and edited lang files, copied once into this plugin's folder when it
-     * has none: the levels and messages a server set keep applying.
+     * plugins/Artisan/modules/guilds/, where the messages live beside the menus; null when Artisan
+     * gives none, the messages then staying in this plugin's folder.
      */
-    private void copyLegacyFiles() {
+    private @Nullable File moduleFolder(ArtisanAPI api) {
+        try {
+            return api.getProjectRoots().moduleFolder(GuildsModule.FOLDER, GuildsModule.ID, null);
+        } catch (RuntimeException e) {
+            getLogger().log(Level.WARNING, "No folder plugins/Artisan/modules/" + GuildsModule.FOLDER
+                    + ": the messages stay in plugins/" + getName() + "/lang/", e);
+            return null;
+        }
+    }
+
+    /**
+     * MSGuilds' config.yml and edited lang files, copied once when this plugin has none: the
+     * levels and messages a server set keep applying. A lang file goes to the data folder, from
+     * where the bundle moves it to the module's folder; one the module's folder holds is not
+     * copied again.
+     */
+    private void copyLegacyFiles(@Nullable File moduleFolder) {
         Path legacy = getDataFolder().toPath().resolveSibling("MSGuilds");
         Map<String, String> files = Map.of("config.yml", "config.yml",
                 "lang/en_EN.yml", "lang/en.yml", "lang/fr_FR.yml", "lang/fr.yml");
         files.forEach((from, to) -> {
             Path source = legacy.resolve(from);
             Path target = getDataFolder().toPath().resolve(to);
-            if (!Files.isRegularFile(source) || Files.exists(target)) return;
+            boolean moved = moduleFolder != null && to.startsWith("lang/") && (Files.exists(moduleFolder.toPath().resolve(to))
+                    || Files.exists(moduleFolder.toPath().resolve(to.replace(".yml", ".yaml"))));
+            if (!Files.isRegularFile(source) || Files.exists(target) || moved) return;
             try {
                 Files.createDirectories(target.getParent());
                 Files.copy(source, target);
