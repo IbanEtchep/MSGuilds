@@ -1,0 +1,64 @@
+# Guild settings, edited in the Artisan editor (the guilds folder, Settings).
+# language: the guild messages' language when a player's is not offered (en, fr).
+# levels: a guild's level is the highest one whose xp it has reached. Guild levels are earned
+# through MSQuests rankup quests (ArtisanGuildQuests `guild_level` action, or
+# `guild admin setlevel <guild> <level>` from the console), which set the XP to the level's
+# threshold: one XP point per level. The guild chest (/g chest) has chest-pages pages of
+# chest-rows rows (1 to 6); 0 pages: no chest.
+language: en
+levels:
+  0:
+    xp: 0
+    max-members: 5
+    chest-rows: 0
+    chest-pages: 0
+  1:
+    xp: 1
+    max-members: 7
+    chest-rows: 0
+    chest-pages: 0
+  2:
+    xp: 2
+    max-members: 7
+    chest-rows: 3
+    chest-pages: 1
+  3:
+    xp: 3
+    max-members: 7
+    chest-rows: 3
+    chest-pages: 1
+  4:
+    xp: 4
+    max-members: 10
+    chest-rows: 6
+    chest-pages: 1
+  5:
+    xp: 5
+    max-members: 10
+    chest-rows: 6
+    chest-pages: 1
+  6:
+    xp: 6
+    max-members: 15
+    chest-rows: 6
+    chest-pages: 1
+  7:
+    xp: 7
+    max-members: 15
+    chest-rows: 6
+    chest-pages: 2
+  8:
+    xp: 8
+    max-members: 30
+    chest-rows: 6
+    chest-pages: 2
+  9:
+    xp: 9
+    max-members: 30
+    chest-rows: 6
+    chest-pages: 2
+  10:
+    xp: 10
+    max-members: 30
+    chest-rows: 6
+    chest-pages: 5

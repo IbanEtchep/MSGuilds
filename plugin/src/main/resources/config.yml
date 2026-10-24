@@ -1,55 +1,11 @@
-config-version: 1
+config-version: 2
 
-language: en_EN
+# The language and the guild levels moved to plugins/Artisan/modules/guilds/data/settings.yml,
+# edited in the Artisan editor (the guilds folder, Settings). This file keeps what belongs to
+# this server only.
 
 chest:
   # false on every server other than the one hosting the guild chest (events…): the chest lives
   # in that server's memory, and a second server writing the same rows would lose or duplicate
   # items. A version shared across servers would need a lock.
   enabled: true
-
-# The level is derived from the guild's XP: the highest level whose `xp` is reached.
-# Guild levels are earned through MSQuests rankup quests (ArtisanGuildQuests `guild_level` action,
-# or `guild admin setlevel <guild> <level>` from the console),
-# which set the XP to the level's threshold — hence one XP point per level.
-# The guild chest (/g chest) has `chest-pages` pages of `chest-rows` rows. A level that does not
-# set them keeps the previous level's; 0 pages = no chest.
-levels:
-  0:
-    xp: 0
-    max-members: 5
-  1:
-    xp: 1
-    max-members: 7
-  2:
-    xp: 2
-    max-members: 7
-    chest-rows: 3
-    chest-pages: 1
-  3:
-    xp: 3
-    max-members: 7
-  4:
-    xp: 4
-    max-members: 10
-    chest-rows: 6
-  5:
-    xp: 5
-    max-members: 10
-  6:
-    xp: 6
-    max-members: 15
-  7:
-    xp: 7
-    max-members: 15
-    chest-pages: 2
-  8:
-    xp: 8
-    max-members: 30
-  9:
-    xp: 9
-    max-members: 30
-  10:
-    xp: 10
-    max-members: 30
-    chest-pages: 5
