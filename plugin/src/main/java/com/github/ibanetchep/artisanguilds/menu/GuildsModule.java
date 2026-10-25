@@ -10,6 +10,7 @@ import net.artisanmc.modules.api.datasource.DataSourceDeclaration;
 import net.artisanmc.modules.api.datasource.DataSourceField;
 import net.artisanmc.modules.api.model.ModelField;
 import net.artisanmc.modules.api.model.ModelFieldType;
+import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.template.TemplateDeclaration;
 
 import java.io.File;
@@ -21,6 +22,9 @@ import java.util.logging.Logger;
  * ArtisanGuilds inside Artisan:
  * <ul>
  *   <li>the folder {@code plugins/Artisan/modules/guilds/}, listed under the module in the editor;</li>
+ *   <li>{@code /guild} and its sub-commands, owned by the module: Artisan writes them as
+ *       {@code commands/guild.yaml} of that folder, a system file the admin edits in the editor
+ *       (name, aliases, permissions, cooldown, steps around the code) and resets to this jar's;</li>
  *   <li>its system menus and dialogs, kept there by Artisan and opened by id: {@code guilds:main}
  *       (from {@code /guild}), {@code guilds:members} ({@code /guild members}), {@code guilds:ranks}
  *       ({@code /guild ranks}), {@code guilds:rank_permissions}, {@code guilds:rank_delete_confirm},
@@ -65,13 +69,16 @@ public final class GuildsModule implements ArtisanModule {
     public static final String RANK_CREATE = "guilds:rank_create";
     public static final String RANK_PERMISSION = "guilds:rank_permission";
 
+    private final PlayerCommandDeclaration commands;
     private final GuildMenuData data;
     private final GuildMenuActions actions;
     /** Reads data/settings.yml again: a Deploy may have changed the levels. */
     private final Runnable reloadSettings;
     private final Logger logger;
 
-    public GuildsModule(Guilds guilds, GuildMessages messages, Runnable reloadSettings, Logger logger) {
+    public GuildsModule(Guilds guilds, GuildMessages messages, PlayerCommandDeclaration commands,
+                        Runnable reloadSettings, Logger logger) {
+        this.commands = commands;
         this.data = new GuildMenuData(guilds.registry(), guilds.leveling(), messages);
         this.actions = new GuildMenuActions(guilds.registry(), guilds.ranks(), messages);
         this.reloadSettings = reloadSettings;
@@ -91,6 +98,8 @@ public final class GuildsModule implements ArtisanModule {
     @Override
     public void onEnable(ArtisanAPI api) {
         claimFolder(api);
+        // Registered from here, the commands belong to the module: their file goes in its folder.
+        api.getPlayerCommands().register(commands);
         registerSystemFiles(api);
         registerSettings(api);
         registerDataSources(api);

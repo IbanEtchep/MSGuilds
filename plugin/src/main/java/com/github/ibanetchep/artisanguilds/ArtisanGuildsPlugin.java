@@ -29,6 +29,7 @@ import com.github.ibanetchep.artisanguilds.storage.LegacyImport;
 import com.github.ibanetchep.artisanguilds.sync.GuildSync;
 import net.artisanmc.modules.api.ArtisanAPI;
 import net.artisanmc.modules.api.network.NetworkApi;
+import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.translation.MessageBundle;
 import net.artisanmc.modules.api.translation.MessageBundleDeclaration;
 import org.bukkit.plugin.ServicePriority;
@@ -190,14 +191,13 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                 new GuildChat(registry, messages, getLogger()), messages), this);
         getServer().getServicesManager().register(ArtisanGuildsApi.class,
                 new GuildsApiImpl(registry, store, bank, leveling), this, ServicePriority.Normal);
-        // Removed by Artisan when this plugin disables.
-        api.getPlayerCommands().register(new GuildCommands(running, messages, api.getText(),
+        PlayerCommandDeclaration commands = new GuildCommands(running, messages, api.getText(),
                 PlayerLookup.of(network.getPresence(), getServer()),
                 new GuildSuggestions(registry, () -> network.getPresence().getOnline(),
                         id -> getServer().getOfflinePlayer(id).getName()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"),
                 player -> api.getMenus().open(player, GuildCommands.MAIN_MENU), getLogger())
-                .declaration());
+                .declaration();
         // %msguilds_…% as MSGuilds named them, for PlaceholderAPI too; removed by Artisan on disable.
         try {
             api.getPlaceholders().register(GuildPlaceholders.NAMESPACE, new GuildPlaceholders(registry, messages), true);
@@ -206,11 +206,14 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                     + " (is MSGuilds still installed?)");
         }
         // The guild, members, ranks and disband menus those commands open, with their data sources and actions.
+        // /guild too: registered by the module, it is a file of the module's folder, edited in the editor.
         try {
-            api.getModules().register(new GuildsModule(running, messages, () -> reloadLevels(leveling), getLogger()));
+            api.getModules().register(new GuildsModule(running, messages, commands, () -> reloadLevels(leveling), getLogger()));
         } catch (RuntimeException e) {
             getLogger().log(Level.WARNING, "The guild menus are not available", e);
         }
+        // Without the module, /guild still works, as declared: Artisan removes it when this plugin disables.
+        if (api.getPlayerCommands().find(GuildCommands.ROOT) == null) api.getPlayerCommands().register(commands);
         return running;
     }
 
