@@ -2,10 +2,15 @@ package com.github.ibanetchep.artisanguilds.service;
 
 import com.github.ibanetchep.artisanguilds.api.GuildPermission;
 
+import com.github.ibanetchep.artisanguilds.model.RankData;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 /** The ranks a new guild starts with, the lowest first. */
-enum DefaultRank {
+public enum DefaultRank {
 
     MEMBER("<color:#27ae60>Membre", Set.of(GuildPermission.CHEST_DEPOSIT)),
     MODERATOR("<color:#2980b9>Modérateur", Set.of(GuildPermission.KICK_MEMBER, GuildPermission.CHEST_DEPOSIT)),
@@ -37,5 +42,10 @@ enum DefaultRank {
 
     Set<GuildPermission> permissions() {
         return permissions;
+    }
+
+    /** Fresh ranks with new ids, the lowest first. */
+    public static List<RankData> create() {
+        return Arrays.stream(values()).map(r -> new RankData(UUID.randomUUID(), r.label, 0, r.permissions)).toList();
     }
 }
