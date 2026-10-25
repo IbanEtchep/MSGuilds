@@ -18,6 +18,8 @@ import net.artisanmc.modules.api.action.ActionContext;
 import net.artisanmc.modules.api.action.ActionRegistry;
 import net.artisanmc.modules.api.action.ActionRuntime;
 import net.artisanmc.modules.api.datasource.DataSourceRegistry;
+import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
+import net.artisanmc.modules.api.playercommand.PlayerCommandRegistry;
 import net.artisanmc.modules.api.project.ProjectRootRegistry;
 import net.artisanmc.modules.api.template.TemplateDeclaration;
 import net.artisanmc.modules.api.template.TemplateRegistry;
@@ -303,7 +305,7 @@ class GuildMenuTest {
     // --- module ---
 
     @Test
-    void enablingRegistersFolderMenusDataSourcesAndActions() {
+    void enablingRegistersFolderCommandsMenusDataSourcesAndActions() {
         ArtisanAPI api = mock(ArtisanAPI.class);
         ProjectRootRegistry roots = mock(ProjectRootRegistry.class);
         when(roots.moduleFolder(any(), any(), isNull())).thenReturn(new File("guilds"));
@@ -317,6 +319,9 @@ class GuildMenuTest {
         sources.bindOwner(GuildsModule.ID);
         actionRegistry.bindOwner(GuildsModule.ID);
         templates.bindOwner(GuildsModule.ID);
+        PlayerCommandRegistry commands = new PlayerCommandRegistry();
+        commands.bindOwner(GuildsModule.ID);
+        when(api.getPlayerCommands()).thenReturn(commands);
         when(api.getProjectRoots()).thenReturn(roots);
         when(api.getDataSources()).thenReturn(sources);
         when(api.getActionRegistry()).thenReturn(actionRegistry);
@@ -324,7 +329,14 @@ class GuildMenuTest {
         when(api.getModels()).thenReturn(models);
         when(api.getScreens()).thenReturn(screens);
 
-        new GuildsModule(guilds, f.messages, () -> {}, Logger.getLogger("GuildMenuTest")).onEnable(api);
+        PlayerCommandDeclaration guild = PlayerCommandDeclaration.builder(GuildCommands.ROOT).name("guild")
+                .opensMenu(GuildCommands.MAIN_MENU).build();
+
+        new GuildsModule(guilds, f.messages, guild, () -> {}, Logger.getLogger("GuildMenuTest")).onEnable(api);
+
+        // Owned by the module: Artisan writes commands/guild.yaml in its folder, the editor lists it.
+        assertEquals(List.of(guild), commands.declarations());
+        assertEquals(GuildsModule.ID, commands.ownerOf(GuildCommands.ROOT));
 
         verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
         assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.GUILD, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS,
