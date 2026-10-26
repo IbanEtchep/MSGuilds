@@ -12,25 +12,25 @@ public class ChatUtils {
     private ChatUtils() {}
 
     /**
-     * Convertit une chaîne avec des codes couleur (&)  et minimessage en Component
-     * @param string Le texte à convertir
-     * @return Le Component formaté
+     * Converts a string with color codes (&) and MiniMessage into a Component
+     * @param string The text to convert
+     * @return The formatted Component
      */
     public static String translateColors(String string) {
         return componentToString(LegacyComponentSerializer.legacyAmpersand().deserialize(string));
     }
 
     /**
-     * Convertit une chaîne contenant à la fois des codes couleur (&) et de la syntaxe MiniMessage en Component
-     * Seuls les styles de formatage sont autorisés (couleurs, décorations, gradients)
-     * @param message Le message à convertir
-     * @return Le Component formaté avec les deux types de syntaxe
+     * Converts a string containing both color codes (&) and MiniMessage syntax into a Component
+     * Only formatting styles are allowed (colors, decorations, gradients)
+     * @param message The message to convert
+     * @return The Component formatted with both syntax types
      */
     public static Component parseAll(String message) {
         MiniMessage miniMessage = MiniMessage.builder()
                 .tags(TagResolver.builder()
                         .resolver(StandardTags.color()) // Couleurs basiques
-                        .resolver(StandardTags.decorations()) // Décorations (bold, italic, etc.)
+                        .resolver(StandardTags.decorations()) // Decorations (bold, italic, etc.)
                         .resolver(StandardTags.gradient()) // Gradients
                         .resolver(StandardTags.rainbow()) // Rainbow
                         .build())
@@ -40,18 +40,18 @@ public class ChatUtils {
         return miniMessage.deserialize(miniMessageFormat);
     }
     /**
-     * Convertit une chaîne avec la syntaxe MiniMessage en Component
-     * @param string Le texte à convertir avec syntaxe MiniMessage
-     * @return Le Component formatté
+     * Converts a string with MiniMessage syntax into a Component
+     * @param string The text to convert, in MiniMessage syntax
+     * @return The formatted Component
      */
     public static Component parseMiniMessage(String string) {
         return MiniMessage.miniMessage().deserialize(string);
     }
 
     /**
-     * Convertit un Component en chaîne avec des codes couleur (&)
-     * @param component Le Component à convertir
-     * @return La chaîne formatée
+     * Converts a Component into a string with color codes (&)
+     * @param component The Component to convert
+     * @return The formatted string
      */
     public static String componentToString(Component component) {
         return LegacyComponentSerializer.legacyAmpersand().serialize(component);

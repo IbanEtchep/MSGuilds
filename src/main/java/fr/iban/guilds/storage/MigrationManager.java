@@ -15,29 +15,29 @@ public class MigrationManager {
     private final Gson gson = new Gson();
 
     /**
-     * Vérifie si une migration est nécessaire
+     * Checks whether a migration is needed
      */
     public boolean needsMigration() {
         try (Connection connection = ds.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
 
-            // Vérifier si la table guilds a une colonne 'owner_uuid' (nouvelle structure)
+            // Check whether the guilds table has an 'owner_uuid' column (new structure)
             try (ResultSet rs = metaData.getColumns(null, null, "guilds", "owner_uuid")) {
                 if (rs.next()) {
-                    // La nouvelle structure existe déjà, pas besoin de migrer
+                    // The new structure already exists, no need to migrate
                     return false;
                 }
             }
 
-            // Vérifier si l'ancienne table existe
+            // Check whether the old table exists
             try (ResultSet rs = metaData.getTables(null, null, "guilds", null)) {
                 if (rs.next()) {
-                    // L'ancienne table guilds existe, migration nécessaire
+                    // The old guilds table exists, migration needed
                     return true;
                 }
             }
 
-            // Aucune table n'existe, pas de migration nécessaire (première installation)
+            // No table exists, no migration needed (first install)
             return false;
 
         } catch (SQLException e) {
@@ -47,89 +47,89 @@ public class MigrationManager {
     }
 
     /**
-     * Exécute la migration complète
+     * Runs the full migration
      */
     public void migrate() {
         System.out.println("========================================");
-        System.out.println("DEBUT DE LA MIGRATION DES GUILDES");
+        System.out.println("START OF THE GUILDS MIGRATION");
         System.out.println("========================================");
 
         try (Connection connection = ds.getConnection()) {
             connection.setAutoCommit(false);
 
             try {
-                // Étape 1: Créer les nouvelles tables
-                System.out.println("[1/7] Création des nouvelles tables...");
+                // Step 1: Create the new tables
+                System.out.println("[1/7] Creating the new tables...");
                 createNewTables(connection);
 
-                // Étape 2: Migrer les guildes
-                System.out.println("[2/7] Migration des guildes...");
+                // Step 2: Migrate the guilds
+                System.out.println("[2/7] Migrating guilds...");
                 Map<Integer, UUID> guildIdMapping = migrateGuilds(connection);
-                System.out.println("    → " + guildIdMapping.size() + " guildes migrées");
+                System.out.println("    → " + guildIdMapping.size() + " guilds migrated");
 
-                // Étape 3: Créer les rangs par défaut pour chaque guilde
-                System.out.println("[3/7] Création des rangs par défaut...");
+                // Step 3: Create the default ranks for each guild
+                System.out.println("[3/7] Creating default ranks...");
                 Map<String, Map<String, UUID>> rankMappings = createDefaultRanks(connection, guildIdMapping);
-                System.out.println("    → " + (rankMappings.size() * DefaultRank.values().length) + " rangs créés");
+                System.out.println("    → " + (rankMappings.size() * DefaultRank.values().length) + " ranks created");
 
-                // Étape 4: Migrer les membres
-                System.out.println("[4/7] Migration des membres...");
+                // Step 4: Migrate the members
+                System.out.println("[4/7] Migrating members...");
                 int memberCount = migrateMembers(connection, guildIdMapping, rankMappings);
-                System.out.println("    → " + memberCount + " membres migrés");
+                System.out.println("    → " + memberCount + " members migrated");
 
-                // Étape 5: Migrer les logs
-                System.out.println("[5/7] Migration des logs...");
+                // Step 5: Migrate the logs
+                System.out.println("[5/7] Migrating logs...");
                 int logCount = migrateLogs(connection, guildIdMapping);
-                System.out.println("    → " + logCount + " logs migrés");
+                System.out.println("    → " + logCount + " logs migrated");
 
-                // Étape 6: Migrer les alliances
-                System.out.println("[6/7] Migration des alliances...");
+                // Step 6: Migrate the alliances
+                System.out.println("[6/7] Migrating alliances...");
                 int allianceCount = migrateAlliances(connection, guildIdMapping);
-                System.out.println("    → " + allianceCount + " alliances migrées");
+                System.out.println("    → " + allianceCount + " alliances migrated");
 
-                // Étape 7: Supprimer les anciennes tables
-                System.out.println("[7/7] Nettoyage des anciennes tables...");
+                // Step 7: Drop the old tables
+                System.out.println("[7/7] Cleaning up the old tables...");
                 dropOldTables(connection);
 
                 connection.commit();
 
                 System.out.println("========================================");
-                System.out.println("MIGRATION TERMINEE AVEC SUCCES !");
+                System.out.println("MIGRATION COMPLETED SUCCESSFULLY!");
                 System.out.println("========================================");
 
             } catch (SQLException e) {
                 connection.rollback();
                 System.err.println("========================================");
-                System.err.println("ERREUR LORS DE LA MIGRATION - ROLLBACK");
+                System.err.println("ERROR DURING THE MIGRATION - ROLLBACK");
                 System.err.println("========================================");
                 e.printStackTrace();
-                throw new RuntimeException("Migration échouée", e);
+                throw new RuntimeException("Migration failed", e);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Erreur de connexion à la base de données", e);
+            throw new RuntimeException("Database connection error", e);
         }
     }
 
     private void createNewTables(Connection connection) throws SQLException {
-        // D'abord, sauvegarder les anciennes tables de référence avant de les supprimer
-        System.out.println("    Sauvegarde des tables de référence...");
+        // First, back up the old reference tables before dropping them
+        System.out.println("    Backing up reference tables...");
 
         try (Statement stmt = connection.createStatement()) {
-            // Créer des copies temporaires des tables de référence
+            // Create temporary copies of the reference tables
             stmt.executeUpdate("CREATE TEMPORARY TABLE guilds_ranks_old AS SELECT * FROM guilds_ranks;");
             stmt.executeUpdate("CREATE TEMPORARY TABLE guilds_chatmode_old AS SELECT * FROM guilds_chatmode;");
             stmt.executeUpdate("CREATE TEMPORARY TABLE guilds_members_old AS SELECT * FROM guilds_members;");
             stmt.executeUpdate("CREATE TEMPORARY TABLE guilds_logs_old AS SELECT * FROM guilds_logs;");
             stmt.executeUpdate("CREATE TEMPORARY TABLE guilds_alliances_old AS SELECT * FROM guilds_alliances;");
-            System.out.println("    Tables de référence sauvegardées");
+            System.out.println("    Reference tables backed up");
         } catch (SQLException e) {
-            System.out.println("    Erreur lors de la sauvegarde: " + e.getMessage());
+            System.out.println("    Error during backup: " + e.getMessage());
             throw e;
         }
 
-        // Supprimer toutes les anciennes tables
+        // Drop all the old tables
         String[] dropOldStructure = {
                 "DROP TABLE IF EXISTS guilds_members;",
                 "DROP TABLE IF EXISTS guilds_logs;",
@@ -141,21 +141,21 @@ public class MigrationManager {
         for (String sql : dropOldStructure) {
             try (Statement stmt = connection.createStatement()) {
                 stmt.executeUpdate(sql);
-                System.out.println("    Suppression: " + sql);
+                System.out.println("    Dropping: " + sql);
             } catch (SQLException e) {
                 System.out.println("    Info: " + e.getMessage());
             }
         }
 
-        // Renommer la table guilds
+        // Rename the guilds table
         try (Statement stmt = connection.createStatement()) {
             stmt.executeUpdate("ALTER TABLE guilds RENAME TO guilds_old;");
-            System.out.println("    Table guilds renommée en guilds_old");
+            System.out.println("    Table guilds renamed to guilds_old");
         } catch (SQLException e) {
             System.out.println("    Info: " + e.getMessage());
         }
 
-        // Créer les nouvelles tables
+        // Create the new tables
         String[] createStatements = {
                 "CREATE TABLE guilds(" +
                         "id VARCHAR(36) PRIMARY KEY," +
@@ -225,11 +225,11 @@ public class MigrationManager {
                 int oldId = rs.getInt("id");
                 UUID newId = UUID.fromString(rs.getString("guild_uuid"));
 
-                // Vérifier si la guilde a des membres
+                // Check whether the guild has members
                 UUID ownerUuid = findGuildOwner(connection, oldId);
                 if (ownerUuid == null) {
-                    System.out.println("    ATTENTION: Guilde " + oldId + " (" + rs.getString("name") + ") sans membres - ignorée");
-                    continue; // Sauter cette guilde
+                    System.out.println("    WARNING: Guild " + oldId + " (" + rs.getString("name") + ") has no members - skipped");
+                    continue; // Skip this guild
                 }
 
                 insertPs.setString(1, newId.toString());
@@ -262,7 +262,7 @@ public class MigrationManager {
             }
         }
 
-        // Fallback: prendre le premier membre
+        // Fallback: take the first member
         String fallbackSql = "SELECT player_uuid FROM guilds_members_old WHERE guild_id = ? LIMIT 1;";
         try (PreparedStatement ps = connection.prepareStatement(fallbackSql)) {
             ps.setInt(1, guildOldId);
@@ -273,7 +273,7 @@ public class MigrationManager {
             }
         }
 
-        // Aucun membre trouvé, retourner null au lieu de throw
+        // No member found, return null instead of throwing
         return null;
     }
 
@@ -315,7 +315,7 @@ public class MigrationManager {
     }
 
     private int migrateMembers(Connection connection, Map<Integer, UUID> guildIdMapping, Map<String, Map<String, UUID>> rankMappings) throws SQLException {
-        // D'abord, créer une copie temporaire des anciennes données
+        // First, create a temporary copy of the old data
         String createTempSql = "CREATE TEMPORARY TABLE temp_members AS " +
                 "SELECT gm.*, gr.label as rank_label, gc.label as chatmode_label " +
                 "FROM guilds_members_old gm " +

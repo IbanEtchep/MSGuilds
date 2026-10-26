@@ -138,10 +138,10 @@ public class GuildsManagerImpl implements GuildManager {
             Guild newGuild = storage.getGuild(guildId);
 
             if (oldGuild != null && newGuild == null) {
-                //Suppression d'une guilde
+                //Guild deleted
                 guilds.remove(guildId);
             } else {
-                //Ajout ou maj à jour de la guilde
+                //Guild added or updated
                 guilds.put(guildId, newGuild);
                 for (GuildPlayerDTO guildPlayerDTO : storage.getGuildPlayerDTOs(guildId)) {
                     loadGuildPlayerFromDTO(guildPlayerDTO);
@@ -164,7 +164,7 @@ public class GuildsManagerImpl implements GuildManager {
 
             GuildPlayerDTO updatedGuildPlayerDTO = storage.getGuildPlayerDto(uuid);
             if (oldGuildPlayer != null && updatedGuildPlayerDTO == null) {
-                //Le joueur a quitté la guilde
+                //The player left the guild
                 Guild guild = getGuildById(oldGuildPlayer.getGuild().getId());
                 if (guild != null) {
                     guild.getMembers().remove(uuid);
@@ -194,7 +194,7 @@ public class GuildsManagerImpl implements GuildManager {
             }
         }
 
-        plugin.getLogger().info(guilds.size() + " guildes chargées en " + (System.currentTimeMillis() - start) + "ms.");
+        plugin.getLogger().info(guilds.size() + " guilds loaded in " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     private void loadGuildPlayers() {
@@ -203,7 +203,7 @@ public class GuildsManagerImpl implements GuildManager {
         for (GuildPlayerDTO guildPlayerDTO : guildPlayers) {
             loadGuildPlayerFromDTO(guildPlayerDTO);
         }
-        plugin.getLogger().info(guildPlayers.size() + " joueurs de guilde chargées en " + (System.currentTimeMillis() - start) + "ms.");
+        plugin.getLogger().info(guildPlayers.size() + " guild players loaded in " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     public void load() {
