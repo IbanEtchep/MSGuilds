@@ -86,42 +86,42 @@ public final class GuildsPlugin extends JavaPlugin {
         instance = this;
         foliaLib = new FoliaLib(this);
 
-        // ÉTAPE 1: Vérifier et exécuter la migration si nécessaire
+        // STEP 1: Check for and run the migration if needed
         MigrationManager migrationManager = new MigrationManager();
 
         if (migrationManager.needsMigration()) {
             getLogger().warning("===================================");
-            getLogger().warning("MIGRATION NECESSAIRE DETECTEE !");
+            getLogger().warning("MIGRATION REQUIRED!");
             getLogger().warning("===================================");
-            getLogger().warning("L'ancienne structure de base de données a été détectée.");
-            getLogger().warning("La migration va démarrer dans 5 secondes...");
-            getLogger().warning("NE PAS ARRETER LE SERVEUR PENDANT LA MIGRATION !");
+            getLogger().warning("The old database structure was detected.");
+            getLogger().warning("The migration will start in 5 seconds...");
+            getLogger().warning("DO NOT STOP THE SERVER DURING THE MIGRATION!");
 
             try {
-                Thread.sleep(5000); // Donne le temps de lire les logs
+                Thread.sleep(5000); // Gives time to read the logs
 
                 migrationManager.migrate();
 
                 getLogger().info("===================================");
-                getLogger().info("Migration terminée avec succès !");
+                getLogger().info("Migration completed successfully!");
                 getLogger().info("===================================");
 
             } catch (InterruptedException e) {
-                getLogger().severe("Migration interrompue !");
+                getLogger().severe("Migration interrupted!");
                 getServer().getPluginManager().disablePlugin(this);
                 return;
             } catch (Exception e) {
                 getLogger().severe("===================================");
-                getLogger().severe("ERREUR CRITIQUE LORS DE LA MIGRATION");
+                getLogger().severe("CRITICAL ERROR DURING THE MIGRATION");
                 getLogger().severe("===================================");
-                getLogger().severe("Le plugin va être désactivé.");
-                getLogger().severe("Vérifiez les logs et contactez un administrateur.");
+                getLogger().severe("The plugin will be disabled.");
+                getLogger().severe("Check the logs and contact an administrator.");
                 e.printStackTrace();
                 getServer().getPluginManager().disablePlugin(this);
                 return;
             }
         } else {
-            getLogger().info("Structure de base de données à jour, pas de migration nécessaire.");
+            getLogger().info("Database structure is up to date, no migration needed.");
         }
 
 

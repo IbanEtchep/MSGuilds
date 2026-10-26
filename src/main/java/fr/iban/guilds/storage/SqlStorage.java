@@ -368,10 +368,10 @@ public class SqlStorage {
     }
 
     public void saveAlliances(Guild guild) {
-        // On remplace l'ensemble des alliances de la guilde : suppression de toutes les
-        // lignes qui la concernent (dans les deux sens), puis réinsertion des alliances
-        // actuelles. La suppression est inconditionnelle afin de gérer correctement le cas
-        // où il ne reste plus aucune alliance (retrait de la dernière alliance).
+        // We replace all of the guild's alliances: delete every
+        // row that involves it (in both directions), then reinsert the current
+        // alliances. The delete is unconditional so that the case where no
+        // alliance remains (removal of the last alliance) is handled correctly.
         String deleteStatement = "DELETE FROM guilds_alliances WHERE guild_a_id = ? OR guild_b_id = ?";
 
         String insertStatement = """
@@ -384,14 +384,14 @@ public class SqlStorage {
             connection.setAutoCommit(false);
 
             try {
-                // Suppression de toutes les alliances existantes de la guilde
+                // Delete all existing alliances of the guild
                 try (PreparedStatement deletePs = connection.prepareStatement(deleteStatement)) {
                     deletePs.setString(1, guild.getId().toString());
                     deletePs.setString(2, guild.getId().toString());
                     deletePs.executeUpdate();
                 }
 
-                // Réinsertion des alliances actuelles
+                // Reinsert the current alliances
                 if (!guild.getAlliances().isEmpty()) {
                     try (PreparedStatement insertPs = connection.prepareStatement(insertStatement)) {
                         for (Guild ally : guild.getAlliances()) {

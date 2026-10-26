@@ -7,15 +7,15 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public enum Lang {
-    // Messages d'aide
+    // Help messages
     HELP_HEADER("messages.help.header"),
     HELP_NO_GUILD("messages.help.no_guild"),
     HELP_MEMBER("messages.help.member"),
 
-    // Messages généraux
+    // General messages
     RELOAD("messages.reload"),
 
-    // Messages de guilde
+    // Guild messages
     GUILD_CREATED("messages.guild.created"),
     GUILD_DELETED("messages.guild.deleted"),
     GUILD_DISBANDED("messages.guild.disbanded"),
@@ -25,17 +25,17 @@ public enum Lang {
     GUILD_NAME_INVALID_LENGTH("messages.guild.name.invalid_length"),
     GUILD_RANK_CHANGE("messages.guild.rank.change"),
 
-    // Messages de chat
+    // Chat messages
     CHAT_MODE_CHANGED("messages.chat.mode_changed"),
 
-    // Messages de membres
+    // Member messages
     MEMBER_INVITED("messages.members.invite.sent"),
     MEMBER_INVITE_RECEIVED("messages.members.invite.received"),
     MEMBER_INVITE_REVOKED("messages.members.invite.revoked"),
     MEMBER_JOINED("messages.members.join"),
     MEMBER_LEFT("messages.members.leave"),
 
-    // Messages de banque
+    // Bank messages
     BANK_BALANCE("messages.bank.balance"),
     BANK_DEPOSIT_SUCCESS("messages.bank.deposit.success"),
     BANK_WITHDRAW_SUCCESS("messages.bank.withdraw.success"),
@@ -43,25 +43,25 @@ public enum Lang {
     BANK_ECONOMY_DISABLED("messages.bank.economy_disabled"),
     PLAYER_INSUFFICIENT_FUNDS("messages.bank.player_insufficient_funds"),
 
-    // Messages de home
+    // Home messages
     HOME_TELEPORT("messages.home.teleport"),
     HOME_SET("messages.home.set"),
     HOME_DELETE("messages.home.delete"),
     HOME_NOT_SET("messages.home.not_set"),
 
-    // Messages d'info
+    // Info messages
     INFO_HEADER("messages.info.header"),
     INFO_CREATED("messages.info.created"),
     INFO_RANK_FORMAT("messages.info.rank_format"),
     INFO_ALLIANCES("messages.info.alliances"),
 
-    // Messages de liste
+    // List messages
     LIST_HEADER("messages.list.header"),
     LIST_FORMAT("messages.list.format"),
     LIST_FOOTER("messages.list.footer"),
     LIST_INVALID_PAGE("messages.list.invalid_page"),
 
-    // Messages de logs
+    // Log messages
     LOGS_HEADER("messages.logs.header"),
     LOGS_ENTRY("messages.logs.entry"),
     LOGS_FOOTER("messages.logs.footer"),
@@ -81,33 +81,33 @@ public enum Lang {
     ALLIANCE_REQUEST_SENT("messages.alliance.request.sent"),
     ALLIANCE_FORMED("messages.alliance.formed"),
 
-    // Messages de transfert
+    // Transfer messages
     ERROR_TRANSFER_OWNER("messages.guild.transfer.error.owner"),
     ERROR_TRANSFER_SELF("messages.guild.transfer.error.self"),
     TRANSFER_SUCCESS("messages.guild.transfer.success"),
 
-    // Messages de kick
+    // Kick messages
     ERROR_KICK_SELF("messages.guild.kick.error.self"),
     ERROR_KICK_RANK("messages.guild.kick.error.rank"),
     KICK_SUCCESS("messages.guild.kick.success"),
     KICK_TARGET("messages.guild.kick.target"),
 
-    // Messages de leave
+    // Leave messages
     ERROR_LEAVE_OWNER("messages.guild.leave.error.owner"),
     LEAVE_SUCCESS("messages.guild.leave.success"),
     JOIN_SUCCESS("messages.guild.join.success"),
 
-    // Messages de promotion/rétrogradation
+    // Promotion/demotion messages
     PROMOTE_SUCCESS("messages.guild.promote.success"),
     DEMOTE_SUCCESS("messages.guild.demote.success"),
 
-    // Messages de rang
+    // Rank messages
     RANK_RENAMED("messages.guild.rank.renamed"),
     RANK_DELETED("messages.guild.rank.deleted"),
     RANK_MOVED_UP("messages.guild.rank.moved_up"),
     RANK_MOVED_DOWN("messages.guild.rank.moved_down"),
 
-    // Messages d'erreur (à garder)
+    // Error messages (keep)
     ERROR_NO_PERMISSION("messages.errors.no_permission"),
     ERROR_NOT_GUILD_MEMBER("messages.errors.not_guild_member"),
     ERROR_GUILD_NOT_FOUND("messages.errors.guild_not_found"),

@@ -2,7 +2,7 @@ package fr.iban.guilds.enums;
 
 public enum GuildPermission {
 
-    // Permissions modérateur
+    // Moderator permissions
     KICK_MEMBER("Expulser un membre"),
     INVITE_MEMBER("Inviter un membre"),
 
