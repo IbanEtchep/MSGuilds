@@ -23,6 +23,7 @@ import net.artisanmc.modules.api.playercommand.PlayerCommandRegistry;
 import net.artisanmc.modules.api.project.ProjectRootRegistry;
 import net.artisanmc.modules.api.template.TemplateDeclaration;
 import net.artisanmc.modules.api.template.TemplateRegistry;
+import net.artisanmc.modules.api.variable.VariableRegistry;
 import net.artisanmc.modules.api.text.TextApi;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -335,6 +336,10 @@ class GuildMenuTest {
         when(api.getTemplates()).thenReturn(templates);
         when(api.getModels()).thenReturn(models);
         when(api.getScreens()).thenReturn(screens);
+        VariableRegistry variables = new VariableRegistry();
+        variables.bindOwner(GuildsModule.ID);
+        when(api.getVariables()).thenReturn(variables);
+        when(api.isCompatibleWith(any())).thenReturn(true);
 
         PlayerCommandDeclaration guild = PlayerCommandDeclaration.builder(GuildCommands.ROOT).name("guild")
                 .opensMenu(GuildCommands.MAIN_MENU).build();
@@ -346,6 +351,13 @@ class GuildMenuTest {
         assertEquals(GuildsModule.ID, commands.ownerOf(GuildCommands.ROOT));
 
         verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
+        // guilds.has_guild, read by /guild's file: true for a member only.
+        var hasGuild = variables.find("guilds.has_guild");
+        assertNotNull(hasGuild);
+        Player outsider = f.player("Outsider");
+        assertEquals(false, hasGuild.getDeclaration().getResolver().resolve(outsider, null));
+        f.guilds.createGuild(outsider, "Gamma");
+        assertEquals(true, hasGuild.getDeclaration().getResolver().resolve(outsider, null));
         // Without it Artisan does not read the folder: guilds:main would be "not found".
         assertEquals(GuildsModule.MODULE_FILE, Files.readString(folder.toPath().resolve("artisan-module.yml")));
         assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.GUILD, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS,
