@@ -38,6 +38,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -304,11 +307,15 @@ class GuildMenuTest {
 
     // --- module ---
 
+    @TempDir
+    Path modules;
+
     @Test
-    void enablingRegistersFolderCommandsMenusDataSourcesAndActions() {
+    void enablingRegistersFolderCommandsMenusDataSourcesAndActions() throws Exception {
         ArtisanAPI api = mock(ArtisanAPI.class);
         ProjectRootRegistry roots = mock(ProjectRootRegistry.class);
-        when(roots.moduleFolder(any(), any(), isNull())).thenReturn(new File("guilds"));
+        File folder = modules.resolve("guilds").toFile();
+        when(roots.moduleFolder(any(), any(), isNull())).thenReturn(folder);
         DataSourceRegistry sources = new DataSourceRegistry();
         ActionRegistry actionRegistry = new ActionRegistry();
         TemplateRegistry templates = new TemplateRegistry();
@@ -339,6 +346,8 @@ class GuildMenuTest {
         assertEquals(GuildsModule.ID, commands.ownerOf(GuildCommands.ROOT));
 
         verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
+        // Without it Artisan does not read the folder: guilds:main would be "not found".
+        assertEquals(GuildsModule.MODULE_FILE, Files.readString(folder.toPath().resolve("artisan-module.yml")));
         assertEquals(Set.of(GuildsModule.VIEWER, GuildsModule.GUILD, GuildsModule.RANKS, GuildsModule.RANK_PERMISSIONS,
                         GuildsModule.MEMBERS),
                 sources.refs());
@@ -373,5 +382,18 @@ class GuildMenuTest {
         }
         String disband = new String(system.getFile("menus/disband_confirm.yaml"), StandardCharsets.UTF_8);
         assertTrue(disband.contains("module_command: { command: \"guilds:guild.disband.confirm\" }"));
+    }
+
+    @Test
+    void theModuleFileIsWrittenOnceAndAnAdminsOneKept() throws Exception {
+        File folder = modules.resolve("kept").toFile();
+        assertTrue(GuildsModule.writeModuleFile(folder));
+        assertFalse(GuildsModule.writeModuleFile(folder), "already there");
+
+        File legacy = modules.resolve("legacy").toFile();
+        Files.createDirectories(legacy.toPath());
+        Files.writeString(legacy.toPath().resolve("manifest.yml"), "schema: module/v1\ndefault_lang: fr\n");
+        assertFalse(GuildsModule.writeModuleFile(legacy), "a module file under an older name counts");
+        assertFalse(Files.exists(legacy.toPath().resolve("artisan-module.yml")));
     }
 }

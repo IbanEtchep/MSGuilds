@@ -14,6 +14,10 @@ import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.template.TemplateDeclaration;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +25,9 @@ import java.util.logging.Logger;
 /**
  * ArtisanGuilds inside Artisan:
  * <ul>
- *   <li>the folder {@code plugins/Artisan/modules/guilds/}, listed under the module in the editor;</li>
+ *   <li>the folder {@code plugins/Artisan/modules/guilds/}, listed under the module in the editor, with
+ *       its {@code artisan-module.yml}: without it Artisan does not read the folder as a project and
+ *       none of the menus below loads;</li>
  *   <li>{@code /guild} and its sub-commands, owned by the module: Artisan writes them as
  *       {@code commands/guild.yaml} of that folder, a system file the admin edits in the editor
  *       (name, aliases, permissions, cooldown, steps around the code) and resets to this jar's;</li>
@@ -121,10 +127,42 @@ public final class GuildsModule implements ArtisanModule {
         try {
             File folder = api.getProjectRoots().moduleFolder(FOLDER, ID, null);
             logger.fine("Module folder: " + folder.getPath());
-        } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException e) {
+            if (writeModuleFile(folder)) logger.info("Wrote " + MODULE_FILE_NAMES.getFirst() + " in " + folder.getPath()
+                    + ": Artisan now reads the guild menus there.");
+        } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException | IOException e) {
             logger.log(Level.WARNING, "The folder plugins/Artisan/modules/" + FOLDER + " is not available: "
                     + "the guild menus will not open", e);
         }
+    }
+
+    /** The module file under each name Artisan reads, the one it looks for first first. */
+    static final List<String> MODULE_FILE_NAMES = List.of("artisan-module.yml", "manifest.yml", "manifest.yaml");
+
+    static final String MODULE_FILE = """
+            schema: module/v1
+            default_lang: en
+            languages:
+              - en
+              - fr
+            """;
+
+    /**
+     * Writes the folder's {@code artisan-module.yml} when it has no module file under any name.
+     * A system template never ships one (Artisan writes it only when it seeds a starter template,
+     * which this module has none of), and a folder without it is not a project to Artisan: the
+     * system menus sit on disk and {@code guilds:main} is "not found". The admin's file, once
+     * there, is never touched. True when written.
+     */
+    static boolean writeModuleFile(File folder) throws IOException {
+        for (String name : MODULE_FILE_NAMES) {
+            if (new File(folder, name).exists()) return false;
+        }
+        Files.createDirectories(folder.toPath());
+        File target = new File(folder, MODULE_FILE_NAMES.getFirst());
+        File tmp = new File(folder, "." + target.getName() + ".tmp");
+        Files.writeString(tmp.toPath(), MODULE_FILE, StandardCharsets.UTF_8);
+        Files.move(tmp.toPath(), target.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        return true;
     }
 
     private void registerSystemFiles(ArtisanAPI api) {
