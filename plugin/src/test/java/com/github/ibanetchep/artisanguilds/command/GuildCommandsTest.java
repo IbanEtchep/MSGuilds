@@ -286,6 +286,19 @@ class GuildCommandsTest {
     }
 
     @Test
+    void fromArtisan224GuildDecidesInItsFileOnTheModuleVariable() {
+        assertEquals(List.of(), root.getFileActions(), "an older Artisan: the code decides");
+        PlayerCommandDeclaration inFile = new GuildCommands(null, f.messages, TextApi.NOOP, known::get, suggestions,
+                () -> { }, p -> { }, p -> true, Logger.getLogger("GuildCommandsTest")).declaration(true);
+        assertEquals(List.of(Map.of(
+                "if", List.of(Map.of("expression", "var.guilds.has_guild")),
+                "do", List.of(Map.of("open_menu", GuildCommands.MAIN_MENU)),
+                "else", List.of(Map.of("module_command", "guilds:guild.help")))), inFile.getFileActions());
+        assertNotNull(inFile.getExecutor(), "a module_command call still runs the code");
+        assertNotNull(find(inFile, "guilds:guild.help"), "the else branch calls a command of the tree");
+    }
+
+    @Test
     void guildWithoutTheMenuLoadedShowsAMemberTheCommands() {
         guild();
         menuLoaded = false;

@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -72,9 +73,27 @@ public final class GuildCommands {
         this.logger = logger;
     }
 
-    /** The whole tree, registered once with {@code api.getPlayerCommands()}. */
+    /**
+     * Artisan API from which {@code /guild} decides in its file, on the module Variable
+     * {@code guilds.has_guild} ({@link #rootFileActions}), and the module declares it.
+     */
+    public static final String VARIABLES_API = "2.24.0";
+
+    /** The whole tree as before Artisan 2.24.0: {@code /guild} decides in {@link #root}. */
     public PlayerCommandDeclaration declaration() {
-        return PlayerCommandDeclaration.builder(ROOT)
+        return declaration(false);
+    }
+
+    /**
+     * The whole tree, registered once with {@code api.getPlayerCommands()}. {@code decideInFile}
+     * (Artisan {@link #VARIABLES_API}+): {@code /guild}'s file holds the choice between the menu
+     * and the help, which the admin sees and edits; {@link #root} still answers a
+     * {@code module_command: guilds:guild} (a menu button).
+     */
+    public PlayerCommandDeclaration declaration(boolean decideInFile) {
+        PlayerCommandDeclaration.Builder root = PlayerCommandDeclaration.builder(ROOT);
+        if (decideInFile) root.fileActions(rootFileActions());
+        return root
                 .name("guild")
                 .aliases("g")
                 .description(Map.of("en", "Guilds", "fr", "Guildes"))
@@ -187,6 +206,18 @@ public final class GuildCommands {
                                 .executor(this::setLevel).build())
                         .build())
                 .build();
+    }
+
+    /**
+     * {@code /guild} in its file: a member gets the guild's menu, anyone else the commands. The
+     * same choice as {@link #root}, written where the editor shows it.
+     */
+    static List<Object> rootFileActions() {
+        Map<String, Object> choice = new LinkedHashMap<>();
+        choice.put("if", List.of(Map.of("expression", "var.guilds.has_guild")));
+        choice.put("do", List.of(Map.of("open_menu", MAIN_MENU)));
+        choice.put("else", List.of(Map.of("module_command", ROOT + ".help")));
+        return List.of(choice);
     }
 
     // --- Executors -------------------------------------------------------------------------------

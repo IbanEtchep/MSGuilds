@@ -197,7 +197,7 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                         id -> getServer().getOfflinePlayer(id).getName()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"),
                 player -> api.getMenus().open(player, GuildCommands.MAIN_MENU), getLogger())
-                .declaration();
+                .declaration(api.isCompatibleWith(GuildCommands.VARIABLES_API));
         // %msguilds_…% as MSGuilds named them, for PlaceholderAPI too; removed by Artisan on disable.
         try {
             api.getPlaceholders().register(GuildPlaceholders.NAMESPACE, new GuildPlaceholders(registry, messages), true);

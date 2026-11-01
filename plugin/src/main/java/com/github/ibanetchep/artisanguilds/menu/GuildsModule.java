@@ -1,6 +1,8 @@
 package com.github.ibanetchep.artisanguilds.menu;
 
 import com.github.ibanetchep.artisanguilds.Guilds;
+import com.github.ibanetchep.artisanguilds.command.GuildCommands;
+import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
 import com.github.ibanetchep.artisanguilds.settings.GuildSettings;
 import com.github.ibanetchep.artisanguilds.service.GuildMessages;
 import net.artisanmc.modules.api.ArtisanAPI;
@@ -12,6 +14,9 @@ import net.artisanmc.modules.api.model.ModelField;
 import net.artisanmc.modules.api.model.ModelFieldType;
 import net.artisanmc.modules.api.playercommand.PlayerCommandDeclaration;
 import net.artisanmc.modules.api.template.TemplateDeclaration;
+import net.artisanmc.modules.api.variable.ModuleVariableDeclaration;
+import net.artisanmc.modules.api.variable.VariableScope;
+import net.artisanmc.modules.api.variable.VariableType;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,7 +45,9 @@ import java.util.logging.Logger;
  *       sub-commands through {@code module_command};</li>
  *   <li>the data sources {@code guilds:viewer}, {@code guilds:guild}, {@code guilds:ranks},
  *       {@code guilds:rank_permissions} and {@code guilds:members} ({@link GuildMenuData});</li>
- *   <li>the actions {@code guilds:rank_*} of the ranks menus ({@link GuildMenuActions}).</li>
+ *   <li>the actions {@code guilds:rank_*} of the ranks menus ({@link GuildMenuActions});</li>
+ *   <li>from Artisan 2.24.0, the module Variable {@code guilds.has_guild}: {@code /guild}'s file
+ *       reads it to choose between the menu and the help, and any Document may.</li>
  * </ul>
  */
 public final class GuildsModule implements ArtisanModule {
@@ -78,6 +86,7 @@ public final class GuildsModule implements ArtisanModule {
     private final PlayerCommandDeclaration commands;
     private final GuildMenuData data;
     private final GuildMenuActions actions;
+    private final GuildRegistry registry;
     /** Reads data/settings.yml again: a Deploy may have changed the levels. */
     private final Runnable reloadSettings;
     private final Logger logger;
@@ -87,6 +96,7 @@ public final class GuildsModule implements ArtisanModule {
         this.commands = commands;
         this.data = new GuildMenuData(guilds.registry(), guilds.leveling(), messages);
         this.actions = new GuildMenuActions(guilds.registry(), guilds.ranks(), messages);
+        this.registry = guilds.registry();
         this.reloadSettings = reloadSettings;
         this.logger = logger;
     }
@@ -110,6 +120,19 @@ public final class GuildsModule implements ArtisanModule {
         registerSettings(api);
         registerDataSources(api);
         registerActions(api);
+        if (api.isCompatibleWith(GuildCommands.VARIABLES_API)) registerVariables(api);
+    }
+
+    /** What a Document may read of a player's guild (Artisan 2.24.0+), computed from memory at each read. */
+    private void registerVariables(ArtisanAPI api) {
+        try {
+            api.getVariables().declare(new ModuleVariableDeclaration("has_guild", VariableType.BOOLEAN,
+                    VariableScope.PLAYER, List.of(), null,
+                    Map.of("en", "The player is in a guild", "fr", "Le joueur est dans une guilde"),
+                    (player, key) -> registry.member(player.getUniqueId()) != null));
+        } catch (RuntimeException e) {
+            logger.log(Level.WARNING, "guilds.has_guild is not available: /guild cannot open the guild menu", e);
+        }
     }
 
     @Override
