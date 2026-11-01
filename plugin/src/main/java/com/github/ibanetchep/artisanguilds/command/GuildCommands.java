@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,12 +53,13 @@ public final class GuildCommands {
     private final PlayerLookup players;
     private final Runnable reload;
     private final Consumer<Player> lands;
-    private final Consumer<Player> mainMenu;
+    /** Opens the guild's menu; false when Artisan has no such menu loaded. */
+    private final Predicate<Player> mainMenu;
     private final GuildSuggestions suggest;
     private final Logger logger;
 
     public GuildCommands(Guilds guilds, GuildMessages messages, TextApi text, PlayerLookup players,
-                         GuildSuggestions suggest, Runnable reload, Consumer<Player> lands, Consumer<Player> mainMenu,
+                         GuildSuggestions suggest, Runnable reload, Consumer<Player> lands, Predicate<Player> mainMenu,
                          Logger logger) {
         this.guilds = guilds;
         this.messages = messages;
@@ -189,10 +191,18 @@ public final class GuildCommands {
 
     // --- Executors -------------------------------------------------------------------------------
 
-    /** {@code /guild}: a member gets the guild's menu, anyone else the commands. */
+    /**
+     * {@code /guild}: a member gets the guild's menu, anyone else the commands. A menu Artisan
+     * did not load (a file it could not read, a reload not done yet) gives the commands too,
+     * and says so in the log: {@code /guild} never answers nothing.
+     */
     void root(Player player, PlayerCommandContext ctx) {
-        if (guilds.registry().member(player.getUniqueId()) != null) mainMenu.accept(player);
-        else help(player, ctx);
+        if (guilds.registry().member(player.getUniqueId()) != null) {
+            if (mainMenu.test(player)) return;
+            logger.warning("Menu '" + MAIN_MENU + "' is not loaded by Artisan: /guild shows the commands instead."
+                    + " Check plugins/Artisan/modules/guilds/menus/main.yml, then /artisan reload.");
+        }
+        help(player, ctx);
     }
 
     /** Below the first level: the first. */

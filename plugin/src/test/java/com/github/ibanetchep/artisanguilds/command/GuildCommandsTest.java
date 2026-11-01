@@ -41,6 +41,8 @@ class GuildCommandsTest {
     private int reloads;
     /** Who {@code /guild} sent to the guild menu. */
     private final java.util.List<Player> menus = new java.util.ArrayList<>();
+    /** Whether Artisan has the guild menu loaded. */
+    private boolean menuLoaded = true;
     private PlayerCommandDeclaration root;
     private GuildSuggestions suggestions;
     private final List<NetworkPlayer> online = new ArrayList<>();
@@ -56,7 +58,7 @@ class GuildCommandsTest {
                 new AllianceService(f.registry, f.store, f.messages, f.network, f.sync), f.chest);
         suggestions = new GuildSuggestions(f.registry, () -> online, id -> names.get(id));
         root = new GuildCommands(guilds, f.messages, TextApi.NOOP, known::get, suggestions, () -> reloads++, p -> { },
-                p -> menus.add(p), Logger.getLogger("GuildCommandsTest")).declaration();
+                p -> menuLoaded && menus.add(p), Logger.getLogger("GuildCommandsTest")).declaration();
     }
 
     private GuildData guild() {
@@ -281,6 +283,16 @@ class GuildCommandsTest {
         run(owner, "", Map.of());
         assertEquals(List.of(owner), menus);
         assertEquals(GuildCommands.MEMBERS_MENU, find(root, "guilds:guild.members").getOpensMenu());
+    }
+
+    @Test
+    void guildWithoutTheMenuLoadedShowsAMemberTheCommands() {
+        guild();
+        menuLoaded = false;
+        run(owner, "", Map.of());
+        assertEquals(List.of(), menus);
+        assertTrue(f.bundle.got(owner, Msg.HELP_HEADER));
+        assertTrue(f.bundle.got(owner, Msg.HELP_MEMBER));
     }
 
     @Test
