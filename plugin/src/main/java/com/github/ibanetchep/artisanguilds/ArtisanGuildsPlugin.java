@@ -63,10 +63,10 @@ import java.util.logging.Level;
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
     /**
-     * Lowest Artisan API this plugin compiles against: {@code getNetwork} (2.13.0), argument
-     * suggestions (2.14.0), messages in the module's folder (2.17.0).
+     * Lowest Artisan API this plugin compiles against: {@code getNetwork}, argument suggestions,
+     * messages in the module's folder, module Variables ({@code guilds.has_guild}).
      */
-    public static final String MIN_API_VERSION = "2.17.0";
+    public static final String MIN_API_VERSION = "1.0.0";
 
     /** The namespace of the tables: {@code artisan_guilds_*} by default. */
     public static final String TABLES = "guilds";
@@ -197,7 +197,7 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
                         id -> getServer().getOfflinePlayer(id).getName()),
                 () -> reload(messages, leveling), player -> player.performCommand("lands guild"),
                 player -> api.getMenus().open(player, GuildCommands.MAIN_MENU), getLogger())
-                .declaration(api.isCompatibleWith(GuildCommands.VARIABLES_API));
+                .declaration(true);
         // %msguilds_…% as MSGuilds named them, for PlaceholderAPI too; removed by Artisan on disable.
         try {
             api.getPlaceholders().register(GuildPlaceholders.NAMESPACE, new GuildPlaceholders(registry, messages), true);

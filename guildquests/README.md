@@ -12,7 +12,7 @@ Built with ArtisanGuilds, from the root of this repository. MSQuests (branch `ar
 is consumed from the local Maven repo, so publish it first:
 
 ```bash
-cd <MSQuests>      && ./gradlew publishToMavenLocal -PartisanApiVersion=2.13.0
+cd <MSQuests>      && ./gradlew publishToMavenLocal -PartisanApiVersion=1.0.0
 cd <ArtisanGuilds> && ./gradlew build
 ```
 
