@@ -11,6 +11,7 @@ repositories {
     mavenLocal()
     maven { url = uri("https://repo.papermc.io/repository/maven-public/") }
     maven { url = uri("https://repo.artisanmc.net/releases") }
+    maven { url = uri("https://repo.artisanmc.net/snapshots") }
     maven { url = uri("https://jitpack.io") }
 }
 

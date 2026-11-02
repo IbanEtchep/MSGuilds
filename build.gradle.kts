@@ -4,5 +4,6 @@
 
 allprojects {
     group = "com.github.ibanetchep"
-    version = "2.0.0-SNAPSHOT"
+    // CI passes -PpluginVersion=<tag without v> for releases.
+    version = findProperty("pluginVersion") ?: "2.0.0-SNAPSHOT"
 }
