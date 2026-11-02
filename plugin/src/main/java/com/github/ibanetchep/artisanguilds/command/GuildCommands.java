@@ -73,20 +73,14 @@ public final class GuildCommands {
         this.logger = logger;
     }
 
-    /**
-     * Artisan API from which {@code /guild} decides in its file, on the module Variable
-     * {@code guilds.has_guild} ({@link #rootFileActions}), and the module declares it.
-     */
-    public static final String VARIABLES_API = "2.24.0";
-
-    /** The whole tree as before Artisan 2.24.0: {@code /guild} decides in {@link #root}. */
+    /** The whole tree with {@code /guild} deciding in {@link #root} (tests). */
     public PlayerCommandDeclaration declaration() {
         return declaration(false);
     }
 
     /**
-     * The whole tree, registered once with {@code api.getPlayerCommands()}. {@code decideInFile}
-     * (Artisan {@link #VARIABLES_API}+): {@code /guild}'s file holds the choice between the menu
+     * The whole tree, registered once with {@code api.getPlayerCommands()}. {@code decideInFile}:
+     * {@code /guild}'s file, on the module Variable {@code guilds.has_guild}, holds the choice between the menu
      * and the help, which the admin sees and edits; {@link #root} still answers a
      * {@code module_command: guilds:guild} (a menu button).
      */

@@ -1,7 +1,6 @@
 package com.github.ibanetchep.artisanguilds.menu;
 
 import com.github.ibanetchep.artisanguilds.Guilds;
-import com.github.ibanetchep.artisanguilds.command.GuildCommands;
 import com.github.ibanetchep.artisanguilds.model.GuildRegistry;
 import com.github.ibanetchep.artisanguilds.settings.GuildSettings;
 import com.github.ibanetchep.artisanguilds.service.GuildMessages;
@@ -46,7 +45,7 @@ import java.util.logging.Logger;
  *   <li>the data sources {@code guilds:viewer}, {@code guilds:guild}, {@code guilds:ranks},
  *       {@code guilds:rank_permissions} and {@code guilds:members} ({@link GuildMenuData});</li>
  *   <li>the actions {@code guilds:rank_*} of the ranks menus ({@link GuildMenuActions});</li>
- *   <li>from Artisan 2.24.0, the module Variable {@code guilds.has_guild}: {@code /guild}'s file
+ *   <li>the module Variable {@code guilds.has_guild}: {@code /guild}'s file
  *       reads it to choose between the menu and the help, and any Document may.</li>
  * </ul>
  */
@@ -120,10 +119,10 @@ public final class GuildsModule implements ArtisanModule {
         registerSettings(api);
         registerDataSources(api);
         registerActions(api);
-        if (api.isCompatibleWith(GuildCommands.VARIABLES_API)) registerVariables(api);
+        registerVariables(api);
     }
 
-    /** What a Document may read of a player's guild (Artisan 2.24.0+), computed from memory at each read. */
+    /** What a Document may read of a player's guild computed from memory at each read. */
     private void registerVariables(ArtisanAPI api) {
         try {
             api.getVariables().declare(new ModuleVariableDeclaration("has_guild", VariableType.BOOLEAN,
