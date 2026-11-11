@@ -57,7 +57,7 @@ public final class GuildsModule implements ArtisanModule {
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
-    static final int SYSTEM_VERSION = 3;
+    static final int SYSTEM_VERSION = 4;
     static final String SYSTEM_ROOT = "artisan-system/guilds";
     static final List<String> SYSTEM_FILES = List.of(
             "menus/main.yaml",
@@ -68,7 +68,47 @@ public final class GuildsModule implements ArtisanModule {
             "menus/disband_confirm.yaml",
             "dialogs/rank_create.yaml",
             "dialogs/rank_rename.yaml",
-            "dialogs/kick.yaml");
+            "dialogs/kick.yaml",
+            // Version 4: the menus' variants and their images (variants.yaml: who sees which).
+            "assets/glyphs/bg_disband_confirm.png",
+            "assets/glyphs/bg_disband_confirm.yaml",
+            "assets/glyphs/bg_main.png",
+            "assets/glyphs/bg_main.yaml",
+            "assets/glyphs/bg_members.png",
+            "assets/glyphs/bg_members.yaml",
+            "assets/glyphs/bg_members_bedrock.png",
+            "assets/glyphs/bg_members_bedrock.yaml",
+            "assets/glyphs/bg_rank_delete_confirm.png",
+            "assets/glyphs/bg_rank_delete_confirm.yaml",
+            "assets/glyphs/bg_rank_permissions.png",
+            "assets/glyphs/bg_rank_permissions.yaml",
+            "assets/glyphs/bg_rank_permissions_bedrock.png",
+            "assets/glyphs/bg_rank_permissions_bedrock.yaml",
+            "assets/glyphs/bg_ranks.png",
+            "assets/glyphs/bg_ranks.yaml",
+            "assets/textures/arrow_left.png",
+            "assets/textures/arrow_left.yaml",
+            "assets/textures/arrow_right.png",
+            "assets/textures/arrow_right.yaml",
+            "assets/textures/back.png",
+            "assets/textures/back.yaml",
+            "assets/textures/close.png",
+            "assets/textures/close.yaml",
+            "assets/textures/confirm.png",
+            "assets/textures/confirm.yaml",
+            "variants.yaml",
+            "variants/bedrock/menus/disband_confirm.yaml",
+            "variants/bedrock/menus/main.yaml",
+            "variants/bedrock/menus/members.yaml",
+            "variants/bedrock/menus/rank_delete_confirm.yaml",
+            "variants/bedrock/menus/rank_permissions.yaml",
+            "variants/bedrock/menus/ranks.yaml",
+            "variants/textured/menus/disband_confirm.yaml",
+            "variants/textured/menus/main.yaml",
+            "variants/textured/menus/members.yaml",
+            "variants/textured/menus/rank_delete_confirm.yaml",
+            "variants/textured/menus/rank_permissions.yaml",
+            "variants/textured/menus/ranks.yaml");
 
     public static final String VIEWER = "guilds:viewer";
     public static final String GUILD = "guilds:guild";

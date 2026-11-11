@@ -1,0 +1,89 @@
+schema: menu/v1
+# The 'bedrock' version of menus/ranks.yaml: same inputs, every action on a tap (the only
+# click Bedrock sends): a tap opens the rank; moving and deleting it are buttons of rank_permissions.
+title:
+  - kind: background
+    asset_id: bg_ranks
+  - kind: plain
+    value:
+      en: "<dark_purple>Guild ranks"
+      fr: "<dark_purple>Grades de guilde"
+size: 54
+inputs:
+  - name: viewer
+    type: list
+    source: {ref: "guilds:viewer"}
+  # Empty unless the viewer may manage the ranks (owner or MANAGE_RANKS).
+  - name: ranks
+    type: list
+    source: {ref: "guilds:ranks"}
+elements:
+  - id: ranks
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: {source: ranks, alias: r}
+    material: PAINTING
+    title: "{r.name}"
+    lore:
+      en:
+        - "<gray>Members: <white>{r.members}"
+        - ""
+        - "<aqua>[Tap] <white>permissions, order, delete"
+      fr:
+        - "<gray>Membres : <white>{r.members}"
+        - ""
+        - "<aqua>[Toucher] <white>permissions, ordre, suppression"
+    click:
+      left:
+        - open_menu: {menu_id: rank_permissions, context: {rank: "{r.id}"}}
+  - id: previous
+    positions: "48"
+    material: ARROW
+    title:
+      en: "<yellow>Previous"
+      fr: "<yellow>Précédent"
+    click:
+      left:
+        - pagination_prev: ranks
+    states:
+      - if:
+          - pagination_at_first: ranks
+  - id: next
+    positions: "50"
+    material: ARROW
+    title:
+      en: "<yellow>Next"
+      fr: "<yellow>Suivant"
+    click:
+      left:
+        - pagination_next: ranks
+    states:
+      - if:
+          - pagination_at_last: ranks
+  - id: access
+    positions: "49"
+    iterates: {source: viewer, alias: v}
+    states:
+      - if:
+          - placeholder_equals: {placeholder: "{v.can_manage_ranks}", value: "false"}
+        material: BARRIER
+        title:
+          en: "<red>You cannot manage the ranks"
+          fr: "<red>Vous ne pouvez pas gérer les grades"
+        lore:
+          en:
+            - "<gray>Ask your guild's owner for the permission."
+          fr:
+            - "<gray>Demandez la permission au chef de votre guilde."
+  - id: add_rank
+    positions: "53"
+    iterates: {source: viewer, alias: v}
+    material: EMERALD
+    title:
+      en: "<dark_green><bold>Add a rank"
+      fr: "<dark_green><bold>Ajouter un rang"
+    click:
+      left:
+        - open_dialog: rank_create
+    states:
+      - if:
+          - placeholder_equals: {placeholder: "{v.can_manage_ranks}", value: "false"}
