@@ -1,6 +1,6 @@
 ---
 title: settings.yml
-description: The guild messages' language and the levels: XP, members, chest size.
+description: "The guild messages' language and the levels: XP, members, chest size."
 sidebar:
   order: 1
 ---
