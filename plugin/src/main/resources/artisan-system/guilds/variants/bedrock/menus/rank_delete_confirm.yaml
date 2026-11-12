@@ -2,8 +2,6 @@ schema: menu/v1
 # The 'bedrock' version of menus/rank_delete_confirm.yaml: same inputs, every action on a tap (the only
 # click Bedrock sends): once deleted, back to the ranks list.
 title:
-  - kind: background
-    asset_id: bg_rank_delete_confirm
   - kind: plain
     value:
       en: "<dark_red>Delete this rank?"
@@ -16,6 +14,10 @@ inputs:
     type: list
     source: {ref: "guilds:ranks", filter: {id: "{rank}"}}
 elements:
+  - id: frame
+    positions: "0-26"
+    material: GRAY_STAINED_GLASS_PANE
+    title: " "
   - id: rank
     positions: "13"
     iterates: {source: info, alias: r}

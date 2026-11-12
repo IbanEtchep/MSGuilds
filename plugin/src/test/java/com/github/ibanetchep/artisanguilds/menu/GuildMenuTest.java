@@ -382,8 +382,8 @@ class GuildMenuTest {
         TemplateDeclaration system = TemplateDeclaration.fromResources(getClass().getClassLoader(),
                 GuildsModule.SYSTEM_ROOT, GuildsModule.SYSTEM, GuildsModule.SYSTEM_VERSION, GuildsModule.SYSTEM_FILES).build();
         for (String path : system.getPaths()) {
-            // Images, their descriptors and the display rules are not Documents.
-            if (path.startsWith("assets/") || path.equals("variants.yaml")) continue;
+            // The display rules are not a Document.
+            if (path.equals("variants.yaml")) continue;
             Map<String, Object> doc = new Yaml().load(new String(system.getFile(path), StandardCharsets.UTF_8));
             String kind = path.contains("menus/") ? "menu/v1" : "dialog/v1";
             assertEquals(kind, doc.get("schema"), path);

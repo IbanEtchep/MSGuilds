@@ -2,8 +2,6 @@ schema: menu/v1
 # The 'bedrock' version of menus/rank_permissions.yaml: same inputs, every action on a tap (the only
 # click Bedrock sends): with the buttons that move and delete the rank (other clicks in the module's ranks menu).
 title:
-  - kind: background
-    asset_id: bg_rank_permissions_bedrock
   - kind: plain
     value:
       en: "<dark_purple>Rank permissions"
@@ -21,6 +19,10 @@ inputs:
     type: list
     source: {ref: "guilds:rank_permissions", params: {rank: "{rank}"}}
 elements:
+  - id: frame
+    positions: "0-9,17-18,26-27,35-36,44,48-53"
+    material: WHITE_STAINED_GLASS_PANE
+    title: " "
   - id: rank
     positions: "4"
     iterates: {source: info, alias: r}

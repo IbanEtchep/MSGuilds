@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/** The menus' variants the module ships: {@code textured} (resource pack) and {@code bedrock}. */
+/** The Bedrock versions of the menus the module ships. */
 class VariantFilesTest {
 
     private static final Pattern OTHER_CLICK =
@@ -39,6 +39,6 @@ class VariantFilesTest {
             assertEquals(module.get("inputs"), variant.get("inputs"), path);
             if (parts[1].equals("bedrock")) assertFalse(OTHER_CLICK.matcher(text).find(), path);
         }
-        assertEquals(12, variants);
+        assertEquals(4, variants);
     }
 }
