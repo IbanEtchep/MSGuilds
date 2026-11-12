@@ -1,0 +1,167 @@
+schema: menu/v1
+# The 'bedrock' version of menus/members.yaml: same inputs, every action on a tap (the only
+# click Bedrock sends): the 'mode' button picks what a tap on a member does (promote, demote,
+# kick). 'mode' is a menu arg it sets, not an input.
+title:
+  - kind: plain
+    value:
+      en: "Guild members"
+      fr: "Membres de la guilde"
+size: 54
+inputs:
+  - name: members
+    type: list
+    source: {ref: "guilds:members"}
+background:
+  material: BLACK_STAINED_GLASS_PANE
+  title: " "
+elements:
+  - id: list
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: {source: members, alias: m}
+    material: PLAYER_HEAD
+    head: "playerhead:{m.name}"
+    title: "<white>{m.name}"
+    # The rank, the status, then only what the viewer may do to this member (the commands' own rules).
+    lore:
+      en:
+        - "<gray>Rank: {m.rank}"
+        - '{m.online ? "<green>Online" : "<gray>Offline"}'
+        - ""
+        - '{m.can_promote ? "<yellow>Tap <gray>: promote" : ""}'
+      fr:
+        - "<gray>Grade : {m.rank}"
+        - '{m.online ? "<green>En ligne" : "<gray>Hors ligne"}'
+        - ""
+        - '{m.can_promote ? "<yellow>Toucher <gray>: promouvoir" : ""}'
+    click:
+      left:
+        - if:
+            - expression: m.can_promote
+          do:
+            - module_command: {command: "guilds:guild.promote", args: {member: "{m.name}"}}
+            - set_arg: {arg: refresh, value: "1"}
+    states:
+      - if:
+          - placeholder_equals: {placeholder: "{mode}", value: "demote"}
+        material: PLAYER_HEAD
+        head: "playerhead:{m.name}"
+        title: "<white>{m.name}"
+        lore:
+          en:
+            - "<gray>Rank: {m.rank}"
+            - '{m.online ? "<green>Online" : "<gray>Offline"}'
+            - ""
+            - '{m.can_demote ? "<yellow>Tap <gray>: demote" : ""}'
+          fr:
+            - "<gray>Grade : {m.rank}"
+            - '{m.online ? "<green>En ligne" : "<gray>Hors ligne"}'
+            - ""
+            - '{m.can_demote ? "<yellow>Toucher <gray>: rétrograder" : ""}'
+        click:
+          left:
+            - if:
+                - expression: m.can_demote
+              do:
+                - module_command: {command: "guilds:guild.demote", args: {member: "{m.name}"}}
+                - set_arg: {arg: refresh, value: "1"}
+      - if:
+          - placeholder_equals: {placeholder: "{mode}", value: "kick"}
+        material: PLAYER_HEAD
+        head: "playerhead:{m.name}"
+        title: "<white>{m.name}"
+        lore:
+          en:
+            - "<gray>Rank: {m.rank}"
+            - '{m.online ? "<green>Online" : "<gray>Offline"}'
+            - ""
+            - '{m.can_kick ? "<red>Tap <gray>: kick" : ""}'
+          fr:
+            - "<gray>Grade : {m.rank}"
+            - '{m.online ? "<green>En ligne" : "<gray>Hors ligne"}'
+            - ""
+            - '{m.can_kick ? "<red>Toucher <gray>: exclure" : ""}'
+        click:
+          left:
+            - if:
+                - expression: m.can_kick
+              do:
+                - open_dialog: {dialog_id: kick, context: {target: "{m.name}"}}
+  - id: mode
+    positions: "47"
+    material: LIME_DYE
+    title:
+      en: "<yellow>A tap: <white>promote"
+      fr: "<yellow>Un toucher : <white>promouvoir"
+    lore:
+      en:
+        - "<gray>Tap to change what a tap on a member does."
+      fr:
+        - "<gray>Toucher pour changer l'effet d'un toucher sur un membre."
+    click:
+      left:
+        - set_arg_cycle_next: {arg: mode, list: "demote,kick,promote"}
+    states:
+      - if:
+          - placeholder_equals: {placeholder: "{mode}", value: "demote"}
+        material: ORANGE_DYE
+        title:
+          en: "<yellow>A tap: <white>demote"
+          fr: "<yellow>Un toucher : <white>rétrograder"
+        lore:
+          en:
+            - "<gray>Tap to change what a tap on a member does."
+          fr:
+            - "<gray>Toucher pour changer l'effet d'un toucher sur un membre."
+        click:
+          left:
+            - set_arg_cycle_next: {arg: mode, list: "demote,kick,promote"}
+      - if:
+          - placeholder_equals: {placeholder: "{mode}", value: "kick"}
+        material: RED_DYE
+        title:
+          en: "<yellow>A tap: <white>kick"
+          fr: "<yellow>Un toucher : <white>exclure"
+        lore:
+          en:
+            - "<gray>Tap to change what a tap on a member does."
+          fr:
+            - "<gray>Toucher pour changer l'effet d'un toucher sur un membre."
+        click:
+          left:
+            - set_arg_cycle_next: {arg: mode, list: "demote,kick,promote"}
+  - id: previous
+    positions: "45"
+    states:
+      - if:
+          - not:
+              pagination_at_first: list
+        material: ARROW
+        title:
+          en: "<yellow>Previous page"
+          fr: "<yellow>Page précédente"
+        click:
+          left:
+            - pagination_prev: list
+  - id: next
+    positions: "53"
+    states:
+      - if:
+          - not:
+              pagination_at_last: list
+        material: ARROW
+        title:
+          en: "<yellow>Next page"
+          fr: "<yellow>Page suivante"
+        click:
+          left:
+            - pagination_next: list
+  - id: back
+    positions: "49"
+    material: ARROW
+    title:
+      en: "<gray>Back"
+      fr: "<gray>Retour"
+    click:
+      left:
+        - open_previous_menu

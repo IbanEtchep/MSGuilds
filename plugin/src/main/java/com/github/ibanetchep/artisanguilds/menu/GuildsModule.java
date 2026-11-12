@@ -57,7 +57,7 @@ public final class GuildsModule implements ArtisanModule {
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
-    static final int SYSTEM_VERSION = 3;
+    static final int SYSTEM_VERSION = 4;
     static final String SYSTEM_ROOT = "artisan-system/guilds";
     static final List<String> SYSTEM_FILES = List.of(
             "menus/main.yaml",
@@ -68,7 +68,14 @@ public final class GuildsModule implements ArtisanModule {
             "menus/disband_confirm.yaml",
             "dialogs/rank_create.yaml",
             "dialogs/rank_rename.yaml",
-            "dialogs/kick.yaml");
+            "dialogs/kick.yaml",
+            // Version 4: the Bedrock versions of the menus that use other clicks than the left one
+            // (variants.yaml: who sees which).
+            "variants.yaml",
+            "variants/bedrock/menus/members.yaml",
+            "variants/bedrock/menus/rank_delete_confirm.yaml",
+            "variants/bedrock/menus/rank_permissions.yaml",
+            "variants/bedrock/menus/ranks.yaml");
 
     public static final String VIEWER = "guilds:viewer";
     public static final String GUILD = "guilds:guild";

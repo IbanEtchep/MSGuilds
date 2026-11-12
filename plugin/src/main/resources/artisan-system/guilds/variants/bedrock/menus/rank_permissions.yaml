@@ -1,0 +1,119 @@
+schema: menu/v1
+# The 'bedrock' version of menus/rank_permissions.yaml: same inputs, every action on a tap (the only
+# click Bedrock sends): with the buttons that move and delete the rank (other clicks in the module's ranks menu).
+title:
+  - kind: plain
+    value:
+      en: "<dark_purple>Rank permissions"
+      fr: "<dark_purple>Permissions du grade"
+size: 54
+inputs:
+  # The rank's id, given by the ranks menu.
+  - name: rank
+    type: string
+  - name: info
+    type: list
+    source: {ref: "guilds:ranks", filter: {id: "{rank}"}}
+  # Empty unless the viewer may manage the ranks of the guild of that rank.
+  - name: permissions
+    type: list
+    source: {ref: "guilds:rank_permissions", params: {rank: "{rank}"}}
+elements:
+  - id: frame
+    positions: "0-9,17-18,26-27,35-36,44,48-53"
+    material: WHITE_STAINED_GLASS_PANE
+    title: " "
+  - id: rank
+    positions: "4"
+    iterates: {source: info, alias: r}
+    material: PAINTING
+    title: "{r.name}"
+    lore:
+      en:
+        - "<gray>Members: <white>{r.members}"
+      fr:
+        - "<gray>Membres : <white>{r.members}"
+  - id: permissions
+    positions: "10-16,19-25,28-34,37-43"
+    iterates: {source: permissions, alias: p}
+    material: GRAY_DYE
+    title: "<red>✘ <gray>{p.name}"
+    lore:
+      en:
+        - "<aqua>[Tap] <white>grant"
+      fr:
+        - "<aqua>[Toucher] <white>accorder"
+    click:
+      left:
+        - guilds:rank_permission: {rank: "{rank}", permission: "{p.key}", granted: "true"}
+        - set_arg: {arg: refresh, value: "{p.key}"}
+    states:
+      - if:
+          - placeholder_equals: {placeholder: "{p.granted}", value: "true"}
+        material: LIME_DYE
+        title: "<green>✔ <white>{p.name}"
+        lore:
+          en:
+            - "<aqua>[Tap] <white>revoke"
+          fr:
+            - "<aqua>[Toucher] <white>retirer"
+        click:
+          left:
+            - guilds:rank_permission: {rank: "{rank}", permission: "{p.key}", granted: "false"}
+            - set_arg: {arg: refresh, value: "{p.key}"}
+  - id: move_up
+    positions: "45"
+    iterates: {source: info, alias: r}
+    material: SPECTRAL_ARROW
+    title:
+      en: "<yellow>Move the rank up"
+      fr: "<yellow>Monter le grade"
+    click:
+      left:
+        - guilds:rank_move: {rank: "{r.id}", direction: up}
+        - set_arg: {arg: refresh, value: "up{r.id}"}
+  - id: move_down
+    positions: "46"
+    iterates: {source: info, alias: r}
+    material: ARROW
+    title:
+      en: "<yellow>Move the rank down"
+      fr: "<yellow>Descendre le grade"
+    click:
+      left:
+        - guilds:rank_move: {rank: "{r.id}", direction: down}
+        - set_arg: {arg: refresh, value: "down{r.id}"}
+  - id: delete
+    positions: "47"
+    iterates: {source: info, alias: r}
+    material: TNT
+    title:
+      en: "<red>Delete the rank"
+      fr: "<red>Supprimer le grade"
+    lore:
+      en:
+        - "<gray>Only a rank without members can be deleted."
+      fr:
+        - "<gray>Seul un grade sans membre peut être supprimé."
+    click:
+      left:
+        - open_menu: {menu_id: rank_delete_confirm, context: {rank: "{r.id}"}}
+  - id: back
+    positions: "49"
+    material: RED_STAINED_GLASS_PANE
+    title:
+      en: "<red>Back"
+      fr: "<red>Retour"
+    click:
+      left:
+        - open_previous_menu
+  - id: rename
+    positions: "53"
+    iterates: {source: info, alias: r}
+    material: NAME_TAG
+    title:
+      en: "<dark_green><bold>Rename the rank"
+      fr: "<dark_green><bold>Renommer le rang"
+    click:
+      left:
+        - open_dialog: {dialog_id: rank_rename, context: {rank: "{r.id}"}}
