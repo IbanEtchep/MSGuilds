@@ -4,5 +4,6 @@
 
 allprojects {
     group = "com.github.ibanetchep"
-    version = "2.0.0-SNAPSHOT"
+    // A release sets it from its tag v<version> (-PpluginVersion, .github/workflows/release.yml).
+    version = (findProperty("pluginVersion") as String?) ?: "2.0.0-SNAPSHOT"
 }

@@ -59,14 +59,36 @@ tasks.jar {
     archiveFileName.set("ArtisanGuilds-${project.version}.jar")
 }
 
-// Plugins that integrate with ArtisanGuilds (MSLands, ArtisanGuildQuests) compile against this jar:
-//   ./gradlew :artisan-guilds-plugin:publishToMavenLocal
-// It is the plugin itself: they use com.github.ibanetchep.artisanguilds.api only.
+// Plugins that integrate with ArtisanGuilds (ArtisanLands, ArtisanGuildQuests) compile against this jar,
+// published as net.artisanmc:artisan-guilds on repo.artisanmc.net (snapshots from main, releases from
+// a tag v<version>: .github/workflows/release.yml). It is the plugin itself: they use
+// com.github.ibanetchep.artisanguilds.api only.
+java {
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("plugin") {
-            artifactId = "artisan-guilds-plugin"
+            groupId = "net.artisanmc"
+            artifactId = "artisan-guilds"
             from(components["java"])
+            pom {
+                name.set("ArtisanGuilds")
+                description.set("Guilds for Paper, an Artisan add-on (formerly MSGuilds).")
+                url.set("https://github.com/artisanmc/artisan-guilds")
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "artisanRepo"
+            val channel = if (version.toString().endsWith("SNAPSHOT")) "snapshots" else "releases"
+            url = uri("https://repo.artisanmc.net/$channel")
+            credentials {
+                username = providers.gradleProperty("artisanRepoUsername").orNull
+                password = providers.gradleProperty("artisanRepoPassword").orNull
+            }
         }
     }
 }
