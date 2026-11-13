@@ -76,7 +76,7 @@ publishing {
             pom {
                 name.set("ArtisanGuilds")
                 description.set("Guilds for Paper, an Artisan add-on (formerly MSGuilds).")
-                url.set("https://github.com/IbanEtchep/MSGuilds")
+                url.set("https://github.com/artisanmc/artisan-guilds")
             }
         }
     }
