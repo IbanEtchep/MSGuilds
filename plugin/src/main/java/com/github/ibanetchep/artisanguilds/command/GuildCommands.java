@@ -225,7 +225,7 @@ public final class GuildCommands {
         if (guilds.registry().member(player.getUniqueId()) != null) {
             if (mainMenu.test(player)) return;
             logger.warning("Menu '" + MAIN_MENU + "' is not loaded by Artisan: /guild shows the commands instead."
-                    + " Check plugins/Artisan/modules/guilds/menus/main.yml, then /artisan reload.");
+                    + " Check plugins/ArtisanGuilds/artisan_module/menus/main.yml, then /artisan reload.");
         }
         help(player, ctx);
     }

@@ -63,16 +63,18 @@ import java.util.logging.Level;
 public final class ArtisanGuildsPlugin extends JavaPlugin {
 
     /**
-     * Lowest Artisan API this plugin compiles against: {@code getNetwork}, argument suggestions,
+     * Lowest Artisan API this plugin compiles against: 1.1.0 for {@code
+     * ProjectRootRegistry.pluginFolder} (the module's files in this plugin's own folder,
+     * {@code plugins/ArtisanGuilds/artisan_module/}). From 1.0.0: {@code getNetwork}, argument suggestions,
      * messages in the module's folder, module Variables ({@code guilds.has_guild}).
      */
-    public static final String MIN_API_VERSION = "1.0.0";
+    public static final String MIN_API_VERSION = "1.1.0";
 
     /** The namespace of the tables: {@code artisan_guilds_*} by default. */
     public static final String TABLES = "guilds";
 
     private @Nullable ArtisanAPI api;
-    /** plugins/Artisan/modules/guilds/, null when Artisan gives none. */
+    /** plugins/ArtisanGuilds/artisan_module/, null when Artisan gives none. */
     private @Nullable File moduleFolder;
     private @Nullable Guilds guilds;
     private @Nullable ExecutorService database;
@@ -208,7 +210,7 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
         // The guild, members, ranks and disband menus those commands open, with their data sources and actions.
         // /guild too: registered by the module, it is a file of the module's folder, edited in the editor.
         try {
-            api.getModules().register(new GuildsModule(running, messages, commands, () -> reloadLevels(leveling), getLogger()));
+            api.getModules().register(new GuildsModule(running, messages, commands, () -> reloadLevels(leveling), getLogger(), moduleDir()));
         } catch (RuntimeException e) {
             getLogger().log(Level.WARNING, "The guild menus are not available", e);
         }
@@ -247,8 +249,8 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
     private void moveSettings(File folder) {
         boolean legacy = getConfig().isConfigurationSection("levels");
         if (!GuildSettings.ensure(folder, legacy ? getConfig() : null, this::getResource, getLogger())) {
-            if (legacy) getLogger().warning("config.yml still holds levels, but plugins/Artisan/modules/"
-                    + GuildsModule.FOLDER + "/" + GuildSettings.PATH + " is the one read: remove them from config.yml.");
+            if (legacy) getLogger().warning("config.yml still holds levels, but "
+                    + new File(folder, GuildSettings.PATH).getPath() + " is the one read: remove them from config.yml.");
             return;
         }
         boolean chest = getConfig().getBoolean("chest.enabled", true);
@@ -258,22 +260,27 @@ public final class ArtisanGuildsPlugin extends JavaPlugin {
             if (!chest) text = text.replace("  enabled: true", "  enabled: false");
             Files.writeString(new File(getDataFolder(), "config.yml").toPath(), text, StandardCharsets.UTF_8);
             reloadConfig();
-            getLogger().info("The language and the levels of config.yml moved to plugins/Artisan/modules/"
-                    + GuildsModule.FOLDER + "/" + GuildSettings.PATH + ", edited in the Artisan editor.");
+            getLogger().info("The language and the levels of config.yml moved to "
+                    + new File(folder, GuildSettings.PATH).getPath() + ", edited in the Artisan editor.");
         } catch (IOException e) {
             getLogger().log(Level.WARNING, "Could not write config.yml again: its levels are no longer read", e);
         }
     }
 
     /**
-     * plugins/Artisan/modules/guilds/, where the messages live beside the menus; null when Artisan
-     * gives none, the messages then staying in this plugin's folder.
+     * plugins/ArtisanGuilds/artisan_module/, where the messages live beside the menus: everything the
+     * plugin stores is in its own folder, and Artisan moves a former plugins/Artisan/modules/guilds/
+     * there once. Null when Artisan gives none, the messages then staying in lang/.
      */
+    private File moduleDir() {
+        return new File(getDataFolder(), GuildsModule.MODULE_DIR);
+    }
+
     private @Nullable File moduleFolder(ArtisanAPI api) {
         try {
-            return api.getProjectRoots().moduleFolder(GuildsModule.FOLDER, GuildsModule.ID, null);
+            return api.getProjectRoots().pluginFolder(GuildsModule.FOLDER, GuildsModule.ID, moduleDir());
         } catch (RuntimeException e) {
-            getLogger().log(Level.WARNING, "No folder plugins/Artisan/modules/" + GuildsModule.FOLDER
+            getLogger().log(Level.WARNING, "No folder " + moduleDir().getPath()
                     + ": the messages stay in plugins/" + getName() + "/lang/", e);
             return null;
         }
