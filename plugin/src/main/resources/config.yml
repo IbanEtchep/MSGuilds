@@ -1,6 +1,6 @@
 config-version: 2
 
-# The language and the guild levels moved to plugins/Artisan/modules/guilds/data/settings.yml,
+# The language and the guild levels moved to plugins/ArtisanGuilds/artisan_module/data/settings.yml,
 # edited in the Artisan editor (the guilds folder, Settings). This file keeps what belongs to
 # this server only.
 

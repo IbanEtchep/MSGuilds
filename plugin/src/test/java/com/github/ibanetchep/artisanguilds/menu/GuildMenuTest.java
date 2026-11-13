@@ -316,7 +316,7 @@ class GuildMenuTest {
         ArtisanAPI api = mock(ArtisanAPI.class);
         ProjectRootRegistry roots = mock(ProjectRootRegistry.class);
         File folder = modules.resolve("guilds").toFile();
-        when(roots.moduleFolder(any(), any(), isNull())).thenReturn(folder);
+        when(roots.pluginFolder(any(), any(), any())).thenReturn(folder);
         DataSourceRegistry sources = new DataSourceRegistry();
         ActionRegistry actionRegistry = new ActionRegistry();
         TemplateRegistry templates = new TemplateRegistry();
@@ -344,13 +344,13 @@ class GuildMenuTest {
         PlayerCommandDeclaration guild = PlayerCommandDeclaration.builder(GuildCommands.ROOT).name("guild")
                 .opensMenu(GuildCommands.MAIN_MENU).build();
 
-        new GuildsModule(guilds, f.messages, guild, () -> {}, Logger.getLogger("GuildMenuTest")).onEnable(api);
+        new GuildsModule(guilds, f.messages, guild, () -> {}, Logger.getLogger("GuildMenuTest"), folder).onEnable(api);
 
         // Owned by the module: Artisan writes commands/guild.yaml in its folder, the editor lists it.
         assertEquals(List.of(guild), commands.declarations());
         assertEquals(GuildsModule.ID, commands.ownerOf(GuildCommands.ROOT));
 
-        verify(roots).moduleFolder(eq("guilds"), eq(GuildsModule.ID), isNull());
+        verify(roots).pluginFolder(eq("guilds"), eq(GuildsModule.ID), eq(folder));
         // guilds.has_guild, read by /guild's file: true for a member only.
         var hasGuild = variables.find("guilds.has_guild");
         assertNotNull(hasGuild);

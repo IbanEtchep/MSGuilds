@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * ArtisanGuilds inside Artisan:
  * <ul>
- *   <li>the folder {@code plugins/Artisan/modules/guilds/}, listed under the module in the editor, with
+ *   <li>the folder {@code plugins/ArtisanGuilds/artisan_module/}, listed under the module in the editor, with
  *       its {@code artisan-module.yml}: without it Artisan does not read the folder as a project and
  *       none of the menus below loads;</li>
  *   <li>{@code /guild} and its sub-commands, owned by the module: Artisan writes them as
@@ -54,6 +54,9 @@ public final class GuildsModule implements ArtisanModule {
     public static final String ID = "guilds";
     /** The module's folder: the {@code guilds} of {@code guilds:ranks}. */
     public static final String FOLDER = "guilds";
+    /** The folder of the module's files inside the plugin's data folder. */
+    public static final String MODULE_DIR = "artisan_module";
+    private final File moduleDir;
 
     /** The shipped menus and dialogs: raise {@link #SYSTEM_VERSION} whenever one of them changes. */
     static final String SYSTEM = "guilds_menus";
@@ -98,7 +101,8 @@ public final class GuildsModule implements ArtisanModule {
     private final Logger logger;
 
     public GuildsModule(Guilds guilds, GuildMessages messages, PlayerCommandDeclaration commands,
-                        Runnable reloadSettings, Logger logger) {
+                        Runnable reloadSettings, Logger logger, File moduleDir) {
+        this.moduleDir = moduleDir;
         this.commands = commands;
         this.data = new GuildMenuData(guilds.registry(), guilds.leveling(), messages);
         this.actions = new GuildMenuActions(guilds.registry(), guilds.ranks(), messages);
@@ -154,12 +158,12 @@ public final class GuildsModule implements ArtisanModule {
     /** Before the system files: Artisan writes them into the module's folder. */
     private void claimFolder(ArtisanAPI api) {
         try {
-            File folder = api.getProjectRoots().moduleFolder(FOLDER, ID, null);
+            File folder = api.getProjectRoots().pluginFolder(FOLDER, ID, moduleDir);
             logger.fine("Module folder: " + folder.getPath());
             if (writeModuleFile(folder)) logger.info("Wrote " + MODULE_FILE_NAMES.getFirst() + " in " + folder.getPath()
                     + ": Artisan now reads the guild menus there.");
         } catch (IllegalArgumentException | IllegalStateException | UnsupportedOperationException | IOException e) {
-            logger.log(Level.WARNING, "The folder plugins/Artisan/modules/" + FOLDER + " is not available: "
+            logger.log(Level.WARNING, "The folder " + moduleDir.getPath() + " is not available: "
                     + "the guild menus will not open", e);
         }
     }
