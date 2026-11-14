@@ -1,9 +1,8 @@
 # Guild settings, edited in the Artisan editor (the guilds folder, Settings).
 # language: the guild messages' language when a player's is not offered (en, fr).
 # levels: a guild's level is the highest one whose xp it has reached. Guild levels are earned
-# through MSQuests rankup quests (ArtisanGuildQuests `guild_level` action, or
-# `guild admin setlevel <guild> <level>` from the console), which set the XP to the level's
-# threshold: one XP point per level. The guild chest (/g chest) has chest-pages pages of
+# with `guild admin setlevel <guild> <level>`, by hand or as the reward of an ArtisanQuests rankup
+# quest (ArtisanGuildQuests), which sets the XP to the level's threshold: one XP point per level. The guild chest (/g chest) has chest-pages pages of
 # chest-rows rows (1 to 6); 0 pages: no chest.
 language: en
 levels:
